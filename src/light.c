@@ -1,7 +1,7 @@
 #include "../include/light.h"
 
 //Default ambient light intensity and color definition
-const double LIGHT_AMBIENT_INTENSITY = 0.5;
+const double LIGHT_AMBIENT_INTENSITY = 0.25;
 const Color LIGHT_AMBIENT_COLOR = {255,255,255};
 
 /**

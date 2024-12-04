@@ -109,26 +109,35 @@ Color Raytracer_trace_ray(const Raytracer *raytracer, const Ray ray, const int d
     double diffuse_intensity = Vector3D_dot(normal, light_direction);
     if (diffuse_intensity < 0) diffuse_intensity = 0; // Clamp to zero if light is behind the surface
 
-    // Calculate specular highlight (see https://en.wikipedia.org/wiki/Specular_highlight)
+    // Calculate specular highlight
     Vector3D view_direction = Vector3D_normalize(Vector3D_subtract(raytracer->camera.position, intersection_point));
-    Vector3D reflect_direction = Vector3D_reflect(Vector3D_scale(light_direction, -1), normal);  // Reflect light direction around normal
-    double specular_intensity_calc = Vector3D_dot(view_direction, reflect_direction);
-    if (specular_intensity < 0) {
-        specular_intensity = 0;  // Clamp negative values
-    }
-    specular_intensity_calc = specular_intensity * pow(specular_intensity_calc, specular_exponent);
+    Vector3D reflect_direction = Vector3D_reflect(Vector3D_scale(light_direction, -1), normal); // Reflect light direction around normal
 
-    // Combine ambient, diffuse, and specular light components
+    double dot = Vector3D_dot(view_direction, reflect_direction);
+    if (dot < 0) {
+        dot = 0;  // Clamp to avoid invalid pow calculation
+    }
+
+    double specular_intensity_calc = pow(dot, specular_exponent) * specular_intensity;
+
     Color final_color;
-    final_color.r = CLAMP_COLOR_COMPONENT(object_color.r * (LIGHT_AMBIENT_COLOR.r / 255.0 * LIGHT_AMBIENT_INTENSITY) +
-                                          object_color.r * (light_color.r / 255.0) * diffuse_intensity +
-                                          light_color.r * specular_intensity_calc);
-    final_color.g = CLAMP_COLOR_COMPONENT(object_color.g * (LIGHT_AMBIENT_COLOR.g / 255.0 * LIGHT_AMBIENT_INTENSITY) +
-                                          object_color.g * (light_color.g / 255.0) * diffuse_intensity +
-                                          light_color.g * specular_intensity_calc);
-    final_color.b = CLAMP_COLOR_COMPONENT(object_color.b * (LIGHT_AMBIENT_COLOR.b / 255.0 * LIGHT_AMBIENT_INTENSITY) +
-                                          object_color.b * (light_color.b / 255.0) * diffuse_intensity +
-                                          light_color.b * specular_intensity_calc);
+    final_color.r = CLAMP_COLOR_COMPONENT(
+        object_color.r * (LIGHT_AMBIENT_COLOR.r / 255.0 * LIGHT_AMBIENT_INTENSITY) +  // Ambient
+        object_color.r * diffuse_intensity +                                          // Diffuse
+        specular_intensity_calc * light_color.r                                       // Specular
+    );
+
+    final_color.g = CLAMP_COLOR_COMPONENT(
+        object_color.g * (LIGHT_AMBIENT_COLOR.g / 255.0 * LIGHT_AMBIENT_INTENSITY) +  // Ambient
+        object_color.g * diffuse_intensity +                                          // Diffuse
+        specular_intensity_calc * light_color.g                                       // Specular
+    );
+
+    final_color.b = CLAMP_COLOR_COMPONENT(
+        object_color.b * (LIGHT_AMBIENT_COLOR.b / 255.0 * LIGHT_AMBIENT_INTENSITY) +  // Ambient
+        object_color.b * diffuse_intensity +                                          // Diffuse
+        specular_intensity_calc * light_color.b                                       // Specular
+    );
 
     return final_color;
 }

@@ -16,8 +16,8 @@ typedef struct {
  Vector3D center;                  ///< The center point of the sphere.
  double radius;                    ///< The radius of the sphere.
  Color color;                      ///< The base color of the sphere.
- double specular_intensity;  ///< Intensity of the specular reflection (strength of highlight).
- int specular_exponent;        ///< Shininess of the sphere (higher value = smaller, sharper highlight).
+ double specular_intensity;        ///< Intensity of the specular reflection (strength of highlight).
+ int specular_exponent;            ///< Shininess of the sphere (higher value = smaller, sharper highlight).
 } Sphere;
 
 /**
