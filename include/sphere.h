@@ -1,9 +1,10 @@
 #ifndef SPHERE_H
 #define SPHERE_H
 
+#include <SFML/Graphics/Color.h>
+
 #include "vector3d.h"
 #include "ray.h"
-#include "color.h"
 
 /**
  * @brief Structure representing a sphere in 3D space.
@@ -15,9 +16,9 @@
 typedef struct {
  Vector3D center;                  ///< The center point of the sphere.
  double radius;                    ///< The radius of the sphere.
- Color color;                      ///< The base color of the sphere.
- double specular_intensity;  ///< Intensity of the specular reflection (strength of highlight).
- int specular_exponent;        ///< Shininess of the sphere (higher value = smaller, sharper highlight).
+ sfColor color;                      ///< The base color of the sphere.
+ double specular_intensity;        ///< Intensity of the specular reflection (strength of highlight).
+ int specular_exponent;            ///< Shininess of the sphere (higher value = smaller, sharper highlight).
 } Sphere;
 
 /**
@@ -28,7 +29,7 @@ typedef struct {
  * @param color The color of the sphere.
  * @return Sphere The initialized sphere.
  */
-Sphere Sphere_new(Vector3D center, double radius, Color color);
+Sphere Sphere_new(Vector3D center, double radius, sfColor color);
 
 /**
  * @brief Initializes a new sphere with a specified center, radius, color, and specular properties.
@@ -40,7 +41,7 @@ Sphere Sphere_new(Vector3D center, double radius, Color color);
  * @param specular_exponent The shininess of the sphere (higher value = smaller, sharper highlight).
  * @return Sphere The initialized sphere.
  */
-Sphere Sphere_new_with_specular(Vector3D center, double radius, Color color, double specular_intensity, int specular_exponent);
+Sphere Sphere_new_with_specular(Vector3D center, double radius, sfColor color, double specular_intensity, int specular_exponent);
 
 /**
  * @brief Calculates the intersection of a ray with the sphere.

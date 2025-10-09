@@ -1,14 +1,15 @@
 #ifndef LIGHT_H
 #define LIGHT_H
 
+#include <SFML/Graphics/Color.h>
+
 #include "vector3d.h"
-#include "color.h"
 
 /**
  * Default ambient light intensity and color
  */
 extern const double LIGHT_AMBIENT_INTENSITY;
-extern const Color LIGHT_AMBIENT_COLOR;
+extern const sfColor LIGHT_AMBIENT_COLOR;
 
 /**
  * @brief Structure representing a light source in 3D space.
@@ -17,7 +18,7 @@ extern const Color LIGHT_AMBIENT_COLOR;
  */
 typedef struct {
     Vector3D position; ///< Position of the light in 3D space.
-    Color color;       ///< Color of the light.
+    sfColor color;     ///< Color of the light.
 } Light;
 
 /**
@@ -27,6 +28,6 @@ typedef struct {
  * @param color The color/intensity of the light (RGB components should be in the range [0, 1]).
  * @return Light The initialized light.
  */
-Light Light_new(Vector3D position, Color color);
+Light Light_new(Vector3D position, sfColor color);
 
 #endif

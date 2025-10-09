@@ -1,8 +1,8 @@
 #include "../include/light.h"
 
 //Default ambient light intensity and color definition
-const double LIGHT_AMBIENT_INTENSITY = 0.5;
-const Color LIGHT_AMBIENT_COLOR = {255,255,255};
+const double LIGHT_AMBIENT_INTENSITY = 0.25;
+const sfColor LIGHT_AMBIENT_COLOR = {255,255,255, 255};
 
 /**
  * @brief Initializes a new light with a specified position and color.
@@ -13,7 +13,7 @@ const Color LIGHT_AMBIENT_COLOR = {255,255,255};
  * @param color The color/intensity of the light.
  * @return Light The initialized light.
  */
-Light Light_new(const Vector3D position, const Color color) {
+Light Light_new(const Vector3D position, const sfColor color) {
     const Light light = {position, color};
     return light;
 }

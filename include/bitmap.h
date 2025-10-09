@@ -1,17 +1,18 @@
 #ifndef BITMAP_H
 #define BITMAP_H
 
-#include "color.h"
+#include <SFML/Graphics.h>
 
 /**
  * @brief Structure representing a bitmap image.
  */
-typedef struct {
-  int width;          ///< Width of the image in pixels
-  int height;         ///< Height of the image in pixels
-  Color *pixels;      ///< Array of RGB pixels
-} Bitmap;
+// typedef struct {
+//   int width;          ///< Width of the image in pixels
+//   int height;         ///< Height of the image in pixels
+//   Color *pixels;      ///< Array of RGB pixels
+// } Bitmap;
 
+typedef sfImage* Bitmap;
 /**
  * @brief Creates a new bitmap with the specified width and height, initializing all pixels to black.
  *
@@ -54,7 +55,7 @@ void Bitmap_free(Bitmap bitmap);
  * @param y The y-coordinate of the pixel (0 to height-1).
  * @param color The color to set the pixel to.
  */
-void Bitmap_put_pixel(Bitmap* bitmap, int x, int y, Color color);
+void Bitmap_put_pixel(Bitmap bitmap, int x, int y, sfColor color);
 
 /**
  * @brief Draws a line on the bitmap from (x0, y0) to (x1, y1) with the specified color.
@@ -69,7 +70,7 @@ void Bitmap_put_pixel(Bitmap* bitmap, int x, int y, Color color);
  * @param y1 The ending y-coordinate of the line.
  * @param color The color to draw the line with.
  */
-void Bitmap_draw_line(Bitmap* bitmap, const int x0, const int y0, const int x1, const int y1, const Color color);
+void Bitmap_draw_line(Bitmap bitmap, const int x0, const int y0, const int x1, const int y1, const sfColor color);
 
 /**
  * @brief Applies a simple box blur for antialiasing to the given bitmap.
@@ -81,6 +82,6 @@ void Bitmap_draw_line(Bitmap* bitmap, const int x0, const int y0, const int x1, 
  *
  * @param bitmap Pointer to the Bitmap struct to apply antialiasing to.
  */
-void Bitmap_antialias_bitmap(const Bitmap *bitmap);
+void Bitmap_antialias_bitmap(const Bitmap bitmap);
 
 #endif

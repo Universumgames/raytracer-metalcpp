@@ -37,75 +37,9 @@ typedef struct {
  * @return Bitmap The newly created bitmap with all pixels initialized to black.
  */
 Bitmap Bitmap_create(const int width, const int height) {
-    Bitmap bitmap;
-    bitmap.width = width;
-    bitmap.height = height;
-    bitmap.pixels = (Color *)malloc(width * height * sizeof(Color));
-
-    if (bitmap.pixels) {
-        // Initialize all pixels to black
-        for (int i = 0; i < width * height; i++) {
-            bitmap.pixels[i].r = 0;
-            bitmap.pixels[i].g = 0;
-            bitmap.pixels[i].b = 0;
-        }
-    }
-
-    return bitmap;
+    return sfImage_create(width, height);
 }
 
-/**
- * @brief Loads a bitmap (.bmp) file and stores the pixel data in an RGB array.
- *
- * @param filename Path to the bitmap file to load.
- * @param bitmap Pointer to a Bitmap struct where the loaded image data will be stored.
- * @return int Returns 1 on success, 0 on failure.
- */
-int Bitmap_load(const char *filename, Bitmap bitmap) {
-    FILE *file = fopen(filename, "rb");
-    if (!file) {
-        perror("Failed to open file");
-        return 0;
-    }
-
-    BITMAPFILEHEADER fileHeader;
-    fread(&fileHeader, sizeof(BITMAPFILEHEADER), 1, file);
-    if (fileHeader.bfType != 0x4D42) { // 'BM' in hexadecimal
-        fclose(file);
-        fprintf(stderr, "Not a valid BMP file.\n");
-        return 0;
-    }
-
-    BITMAPINFOHEADER infoHeader;
-    fread(&infoHeader, sizeof(BITMAPINFOHEADER), 1, file);
-    if (infoHeader.biBitCount != 24) { // Only support 24-bit BMP
-        fclose(file);
-        fprintf(stderr, "Only 24-bit BMP files are supported.\n");
-        return 0;
-    }
-
-    bitmap.width = infoHeader.biWidth;
-    bitmap.height = abs(infoHeader.biHeight);
-    bitmap.pixels = (Color *)malloc(bitmap.width * bitmap.height * sizeof(Color));
-
-    fseek(file, fileHeader.bfOffBits, SEEK_SET);
-    int row_padded = (bitmap.width * 3 + 3) & (~3);
-    uint8_t *row = (uint8_t *)malloc(row_padded);
-
-    for (int y = 0; y < bitmap.height; y++) {
-        fread(row, sizeof(uint8_t), row_padded, file);
-        for (int x = 0; x < bitmap.width; x++) {
-            int pixel_index = (bitmap.height - 1 - y) * bitmap.width + x;
-            bitmap.pixels[pixel_index].b = row[x * 3 + 0];
-            bitmap.pixels[pixel_index].g = row[x * 3 + 1];
-            bitmap.pixels[pixel_index].r = row[x * 3 + 2];
-        }
-    }
-
-    free(row);
-    fclose(file);
-    return 1;
-}
 
 /**
  * @brief Saves an RGB array as a bitmap (.bmp) file.
@@ -115,46 +49,7 @@ int Bitmap_load(const char *filename, Bitmap bitmap) {
  * @return int Returns 1 on success, 0 on failure.
  */
 int Bitmap_save(const char *filename, const Bitmap bitmap) {
-    FILE *file = fopen(filename, "wb");
-    if (!file) {
-        perror("Failed to open file for writing");
-        return 0;
-    }
-
-    const int row_padded = (bitmap.width * 3 + 3) & (~3);
-    const int padding_size = row_padded - bitmap.width * 3;
-
-    BITMAPFILEHEADER fileHeader = {0};
-    fileHeader.bfType = 0x4D42;
-    fileHeader.bfOffBits = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
-    fileHeader.bfSize = fileHeader.bfOffBits + row_padded * bitmap.height;
-
-    BITMAPINFOHEADER infoHeader = {0};
-    infoHeader.biSize = sizeof(BITMAPINFOHEADER);
-    infoHeader.biWidth = bitmap.width;
-    infoHeader.biHeight = bitmap.height;
-    infoHeader.biPlanes = 1;
-    infoHeader.biBitCount = 24;
-    infoHeader.biSizeImage = row_padded * bitmap.height;
-
-    fwrite(&fileHeader, sizeof(BITMAPFILEHEADER), 1, file);
-    fwrite(&infoHeader, sizeof(BITMAPINFOHEADER), 1, file);
-
-    uint8_t *padding = (uint8_t *)calloc(padding_size, 1);
-
-    for (int y = 0; y < bitmap.height; y++) {
-        for (int x = 0; x < bitmap.width; x++) {
-            int pixel_index = (bitmap.height - 1 - y) * bitmap.width + x;
-            fwrite(&bitmap.pixels[pixel_index].b, 1, 1, file);
-            fwrite(&bitmap.pixels[pixel_index].g, 1, 1, file);
-            fwrite(&bitmap.pixels[pixel_index].r, 1, 1, file);
-        }
-        fwrite(padding, 1, padding_size, file);
-    }
-
-    free(padding);
-    fclose(file);
-    return 1;
+    return sfImage_saveToFile(bitmap, filename);
 }
 
 /**
@@ -163,8 +58,7 @@ int Bitmap_save(const char *filename, const Bitmap bitmap) {
  * @param bitmap Pointer to the Bitmap struct to free.
  */
 void Bitmap_free(Bitmap bitmap) {
-    free(bitmap.pixels);
-    bitmap.pixels = NULL;
+    sfImage_destroy(bitmap);
 }
 
 /**
@@ -175,17 +69,8 @@ void Bitmap_free(Bitmap bitmap) {
  * @param y The y-coordinate of the pixel (0 to height-1).
  * @param color The color to set the pixel to.
  */
-void Bitmap_put_pixel(Bitmap* bitmap, const int x, const int y, const Color color) {
-    // Check for valid coordinates
-    if (x < 0 || x >= bitmap->width || y < 0 || y >= bitmap->height) {
-        return;
-    }
-
-    // Calculate the index in the pixel array
-    int pixel_index = (bitmap->height - 1 - y) * bitmap->width + x; // Invert y for correct BMP format
-
-    // Set the pixel color
-    bitmap->pixels[pixel_index] = color;
+void Bitmap_put_pixel(Bitmap bitmap, const int x, const int y, const sfColor color) {
+    sfImage_setPixel(bitmap, x, y, color);
 }
 
 /**
@@ -201,7 +86,7 @@ void Bitmap_put_pixel(Bitmap* bitmap, const int x, const int y, const Color colo
  * @param y1 The ending y-coordinate of the line.
  * @param color The color to draw the line with.
  */
-void Bitmap_draw_line(Bitmap* bitmap, const int x0, const int y0, const int x1, const int y1, const Color color) {
+void Bitmap_draw_line(Bitmap bitmap, const int x0, const int y0, const int x1, const int y1, const sfColor color) {
     int x = x0;
     int y = y0;
     const int dx = abs(x1 - x0);
@@ -240,16 +125,12 @@ void Bitmap_draw_line(Bitmap* bitmap, const int x0, const int y0, const int x1, 
  *
  * @param bitmap Pointer to the Bitmap struct to apply antialiasing to.
  */
-void Bitmap_antialias_bitmap(const Bitmap *bitmap) {
-    const int width = bitmap->width;
-    const int height = bitmap->height;
+void Bitmap_antialias_bitmap(const Bitmap bitmap) {
+    const unsigned int width = sfImage_getSize(bitmap).x;
+    const unsigned int height = sfImage_getSize(bitmap).y;
 
     // Create a copy of the original pixels to avoid overwriting during computation
-    Color *original_pixels = malloc(width * height * sizeof(Color));
-    if (!original_pixels) return;
-    for (int i = 0; i < width * height; i++) {
-        original_pixels[i] = bitmap->pixels[i];
-    }
+    sfImage* original_pixels = sfImage_copy(bitmap);
 
     // Loop over each pixel in the bitmap
     for (int y = 0; y < height; y++) {
@@ -266,7 +147,8 @@ void Bitmap_antialias_bitmap(const Bitmap *bitmap) {
 
                     // Ensure the neighboring pixel is within bounds
                     if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
-                        const Color neighbor_pixel = original_pixels[ny * width + nx];
+                        // const Color neighbor_pixel = original_pixels[ny * width + nx];
+                        sfColor neighbor_pixel = sfImage_getPixel(bitmap, nx, ny);
                         red_total += neighbor_pixel.r;
                         green_total += neighbor_pixel.g;
                         blue_total += neighbor_pixel.b;
@@ -276,14 +158,16 @@ void Bitmap_antialias_bitmap(const Bitmap *bitmap) {
             }
 
             // Compute the average color and set it to the current pixel
-            Color averaged_color;
+            sfColor averaged_color;
             averaged_color.r = red_total / sample_count;
             averaged_color.g = green_total / sample_count;
             averaged_color.b = blue_total / sample_count;
-            bitmap->pixels[y_width + x] = averaged_color;
+            averaged_color.a = 255;
+            // bitmap->pixels[y_width + x] = averaged_color;
+            sfImage_setPixel(bitmap, x, y, averaged_color);
         }
     }
 
     // Free the temporary copy of the original pixels
-    free(original_pixels);
+    sfImage_destroy(original_pixels);
 }

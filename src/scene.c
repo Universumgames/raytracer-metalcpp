@@ -1,5 +1,4 @@
 #include "../include/scene.h"
-#include <stdio.h>
 
 /**
  * @brief Initializes a new empty scene.

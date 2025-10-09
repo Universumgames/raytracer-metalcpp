@@ -10,7 +10,7 @@
  * @param color The color of the plane.
  * @return Plane The initialized plane.
  */
-Plane Plane_new(const Vector3D normal, const double offset, const Color color) {
+Plane Plane_new(const Vector3D normal, const double offset, const sfColor color) {
     // Normalize the normal vector to ensure it has unit length
     const Vector3D normalized_normal = Vector3D_normalize(normal);
     Plane plane = {normalized_normal, offset, color};

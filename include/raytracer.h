@@ -37,6 +37,6 @@ Raytracer Raytracer_new(Camera camera, Scene scene, int max_depth);
  * @param raytracer Pointer to the Raytracer struct.
  * @param bitmap Pointer to the Bitmap where the image will be rendered.
  */
-void Raytracer_render(const Raytracer *raytracer, Bitmap *bitmap);
+void Raytracer_render(const Raytracer *raytracer, Bitmap bitmap);
 
 #endif

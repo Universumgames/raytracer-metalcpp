@@ -8,7 +8,7 @@
  * @param color The color of the sphere.
  * @return Sphere The initialized sphere.
  */
-Sphere Sphere_new(const Vector3D center, const double radius, const Color color) {
+Sphere Sphere_new(const Vector3D center, const double radius, const sfColor color) {
     const Sphere sphere = {center, radius, color, 0.5, 5};
     return sphere;
 }
@@ -23,7 +23,7 @@ Sphere Sphere_new(const Vector3D center, const double radius, const Color color)
  * @param specular_exponent The shininess of the sphere (higher value = smaller, sharper highlight).
  * @return Sphere The initialized sphere.
  */
-Sphere Sphere_new_with_specular(const Vector3D center, const double radius, const Color color, const double specular_intensity, const int specular_exponent) {
+Sphere Sphere_new_with_specular(const Vector3D center, const double radius, const sfColor color, const double specular_intensity, const int specular_exponent) {
     Sphere sphere;
     sphere.center = center;
     sphere.radius = radius;

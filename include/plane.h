@@ -1,9 +1,10 @@
 #ifndef PLANE_H
 #define PLANE_H
 
+#include <SFML/Graphics/Color.h>
+
 #include "vector3d.h"
 #include "ray.h"
-#include "color.h"
 
 /**
  * @brief Structure representing a plane in 3D space.
@@ -13,8 +14,9 @@
 typedef struct {
     Vector3D normal;  ///< The normal vector of the plane (must be unit length).
     double offset;    ///< The distance from the origin along the normal.
-    Color color;      ///< The color of the plane.
+    sfColor color;      ///< The color of the plane.
 } Plane;
+
 
 /**
  * @brief Initializes a plane given a normal vector and an offset.
@@ -24,7 +26,7 @@ typedef struct {
  * @param color The color of the plane.
  * @return Plane The initialized plane.
  */
-Plane Plane_new(Vector3D normal, double offset, Color color);
+Plane Plane_new(Vector3D normal, double offset, sfColor color);
 
 /**
  * @brief Calculates the intersection of a ray with the plane.

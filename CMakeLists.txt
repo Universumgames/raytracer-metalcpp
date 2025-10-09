@@ -11,8 +11,6 @@ add_executable(CCaster src/main.c
         include/bitmap.h
         src/camera.c
         include/camera.h
-        src/color.c
-        include/color.h
         src/configservice.c
         include/configservice.h
         src/light.c
@@ -30,3 +28,14 @@ add_executable(CCaster src/main.c
         src/vector3d.c
         include/vector3d.h
 )
+
+# ----- MacOS -----
+
+include_directories(/opt/homebrew/include)
+add_library( csfml-system SHARED IMPORTED )
+set_target_properties( csfml-system PROPERTIES IMPORTED_LOCATION /opt/homebrew/lib/libcsfml-system.dylib )
+add_library( csfml-window SHARED IMPORTED )
+set_target_properties( csfml-window PROPERTIES IMPORTED_LOCATION /opt/homebrew/lib/libcsfml-window.dylib )
+add_library( csfml-graphics SHARED IMPORTED )
+set_target_properties( csfml-graphics PROPERTIES IMPORTED_LOCATION /opt/homebrew/lib/libcsfml-graphics.dylib )
+target_link_libraries(CCaster csfml-graphics csfml-window csfml-system)
