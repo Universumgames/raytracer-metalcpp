@@ -21,8 +21,8 @@ add_custom_target(METAL_SYMBOLS
 
 # Compile to metallib
 add_custom_target(METAL_SHADERS
-    COMMAND cp default.metallib ../
-    COMMAND cp default.metallibsym ../)
+    COMMAND cp default.metallib ../../
+    COMMAND cp default.metallibsym ../../)
     #COMMAND xcrun -sdk macosx metallib -o ${CMAKE_CURRENT_BINARY_DIR}/../default.metallib ${SHADER_IR})
 
 add_dependencies(METAL_SHADERS ${SHADER_IR_TARGETS} METAL_SYMBOLS)

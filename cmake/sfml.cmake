@@ -5,4 +5,8 @@ CPMAddPackage(
         GIT_SHALLOW OFF
 )
 
+
+include_directories(${SFML_DIR}/include)
+link_directories(${SFML_DIR}/lib)
+
 link_libraries(sfml-graphics sfml-window sfml-system)

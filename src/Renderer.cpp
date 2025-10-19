@@ -5,7 +5,7 @@
 Renderer::Renderer(sf::Vector2u windowSize) {
     this->windowSize = windowSize;
 
-    window = new sf::RenderWindow(sf::VideoMode(windowSize), std::string("Game of Life"));
+    window = new sf::RenderWindow(sf::VideoMode(windowSize), std::string("Raytracer"));
     window->setFramerateLimit(50);
 
     // Font
@@ -45,7 +45,17 @@ void Renderer::updateFPS(unsigned fps) {
 }
 
 
+void Renderer::draw(RayTracing::Image *imageSrc) {
+    for (unsigned x = 0; x < windowSize.x; ++x)
+        for (unsigned y = 0; y < windowSize.y; ++y)
+            image->setPixel({x, y}, imageSrc->getPixel(x, y).toSFMLColor());
 
-void Renderer::draw() {
+    texture->update(*image);
+    window->clear(sf::Color::Black);
+    window->draw(*sprite);
 
+    std::ostringstream ss;
+    statusText->setString(ss.str());
+    window->draw(*statusText);
+    window->display();
 }
