@@ -9,9 +9,9 @@ using namespace RayTracing;
 int main(int argc, char *argv[]) {
     sf::Vector2u windowSize = sf::Vector2u(800, 600);
 
-    Scene scene = Scene::loadFromFile("scene.json");
+    Scene scene = Scene::loadFromFile(SCENE_BASE_DIR "scene.json");
 
-    RayTracer *raytracer = new MetalRaytracer(windowSize.x, windowSize.y, 3, 4);
+    RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 1);
     Image *uvTest = raytracer->uvTest();
     Image *raytraced = raytracer->raytrace(scene);
 
@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
 
     while (renderer.isOpen()) {
         renderer.processEvents();
-        renderer.draw(uvTest);
+        renderer.draw(raytraced);
     }
 
     return 0;

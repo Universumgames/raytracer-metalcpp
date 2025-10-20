@@ -1,4 +1,5 @@
-#include "simples.hpp"
+
+#include "Image.hpp"
 
 namespace RayTracing {
     Image::Image(unsigned int width, unsigned int height) {
@@ -10,7 +11,6 @@ namespace RayTracing {
             this->image[i] = (Color *) malloc(sizeof(Color) * width);
         }
     }
-
 
     Color Image::getPixel(unsigned int x, unsigned int y) {
         return image[y][x];

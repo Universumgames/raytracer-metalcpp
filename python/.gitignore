@@ -1,2 +1,4 @@
-.idea
+.idea/*
 .venv
+pixels.py
+rays.py

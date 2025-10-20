@@ -26,6 +26,28 @@ namespace RayTracing {
         auto *image = new Image(width, height);
         auto rays = calculateStartingRays();
 
+        for (auto &ray : rays) {
+            for (const auto& object : scene.objects) {
+                for (int i = 0; i < object.mesh->numTriangles; i++) {
+                    Vec3* startingPoint = &object.mesh->points[i * 3];
+                    Vec3 triangle[3] = {startingPoint[0] - object.position, startingPoint[1] - object.position, startingPoint[2] - object.position};
+                    auto intersection = ray.intersectTriangle(triangle);
+                    if (intersection.hit) {
+                        auto dot = Vec3::dot(ray.direction, intersection.normal);
+                        ray.colors.push_back((Vec4(object.color) * (1-dot)).asColor());
+                    }
+                }
+            }
+
+            for (const auto& sphere : scene.spheres) {
+                if (ray.intersectSphere(sphere.center * -1, sphere.radius).hit) {
+                     ray.colors.push_back(sphere.color);
+                 }
+            }
+        }
+
+        resolveRays(image, rays);
+
         return image;
     }
 }

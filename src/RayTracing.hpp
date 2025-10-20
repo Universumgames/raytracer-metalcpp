@@ -1,6 +1,8 @@
 #pragma once
+#include "Image.hpp"
+#include "Ray.hpp"
 #include "Scene.hpp"
-#include "simples.hpp"
+#include "vectors.hpp"
 
 namespace RayTracing {
     class RayTracer {
@@ -9,7 +11,7 @@ namespace RayTracing {
         unsigned bounces;
         unsigned samplesPerPixel;
 
-        unsigned fov = 180;
+        unsigned fov = 90;
 
         /**
          * get the view box scaling to convert from screen space to world space
@@ -23,6 +25,8 @@ namespace RayTracing {
          * @return
          */
         std::vector<Ray> calculateStartingRays();
+
+        void resolveRays(Image* image, std::vector<Ray>& rays) const;
 
     private:
         /**

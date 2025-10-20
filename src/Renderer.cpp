@@ -50,6 +50,8 @@ void Renderer::draw(RayTracing::Image *imageSrc) {
         for (unsigned y = 0; y < windowSize.y; ++y)
             image->setPixel({x, y}, imageSrc->getPixel(x, y).toSFMLColor());
 
+    bool suc = image->saveToFile("output.jpg");
+
     texture->update(*image);
     window->clear(sf::Color::Black);
     window->draw(*sprite);

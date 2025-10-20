@@ -3,7 +3,8 @@
 #include <SFML/Graphics.hpp>
 #include <array>
 
-#include "simples.hpp"
+#include "Image.hpp"
+
 
 class Renderer {
 private:

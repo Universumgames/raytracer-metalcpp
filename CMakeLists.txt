@@ -23,7 +23,7 @@ add_subdirectory(shader)
 
 add_custom_target(CopyResources
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cnr.otf ${CMAKE_BINARY_DIR}
-        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/scene.json ${CMAKE_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/scene ${CMAKE_BINARY_DIR}/scene
 )
 add_dependencies(${PROJECT_NAME} CopyResources)
 
