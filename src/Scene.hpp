@@ -1,21 +1,28 @@
 #pragma once
+#include <fstream>
 #include <vector>
 
 #include "simples.hpp"
+#include <nlohmann/json.hpp>
 
 namespace RayTracing {
-    class RayTraceableObject {
-    public:
-        virtual ~RayTraceableObject() = default;
+    struct Mesh {
+        public:
+        std::vector<Vec3> points;
+        std::vector<int> indices;
 
-        Point position;
-        Color color;
-
-        RayTraceableObject(Point position, Color color) : position(position), color(color) {
-        }
-
-        virtual bool intersect(Ray ray) { return false; }
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Mesh, points, indices)
     };
 
-    typedef std::vector<RayTraceableObject> Scene;
+    struct Scene {
+    public:
+        std::vector<Mesh> objects;
+
+    public:
+        Scene() = default;
+
+        static Scene loadFromFile(const std::string &path);
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Scene, objects)
+    };
 }

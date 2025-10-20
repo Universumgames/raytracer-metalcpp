@@ -9,7 +9,7 @@ using namespace RayTracing;
 int main(int argc, char *argv[]) {
     sf::Vector2u windowSize = sf::Vector2u(800, 600);
 
-    Scene scene = {};
+    Scene scene = Scene::loadFromFile("scene.json");
 
     RayTracer *raytracer = new MetalRaytracer(windowSize.x, windowSize.y, 3, 4);
     Image *uvTest = raytracer->uvTest();

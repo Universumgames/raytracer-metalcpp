@@ -24,6 +24,7 @@ namespace RayTracing {
 
     Image *SequentialRayTracer::raytrace(Scene scene) {
         auto *image = new Image(width, height);
+        auto rays = calculateStartingRays();
 
         return image;
     }

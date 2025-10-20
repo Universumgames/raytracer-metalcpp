@@ -20,8 +20,15 @@ add_subdirectory(lib)
 ## adding respective shaders for compilation
 add_subdirectory(shader)
 
-include_directories(definitions)
 
+add_custom_target(CopyResources
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cnr.otf ${CMAKE_BINARY_DIR}
+        COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/scene.json ${CMAKE_BINARY_DIR}
+)
+add_dependencies(${PROJECT_NAME} CopyResources)
+
+## include definitions header for the right platform
+include_directories(definitions)
 if(WIN32)
     if(MSVC)
         target_compile_options(${PROJECT_NAME} PRIVATE /FI"cuda.hpp")

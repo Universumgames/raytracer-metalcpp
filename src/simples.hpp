@@ -1,31 +1,35 @@
 #pragma once
 #include <cmath>
 #include <vector>
+#include <nlohmann/json.hpp>
 #include <simd/vector_types.h>
 
 #include "SFML/Graphics/Color.hpp"
 
+#include "vectors.hpp"
+
 namespace RayTracing {
-    struct Point {
-        int x;
-        int y;
-    };
 
     struct Color {
-        uint8_t r, g, b;
+        uint8_t r, g, b, a;
 
         [[nodiscard]] sf::Color toSFMLColor() const {
             return {r, g, b};
         }
 
-        Color(uint8_t r, uint8_t g, uint8_t b) : r(r), g(g), b(b) {
+        Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : r(r), g(g), b(b), a(a) {
         }
 
-        Color(double r, double g, double b) : r(floor(r)), g(floor(g)), b(floor(b)) {
+        Color(double r, double g, double b, double a = 255) : r(floor(r)), g(floor(g)), b(floor(b)), a(floor(a)) {
         }
 
-        Color(unsigned r, unsigned g, unsigned b) : r(r), g(g), b(b) {
+        Color(unsigned r, unsigned g, unsigned b, unsigned a = 255) : r(r), g(g), b(b), a(a) {
         }
+
+        Color(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {
+        }
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Color, r, g, b, a)
 
 #ifdef USE_SHADER_METAL
         static Color fromFloat4(simd::float4 f) {
@@ -35,8 +39,8 @@ namespace RayTracing {
     };
 
     struct Ray {
-        Point origin;
-        Point direction;
+        Vec3 origin;
+        Vec3 direction;
         std::vector<Color> colors;
     };
 

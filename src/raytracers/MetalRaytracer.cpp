@@ -8,8 +8,7 @@
 #include <Metal/MTLCommandQueue.hpp>
 #include <Metal/MTLComputePipeline.hpp>
 #include <simd/simd.h>
-
-#include "Metal/MTLBuffer.hpp"
+#include <Metal/MTLBuffer.hpp>
 
 
 namespace RayTracing {
@@ -24,7 +23,6 @@ namespace RayTracing {
     }
 
     void MetalRaytracer::initialize() {
-        NS::Error *error = nullptr;
         device = MTL::CreateSystemDefaultDevice();
 
         defaultLibrary = device->newDefaultLibrary();
@@ -122,6 +120,7 @@ namespace RayTracing {
 
     Image *MetalRaytracer::raytrace(Scene scene) {
         auto *image = new Image(width, height);
+        auto rays = calculateStartingRays();
         return image;
     }
 
