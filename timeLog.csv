@@ -1,3 +1,4 @@
 Implementation,Platform,Architecture,Filename,Duration(ms)
 SequentialRayTracer,Darwin,arm64,scene/scene.json,1106
 SequentialRayTracer,Darwin,arm64,scene/scene.json,1116
+SequentialRayTracer,Linux,aarch64,scene/scene.json,999

@@ -40,9 +40,12 @@ if (WIN32)
     endif ()
 elseif (APPLE)
     target_compile_options(${PROJECT_NAME} PRIVATE -include "metal.hpp")
+else()
+    target_compile_options(${PROJECT_NAME} PRIVATE -include "definitions.hpp")
 endif ()
 
 # check for CI/CD
-if (ENV{CI})
+if (CI_CD)
+    message(WARNING "Compiling in CI/CD mode, no display output will be required")
     add_compile_definitions(-DRUNNING_CICD)
 endif ()
