@@ -12,7 +12,9 @@ namespace RayTracing {
 
         [[nodiscard]] Mat3x3 getRotationMatrix() const;
 
-        [[nodiscard]] Vec3 getTranslatedPoint(const Mat3x3 &rotationMatrix, const Vec3 &point) const;
+        [[nodiscard]] Vec3 getTranslatedRotatedPoint(const Mat3x3 &rotationMatrix, const Vec3 &point) const;
+
+        static Vec3 getRotatedNormal(const Mat3x3 &rotationMatrix, const Vec3 &normal);
 
         void rotateEuler(Vec3 rad);
     };

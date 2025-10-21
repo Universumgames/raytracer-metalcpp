@@ -1,2 +1,14 @@
 Implementation,Platform,Architecture,Filename,Samples,Bounces,Duration(ms)
 SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5781
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5640
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,7529
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,7544
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,7609
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5887
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5917
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5842
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5829
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5796
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5820
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5819
+SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,5823

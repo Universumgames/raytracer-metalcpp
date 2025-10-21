@@ -103,6 +103,7 @@ namespace RayTracing {
                 }*/
 
                 Color avg = Color::avg(pixelColors);
+                //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
                 image->setPixel(x, y, avg);
             }
         }

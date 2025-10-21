@@ -52,9 +52,14 @@ namespace RayTracing {
         return rotationMatrix;
     }
 
-    Vec3 RayTraceableObject::getTranslatedPoint(const Mat3x3 &rotationMatrix, const Vec3& point) const {
-        return rotationMatrix * point - position;
+    Vec3 RayTraceableObject::getTranslatedRotatedPoint(const Mat3x3 &rotationMatrix, const Vec3& point) const {
+        return getRotatedNormal(rotationMatrix, point) - position;
     }
+
+    Vec3 RayTraceableObject::getRotatedNormal(const Mat3x3 &rotationMatrix, const Vec3 &normal) {
+        return rotationMatrix * normal;
+    }
+
 
     void RayTraceableObject::rotateEuler(Vec3 rad) {
         double roll = rad.x();

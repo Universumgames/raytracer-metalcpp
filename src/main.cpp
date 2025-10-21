@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     auto test = Sphere({0, 0, 0, 0}, {0, 0, 0}, {}, 3);
     test.rotateEuler({0, 0, 0});
     Vec3 p = {0, 0, 1};
-    Vec3 pn = test.getTranslatedPoint(test.getRotationMatrix(), p);
+    Vec3 pn = test.getTranslatedRotatedPoint(test.getRotationMatrix(), p);
 
 
     auto imageHandler = new ImageHandler(windowSize);

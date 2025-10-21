@@ -30,7 +30,7 @@ namespace RayTracing {
             setValues(values);
         }
 
-        Matrix<float>(double values[X][Y]) {
+        explicit Matrix<X,Y,float>(double values[X][Y]) {
             setValues(values);
         }
 
