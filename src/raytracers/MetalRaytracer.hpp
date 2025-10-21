@@ -45,6 +45,8 @@ namespace RayTracing {
         Image *raytrace(Scene scene) override;
 
         Image *uvTest() override;
+
+        std::string identifier() override { return "MetalRaytracer"; }
     };
 }
 

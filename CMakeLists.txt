@@ -22,7 +22,6 @@ add_subdirectory(shader)
 
 add_definitions(-DPLATFORM_NAME="${CMAKE_SYSTEM_NAME}" -DARCHITECTURE="${CMAKE_HOST_SYSTEM_PROCESSOR}")
 
-
 add_custom_target(CopyResources
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cnr.otf ${CMAKE_BINARY_DIR}
         COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/scene ${CMAKE_BINARY_DIR}/scene
@@ -39,4 +38,9 @@ if(WIN32)
     endif()
 elseif (APPLE)
     target_compile_options(${PROJECT_NAME} PRIVATE -include "metal.hpp")
+endif ()
+
+# check for CI/CD
+if(ENV{CI})
+        add_compile_definitions(-DRUNNING_CICD)
 endif ()

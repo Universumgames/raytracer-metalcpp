@@ -42,6 +42,8 @@ namespace RayTracing {
 
         virtual ~RayTracer();
 
+        virtual std::string identifier() = 0;
+
         /**
          * Raytrace a scene and generate image
          * @param scene scene to raytrace

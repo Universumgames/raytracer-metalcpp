@@ -8,23 +8,33 @@
 
 using namespace RayTracing;
 
-void benchmarkRaytracer(RayTracer* raytracer, const std::string &name, const Scene& scene, bool deleteTracer = true) {
+#define BENCHMARK_LOG_FILE "../timeLog.csv"
+
+Image* benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteImg = true, bool deleteTracer = true) {
     auto start = std::chrono::high_resolution_clock::now();
-    Image* raytraced = raytracer->raytrace(scene);
+    Image *raytraced = raytracer->raytrace(scene);
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "[" << name << "] Laufzeit: " << duration.count() << " ms\n";
+    std::cout << "[" << raytracer->identifier() << "] Laufzeit: " << duration.count() << " ms\n";
 
+    bool exists = std::ifstream(BENCHMARK_LOG_FILE).good();
     std::ofstream timeLog;
-    timeLog.open("../timeLog.csv", std::ios::app);
-    timeLog << name << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," << duration.count() << "\n";
+    timeLog.open(BENCHMARK_LOG_FILE, std::ios::app);
+    if (!exists) {
+        timeLog << "Implementation,Platform,Architecture,Filename,Duration(ms)" << std::endl;
+    }
+    timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," << duration.count()
+            << std::endl;
     timeLog.close();
-
-    delete raytraced;
 
     if (deleteTracer) {
         delete raytracer;
     }
+    if (deleteImg) {
+        delete raytraced;
+        return nullptr;
+    }
+    return raytraced;
 }
 
 int main(int argc, char *argv[]) {
@@ -34,14 +44,20 @@ int main(int argc, char *argv[]) {
 
     RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 1);
     Image *uvTest = raytracer->uvTest();
-    Image *raytraced = raytracer->raytrace(scene);
+    Image *raytraced = benchmarkRaytracer(raytracer, scene, false);
 
-    auto renderer = Renderer(windowSize);
+
+    auto imageHandler = new ImageHandler(windowSize);
+    imageHandler->saveImage("raytraced.jpg", raytraced);
+
+#ifndef RUNNING_CICD
+    auto renderer = Renderer(windowSize, imageHandler);
 
     while (renderer.isOpen()) {
         renderer.processEvents();
         renderer.draw(raytraced);
     }
+#endif
 
     return 0;
 }
