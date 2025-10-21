@@ -3,6 +3,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 
+#include "vectors.hpp"
 #include "SFML/Graphics/Color.hpp"
 
 #ifdef USE_SHADER_METAL
@@ -10,39 +11,76 @@
 #endif
 
 namespace RayTracing {
-    struct Color {
+    struct RGBA8 {
         uint8_t r, g, b, a;
 
         [[nodiscard]] sf::Color toSFMLColor() const {
             return {r, g, b};
         }
 
-        Color &operator+=(const Color& value) {
+        RGBA8 &operator+=(const RGBA8& value) {
             r += value.r;
             g += value.g;
             b += value.b;
             return *this;
         }
 
-        Color(): r(0), g(0), b(0), a(0) {}
+        RGBA8(): r(0), g(0), b(0), a(0) {}
 
-        Color(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : r(r), g(g), b(b), a(a) {}
+        RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : r(r), g(g), b(b), a(a) {}
 
-        Color(double r, double g, double b, double a = 255) : r(floor(r)), g(floor(g)), b(floor(b)), a(floor(a)) {}
+        RGBA8(double r, double g, double b, double a = 255) : r(floor(r)), g(floor(g)), b(floor(b)), a(floor(a)) {}
 
-        Color(unsigned r, unsigned g, unsigned b, unsigned a = 255) : r(r), g(g), b(b), a(a) {}
+        RGBA8(unsigned r, unsigned g, unsigned b, unsigned a = 255) : r(r), g(g), b(b), a(a) {}
 
-        Color(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {}
+        RGBA8(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {}
 
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Color, r, g, b, a)
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(RGBA8, r, g, b, a)
 
-        static Color avg(std::vector<Color> colors);
+        __deprecated
+        static RGBA8 avg(std::vector<RGBA8> colors);
+
+        /// warning this method should be used as confusion with the float-valued color encoding can occur
+        [[nodiscard]] Vec4 forceVec4() const {
+            return Vec4{static_cast<float>(r), static_cast<float>(g),static_cast<float>(b), static_cast<float>(a)};
+        }
+
+        /// warning this method should be used as confusion with the float-valued color encoding can occur
+        static RGBA8 forceFromVec4(Vec4 color) {
+            return {color.x(), color.y(), color.z(), color.w()};
+        }
 
 #ifdef USE_SHADER_METAL
-        static Color fromFloat4(simd::float4 f) {
-            return {f[0] * 255, f[1] * 255, f[2] * 255};
+        static RGBA8 fromFloat4(simd::float4 f) {
+            return {f[0] * 255, f[1] * 255, f[2] * 255, f[3] * 255};
         }
 #endif
+
+    };
+
+    struct RGBf : public Vec4 {
+    public:
+        RGBf(): Vec4(0, 0, 0, 0) {}
+        RGBf(float a, float r, float g, float b) : Vec4(a, r, g, b) {}
+        RGBf(const RGBf& other)= default;
+        RGBf(const Vec4& other): Vec4(other) {}
+        RGBf(const RGBA8& other): Vec4(other.a/255.f, other.r/255.f, other.g/255.f, other.b/255.f) {}
+
+        [[nodiscard]] float getA() const {return this->getW();}
+        [[nodiscard]] float getR() const {return this->getX();}
+        [[nodiscard]] float getG() const {return this->getY();}
+        [[nodiscard]] float getB() const {return this->getZ();}
+
+        float& a() { return this->w();}
+        float& r() { return this->x();}
+        float& g() { return this->y();}
+        float& b()  { return this->z();}
+
+        static RGBf geometricAVG(const std::vector<RGBf>& colors);
+
+        RGBf operator*=(const RGBf& other);
+
+        [[nodiscard]] RGBA8 toRGBA8() const;
 
     };
 

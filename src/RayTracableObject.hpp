@@ -1,4 +1,5 @@
 #pragma once
+#include "Color.hpp"
 #include "matrices.hpp"
 #include "vectors.hpp"
 
@@ -6,7 +7,7 @@
 
 namespace RayTracing {
     struct RayTraceableObject {
-        Color color;
+        RGBf color;
         Vec3 position;
         Quaternion quaternion;
 
@@ -24,7 +25,7 @@ namespace RayTracing {
 
         Sphere() = default;
 
-        Sphere(Color color, const Vec3& position, const Quaternion& quaternion, float radius) : RayTraceableObject(color, position,
+        Sphere(RGBA8 color, const Vec3& position, const Quaternion& quaternion, float radius) : RayTraceableObject(color, position,
             quaternion), radius(radius) {
         }
 

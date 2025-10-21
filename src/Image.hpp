@@ -6,17 +6,17 @@ namespace RayTracing {
     private:
         unsigned int width, height;
 
-        Color **image;
+        RGBA8 **image;
 
     public:
         Image() = delete;
 
         Image(unsigned int width, unsigned int height);
 
-        void setPixel(unsigned int x, unsigned int y, Color color);
+        void setPixel(unsigned int x, unsigned int y, RGBA8 color);
 
-        Color getPixel(unsigned int x, unsigned int y);
+        RGBA8 getPixel(unsigned int x, unsigned int y);
 
-        Color *valueAt(unsigned int x, unsigned int y);
+        RGBA8 *valueAt(unsigned int x, unsigned int y);
     };
 }

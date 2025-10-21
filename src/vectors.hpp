@@ -1,7 +1,6 @@
 #pragma once
 #include <cstdarg>
 #include <nlohmann/json.hpp>
-#include "Color.hpp"
 
 namespace RayTracing {
     template<unsigned int X,
@@ -44,11 +43,11 @@ namespace RayTracing {
             values[2] = z;
         }
 
-        Vector(T x, T y, T z, T w) requires (X == 4) {
-            values[0] = x;
-            values[1] = y;
-            values[2] = z;
-            values[3] = w;
+        Vector(T w, T x, T y, T z) requires (X == 4) {
+            values[0] = w;
+            values[1] = x;
+            values[2] = y;
+            values[3] = z;
         }
 
         Vector(T values[X]) {
@@ -67,13 +66,6 @@ namespace RayTracing {
             for (unsigned int i = 0; i < X; i++) {
                 values[i] = other.values[i];
             }
-        }
-
-        Vector(const Color &other) requires (X == 4) {
-            values[0] = other.r;
-            values[1] = other.g;
-            values[2] = other.b;
-            values[3] = other.a;
         }
 
         /// Dimension expansion
@@ -215,27 +207,11 @@ namespace RayTracing {
             return *this;
         }
 
-        Vector &operator+=(const Color &other) requires (X == 4) {
-            values[0] += (T) other.r;
-            values[1] += (T) other.g;
-            values[2] += (T) other.b;
-            values[3] += (T) other.a;
-            return *this;
-        }
-
         T operator[](unsigned i) const {
             return values[i];
         }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector, values)
-
-        [[nodiscard]] Color asColor() const requires (X == 3) {
-            return Color(values[0], values[1], values[2], (T) 255);
-        }
-
-        [[nodiscard]] Color asColor() const requires (X == 4) {
-            return Color(values[0], values[1], values[2], values[3]);
-        }
 
         static Vector zero() {
             return Vector((T) 0);
@@ -253,11 +229,20 @@ namespace RayTracing {
         T &y() requires (X >= 2 && X <= 3) { return values[1]; }
         T &z() requires (X == 3) { return values[2]; }
 
+        T getX() const requires (X >= 1 && X <= 3) { return values[0]; }
+        T getY() const requires (X >= 2 && X <= 3) { return values[1]; }
+        T getZ() const requires (X == 3) { return values[2]; }
+
         // in 4d w get pushed before x so the indices change
         T &w() requires (X >= 4) { return values[0]; }
         T &x() requires (X >= 4) { return values[1]; }
         T &y() requires (X >= 4) { return values[2]; }
         T &z() requires (X >= 4) { return values[3]; }
+
+        T getW() const requires (X >= 4) { return values[0]; }
+        T getX() const requires (X >= 4) { return values[1]; }
+        T getY() const requires (X >= 4) { return values[2]; }
+        T getZ() const requires (X >= 4) { return values[3]; }
     };
 
     typedef Vector<2, float> Vec2;

@@ -30,7 +30,7 @@ namespace RayTracing {
             for (int b = 0; b < bounces; b++) {
                 Ray::HitInfo currentHit{.hit = false, .dst = MAXFLOAT};
                 Vec3 currentRotatedNormal;
-                Color currentColor;
+                RGBf currentColor;
 
                 for (const auto &object: scene.objects) {
                     auto rotMat = object.getRotationMatrix();

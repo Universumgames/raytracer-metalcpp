@@ -6,21 +6,21 @@ namespace RayTracing {
         this->width = width;
         this->height = height;
 
-        this->image = (Color **) malloc(sizeof(Color *) * height);
+        this->image = (RGBA8 **) malloc(sizeof(RGBA8 *) * height);
         for (int i = 0; i < height; i++) {
-            this->image[i] = (Color *) malloc(sizeof(Color) * width);
+            this->image[i] = (RGBA8 *) malloc(sizeof(RGBA8) * width);
         }
     }
 
-    Color Image::getPixel(unsigned int x, unsigned int y) {
+    RGBA8 Image::getPixel(unsigned int x, unsigned int y) {
         return image[y][x];
     }
 
-    void Image::setPixel(unsigned int x, unsigned int y, Color color) {
+    void Image::setPixel(unsigned int x, unsigned int y, RGBA8 color) {
         image[y][x] = color;
     }
 
-    Color *Image::valueAt(unsigned int x, unsigned int y) {
+    RGBA8 *Image::valueAt(unsigned int x, unsigned int y) {
         return &image[y][x];
     }
 }

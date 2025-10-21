@@ -82,7 +82,7 @@ namespace RayTracing {
         for (unsigned x = 0; x < width; x++) {
             for (unsigned y = 0; y < height; y++) {
                 std::vector<Ray> pixelRays;
-                std::vector<Color> pixelColors;
+                std::vector<RGBf> pixelColors;
 
                 int startIndex = (y * width + x) * samplesPerPixel;
                 for (int i = 0; i < samplesPerPixel; i++) {
@@ -102,9 +102,9 @@ namespace RayTracing {
                     ++it;
                 }*/
 
-                Color avg = Color::avg(pixelColors);
+                RGBf avg = RGBf::geometricAVG(pixelColors);
                 //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
-                image->setPixel(x, y, avg);
+                image->setPixel(x, y, avg.toRGBA8());
             }
         }
     }

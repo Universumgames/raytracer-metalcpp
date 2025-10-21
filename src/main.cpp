@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
     Image *raytraced = benchmarkRaytracer(raytracer, scene, false);
 
     auto test = Sphere({0, 0, 0, 0}, {0, 0, 0}, {}, 3);
-    test.rotateEuler({0, 0, 0});
+    test.rotateEuler({0, 0, deg2rad(45)});
     Vec3 p = {0, 0, 1};
     Vec3 pn = test.getTranslatedRotatedPoint(test.getRotationMatrix(), p);
 

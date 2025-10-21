@@ -111,7 +111,7 @@ namespace RayTracing {
         for (unsigned y = 0; y < height; ++y) {
             for (unsigned x = 0; x < width; ++x) {
                 simd::float4 color = ((simd::float4 *) bufferResult->contents())[y * width + x];
-                image->setPixel(x, y, Color::fromFloat4(color));
+                image->setPixel(x, y, RGBA8::fromFloat4(color));
             }
         }
         return image;
