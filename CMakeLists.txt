@@ -6,7 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 #### Set shader language to compile with
-set(USE_SHADER_METAL ON)
+if (APPLE)
+    set(USE_SHADER_METAL ON)
+endif ()
 #set(USER_SHADER_CUDA OFF)
 
 include(cmake/CMakeLists.txt)
@@ -30,17 +32,17 @@ add_dependencies(${PROJECT_NAME} CopyResources)
 
 ## include definitions header for the right platform
 include_directories(definitions)
-if(WIN32)
-    if(MSVC)
+if (WIN32)
+    if (MSVC)
         target_compile_options(${PROJECT_NAME} PRIVATE /FI"cuda.hpp")
-    else()
+    else ()
         target_compile_options(${PROJECT_NAME} PRIVATE -include "cuda.hpp")
-    endif()
+    endif ()
 elseif (APPLE)
     target_compile_options(${PROJECT_NAME} PRIVATE -include "metal.hpp")
 endif ()
 
 # check for CI/CD
-if(ENV{CI})
-        add_compile_definitions(-DRUNNING_CICD)
+if (ENV{CI})
+    add_compile_definitions(-DRUNNING_CICD)
 endif ()
