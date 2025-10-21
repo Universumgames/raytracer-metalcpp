@@ -1,205 +1,256 @@
 #pragma once
+#include <cstdarg>
 #include <nlohmann/json.hpp>
-
-#include "SFML/System/Vector2.hpp"
-#include "SFML/System/Vector3.hpp"
-
+#include "Color.hpp"
 
 namespace RayTracing {
-    template<typename T,
+    template<unsigned int X,
+        typename T,
         typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
-    struct Vector2 {
-        T x, y;
+    struct Vector {
+    public:
+        enum Direction: unsigned {
+            X_AXIS = 0,
+            Y_AXIS = 1,
+            Z_AXIS = 2,
+            W_AXIS = 3
+        };
 
-        Vector2() : x(0), y(0) {
+        T values[X] = {};
+
+        Vector(T initial = 0) {
+            for (unsigned int i = 0; i < X; i++) {
+                values[i] = initial;
+            }
         }
 
-        Vector2(T x, T y) : x(x), y(y) {
+        // Vector(T value1, T values, ...) requires (X >= 1) {
+        //     this->values[0] = value1;
+        //     std::va_list args;
+        //     va_start(args, values);
+        //     for (unsigned int i = 1; i < X; i++) {
+        //         this->values[i] = va_arg(args, T);;
+        //     }
+        // }
+
+        Vector(T x, T y) requires (X == 2) {
+            values[0] = x;
+            values[1] = y;
         }
 
-        Vector2(const Vector2 &other) : x(other.x), y(other.y) {
+        Vector(T x, T y, T z) requires (X == 3) {
+            values[0] = x;
+            values[1] = y;
+            values[2] = z;
         }
 
-        float length() const {
-            return sqrt(x * x + y * y);
+        Vector(T x, T y, T z, T w) requires (X == 4) {
+            values[0] = x;
+            values[1] = y;
+            values[2] = z;
+            values[3] = w;
         }
 
-        Vector2 operator /(T t) {
-            return Vector2(x / t, y / t);
+        Vector(T values[X]) {
+            for (unsigned int i = 0; i < X; i++) {
+                this->values[i] = values[i];
+            }
         }
 
-        Vector2 operator/(const Vector2 &other) {
-            return Vector2(x / other.x, y / other.y);
+        Vector(const std::vector<T> &values) {
+            for (unsigned int i = 0; i < X; i++) {
+                this->values[i] = values[i];
+            }
         }
 
-        Vector2 operator*(T t) {
-            return Vector2(x * t, y * t);
+        Vector(const Vector &other) {
+            for (unsigned int i = 0; i < X; i++) {
+                values[i] = other.values[i];
+            }
         }
 
-        Vector2 operator*(const Vector2 &other) {
-            return Vector2(x * other.x, y * other.y);
+        Vector(const Color &other) requires (X == 4) {
+            values[0] = other.r;
+            values[1] = other.g;
+            values[2] = other.b;
+            values[3] = other.a;
         }
 
-        Vector2 operator-(const Vector2 &other) {
-            return Vector2(x - other.x, y - other.y);
+        /// Dimension expansion
+        Vector(const Vector<X - 1, T> &other, T value) {
+            for (unsigned int i = 0; i < X - 1; i++) {
+                values[i] = other.values[i];
+            }
+            values[X - 1] = value;
         }
 
-        Vector2 operator+(const Vector2 &other) {
-            return Vector2(x + other.x, y + other.y);
-        }
-
-        Vector2 normalized() const {
-            return {x / length(), y / length()};
-        }
-
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector2, x, y)
-
-        bool operator==(const Vector2 & value) const {
-            return x == value.x && y == value.y;
-        }
-
-        static Vector2 up() { return Vector2(0, 1); }
-        static Vector2 down() { return Vector2(0, -1); }
-        static Vector2 left() { return Vector2(-1, 0); }
-        static Vector2 right() { return Vector2(1, 0); }
-
-        static Vector2 zero() { return Vector2(0, 0); }
-    };
-
-    typedef Vector2<float> Vec2;
-
-    template<typename T,
-        typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
-    struct Vector3 {
-        T x, y, z;
-
-        Vector3() : x(0), y(0), z(0) {
-        }
-
-        Vector3(T x, T y, T z) : x(x), y(y), z(z) {
-        }
-
-        Vector3(const Vector3 &other) : x(other.x), y(other.y), z(other.z) {
-        }
-
-        explicit Vector3(const Vector2<T> &other, T z = 0) : x(other.x), y(other.y), z(z) {
-        }
-
-        float length() const {
-            return sqrt(x * x + y * y + z * z);
-        }
-
-        Vector3 operator/(T t) const {
-            return Vector3(x / t, y / t, z / t);
-        }
-
-        Vector3 operator/(const Vector3 &other) const {
-            return Vector3(x / other.x, y / other.y, z / other.z);
-        }
-
-        Vector3 operator*(T t) const {
-            return Vector3(x * t, y * t, z * t);
-        }
-
-        Vector3 operator*(const Vector3 &other) const {
-            return Vector3(x * other.x, y * other.y, z * other.z);
-        }
-
-        Vector3 operator-(const Vector3 &other) const {
-            return Vector3(x - other.x, y - other.y, z - other.z);
-        }
-
-        Vector3 operator+(const Vector3 &other) const {
-            return Vector3(x + other.x, y + other.y, z + other.z);
-        }
-
-        Vector3 normalized() const {
-            return {x / length(), y / length(), z / length()};
-        }
-
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector3, x, y, z)
-
-        bool isNan() { return x == NAN || y == NAN || z == NAN; }
-
-        static Vector3 up() { return Vector3(0, 1, 0); }
-        static Vector3 down() { return Vector3(0, -1, 0); }
-        static Vector3 left() { return Vector3(-1, 0, 0); }
-        static Vector3 right() { return Vector3(1, 0, 0); }
-        static Vector3 forward() { return Vector3(0, 0, 1); }
-        static Vector3 back() { return Vector3(0, 0, -1); }
-
-        static Vector3 zero() { return Vector3(0, 0, 0); }
-
-        static Vector3 cross(Vector3 a, Vector3 b) {
-            return Vector3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
-        }
-
-        static float dot(Vector3 a, Vector3 b) {
-            return a.x * b.x + a.y * b.y + a.z * b.z;
-        }
-    };
-
-    typedef Vector3<float> Vec3;
-
-    template<typename T,
-        typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
-    struct Vector4 {
-        T x, y, z, w;
-
-        Vector4() : x(0), y(0), z(0), w(0) {
-        }
-
-        Vector4(T x, T y, T z, T w) : x(x), y(y), z(z), w(w) {
-        }
-
-        Vector4(const Vector4 &other) : x(other.x), y(other.y), z(other.z), w(other.w) {
-        }
-
-        Vector4(const Color& other): x(other.r), y(other.g), z(other.b), w(other.a) {}
-
-        explicit Vector4(const Vector3<T> &other, T w = 0) : x(other.x), y(other.y), z(other.z), w(w) {
-        }
-
-        float length() const {
-            return sqrt(x * x + y * y + z * z + w * w);
-        }
-
-        Vector4 operator/(T t) {
-            return Vector4(x / t, y / t, z / t, w / t);
-        }
-
-        Vector4 operator*(T t) {
-            return Vector4(x * t, y * t, z * t, w * t);
-        }
-
-        Vector4 operator-(const Vector4 &other) {
-            return Vector4(x - other.x, y - other.y, z - other.z, w - other.w);
-        }
-
-        Vector4 operator+(const Vector4 &other) {
-            return Vector4(x + other.x, y + other.y, z + other.z, w + other.w);
-        }
-
-        Vector4 normalized() const {
-            return {x / length(), y / length(), z / length(), w / length()};
-        }
-
-        [[nodiscard]] Color asColor() const {
-            return Color(x, y, z, (T) 255);
-        }
-
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector4, x, y, z, w)
-
-        Vector4 &operator+=(Vector4 value) {
-            x += value.x;
-            y += value.y;
-            z += value.z;
-            w += value.w;
+        Vector setValue(unsigned dim, T value) {
+            values[dim] = value;
             return *this;
         }
 
-        static Vector4 zero() { return Vector4(0, 0, 0, 0); }
+        T getValue(unsigned dim) const {
+            return values[dim];
+        }
+
+        [[nodiscard]] float length() const {
+            float sum = 0;
+            for (unsigned int i = 0; i < X; i++) {
+                sum += values[i] * values[i];
+            }
+            return sqrt(sum);
+        }
+
+        Vector normalized() const {
+            float length = this->length();
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] / length;
+            }
+            return Vector(v);
+        }
+
+        float dot(const Vector &other) const {
+            float sum = 0;
+            for (unsigned int i = 0; i < X; i++) {
+                sum += values[i] * other.values[i];
+            }
+            return sum;
+        }
+
+        static float dot(const Vector &a, const Vector &b) {
+            float sum = 0;
+            for (unsigned int i = 0; i < X; i++) {
+                sum += a.values[i] * b.values[i];
+            }
+            return sum;
+        }
+
+        [[nodiscard]] bool isNaN() const {
+            for (unsigned int i = 0; i < X; i++) {
+                if (std::isnan(values[i])) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        template<unsigned int M = X>
+        typename std::enable_if<M == 3, Vector<3, T> >::type
+        cross(const Vector<3, T> &rhs) const {
+            Vector<3, T> result;
+            result.values[0] = values[1] * rhs.values[2] - values[2] * rhs.values[1];
+            result.values[1] = values[2] * rhs.values[0] - values[0] * rhs.values[2];
+            result.values[2] = values[0] * rhs.values[1] - values[1] * rhs.values[0];
+            return result;
+        }
+
+        template<unsigned int M = X>
+        typename std::enable_if<M == 3, Vector<3, T> >::type
+        static cross(const Vector<3, T> &a, const Vector<3, T> &b) {
+            return a.cross(b);
+        }
+
+        Vector operator/(T t) const {
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] / t;
+            }
+            return Vector(v);
+        }
+
+        Vector operator*(T t) const {
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] * t;
+            }
+            return Vector(v);
+        }
+
+        Vector operator/(Vector<X, T> &other) const {
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] / other.values[i];
+            }
+            return Vector(v);
+        }
+
+        Vector operator*(const Vector<X, T> &other) const {
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] * other.values[i];
+            }
+            return Vector(v);
+        }
+
+        Vector operator+(const Vector<X, T> &other) const {
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] + other.values[i];
+            }
+            return Vector(v);
+        }
+
+        Vector operator-(const Vector<X, T> &other) const {
+            T v[X];
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = values[i] - other.values[i];
+            }
+            return Vector(v);
+        }
+
+        bool operator==(const Vector<X, T> &other) const {
+            for (unsigned int i = 0; i < X; i++) {
+                if (values[i] != other.values[i]) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        Vector &operator+=(const Vector &other) const {
+            for (unsigned int i = 0; i < X; i++) {
+                values[i] += other.values[i];
+            }
+            return *this;
+        }
+
+        Vector &operator+=(const Color &other) requires (X == 4) {
+            values[0] += (T) other.r;
+            values[1] += (T) other.g;
+            values[2] += (T) other.b;
+            values[3] += (T) other.a;
+            return *this;
+        }
+
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector, values)
+
+        [[nodiscard]] Color asColor() const requires (X == 3) {
+            return Color(values[0], values[1], values[2], (T) 255);
+        }
+
+        [[nodiscard]] Color asColor() const requires (X == 4) {
+            return Color(values[0], values[1], values[2], values[3]);
+        }
+
+        static Vector zero() {
+            return Vector((T) 0);
+        }
+
+        static Vector up() requires (X >= 2) { return Vector((T) 0).setValue(Y_AXIS, 1); }
+        static Vector down() requires (X >= 2) { return Vector((T) 0).setValue(Y_AXIS, -1); }
+        static Vector left() requires (X >= 2) { return Vector((T) 0).setValue(X_AXIS, 0); }
+        static Vector right() requires (X >= 2) { return Vector((T) 0).setValue(X_AXIS, 1); }
+        static Vector forward() requires (X >= 3) { return Vector((T) 0).setValue(Z_AXIS, 1); }
+        static Vector backward() requires (X >= 3) { return Vector((T) 0).setValue(Z_AXIS, -1); }
+
+        T &x() requires (X >= 1) { return values[0]; }
+        T &y() requires (X >= 2) { return values[1]; }
+        T &z() requires (X >= 3) { return values[2]; }
+        T &w() requires (X >= 4) { return values[3]; }
     };
 
-    typedef Vector4<float> Vec4;
+    typedef Vector<2, float> Vec2;
+    typedef Vector<3, float> Vec3;
+    typedef Vector<4, float> Vec4;
 }

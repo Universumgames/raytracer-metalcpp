@@ -3,15 +3,10 @@
     {
       "fileName": "cube.stl",
       "position": {
-        "x": 3,
-        "y": -2,
-        "z": 5
+        "values": [3, -2, 5]
       },
       "orientation": {
-        "x": 0,
-        "y": 0,
-        "z": 0,
-        "w": 0
+        "values": [0,0,0,0]
       },
       "color": {
         "r": 0,
@@ -23,10 +18,8 @@
   ],
   "spheres": [
     {
-      "center": {
-        "x": 0,
-        "y": 0,
-        "z": 5
+      "position": {
+        "values": [0,0,5]
       },
       "radius": 1,
       "color": {

@@ -40,7 +40,7 @@ namespace RayTracing {
             }
 
             for (const auto& sphere : scene.spheres) {
-                if (ray.intersectSphere(sphere.center * -1, sphere.radius).hit) {
+                if (ray.intersectSphere(sphere.position * -1, sphere.radius).hit) {
                      ray.colors.push_back(sphere.color);
                  }
             }

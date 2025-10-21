@@ -12,12 +12,12 @@ namespace RayTracing {
     }
 
     Vec2 RayTracer::windowSize() const {
-        return {static_cast<float>(width), static_cast<float>(height)};
+        return Vec2{static_cast<float>(width), static_cast<float>(height)};
     }
 
     Vec2 RayTracer::getViewBoxScaling() {
         Vec2 windowSize = this->windowSize();
-        Vec2 desiredSize = {1, 1};
+        Vec2 desiredSize = {1,1};
         return desiredSize / windowSize;
     }
 
@@ -26,11 +26,11 @@ namespace RayTracing {
         const double fov_adjustment = tan((fov * M_PI / 180.0) / 2.0);
 
         float screenDistance = 5;
-        Vec3 rayOrigin = Vec3::back() * screenDistance;
+        Vec3 rayOrigin = Vec3::backward() * screenDistance;
         Vec3 screenOrigin = Vec3::zero();
         Vec3 screen00 = screenOrigin + Vec3(-(float) width / 2.0f, -(float) height / 2.0f, 0);
 
-        Vec3 camForward = Vec3::back();
+        Vec3 camForward = Vec3::backward();
         Vec3 camRight = Vec3::right();
         Vec3 camUp = Vec3::up();
 
@@ -49,13 +49,13 @@ namespace RayTracing {
                 for (const auto &offset: offsets) {
                     Vec3 samplingPixelLocation = Vec3(Vec2(x, y) + offset, 0);
                     Vec3 pixel = (screen00 + samplingPixelLocation) * Vec3(getViewBoxScaling(), 1);
-                    Vec3 rayDir = (camForward + (camRight * pixel.x * aspect_ratio * fov_adjustment) + (camUp * pixel.y * fov_adjustment)).normalized();
+                    Vec3 rayDir = (camForward + (camRight * pixel.x() * aspect_ratio * fov_adjustment) + (camUp * pixel.y() * fov_adjustment)).normalized();
                     Ray ray = Ray(pixel, rayDir, {}, x, y);
                     rays.push_back(ray);
 #ifdef DEBUG_INITIAL_RAY_GENERATION
                     if (y % 32 == 0 && x % 32 == 0 && offset == offsets[0]) {
-                        pixelFile << "[" << pixel.x << ", " << pixel.y << ", " << pixel.z << "]," << std::endl;
-                        raysFile << "[" << rayDir.x << ", " << rayDir.y << ", " << rayDir.z << "]," << std::endl;
+                        pixelFile << "[" << pixel.x() << ", " << pixel.y() << ", " << pixel.z() << "]," << std::endl;
+                        raysFile << "[" << rayDir.x() << ", " << rayDir.y() << ", " << rayDir.z() << "]," << std::endl;
                     }
 #endif
                 }
