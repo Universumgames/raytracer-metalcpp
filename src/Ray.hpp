@@ -14,6 +14,7 @@ namespace RayTracing {
         Vec3 origin;
         Vec3 direction;
         std::vector<Color> colors;
+        float dst = 0;
 
         unsigned idX, idY;
 
@@ -22,9 +23,11 @@ namespace RayTracing {
          * @param triangle points of the triangle
          * @return intersection point on triangle
          */
-        HitInfo intersectTriangle(Vec3 triangle[3]) const;
+        HitInfo intersectTriangle(Vec3 triangle[3], Vec3 normal) const;
 
         HitInfo intersectSphere(Vec3 sphereCenter, float sphereRadius) const;
+
+        Vec3 reflectAt(const Vec3& location, const Vec3 &normal, float totalReflection = 1);
 
 
     };

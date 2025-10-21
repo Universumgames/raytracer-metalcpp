@@ -12,7 +12,7 @@ namespace RayTracing {
     public:
         std::vector<MeshedRayTraceableObject> objects;
         std::vector<Sphere> spheres;
-        std::string fileName;
+        std::string fileName{};
 
     public:
         Scene() = default;

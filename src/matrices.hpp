@@ -20,14 +20,21 @@ namespace RayTracing {
                 }
             }
         }
+
         Matrix(T values[X][Y]) {
             setValues(values);
         }
-        Matrix(std::vector<std::vector<T>> values) {
+
+        /// [X][Y]
+        Matrix(std::vector<std::vector<T> > values) {
             setValues(values);
         }
 
-        void setValues(std::vector<std::vector<T>> values) {
+        Matrix<float>(double values[X][Y]) {
+            setValues(values);
+        }
+
+        void setValues(std::vector<std::vector<T> > values) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
                     values[i][j] = values[i][j];
@@ -51,12 +58,12 @@ namespace RayTracing {
             return values[row][col];
         }
 
-        T* operator[](size_t i) { return values[i]; }
-        const T* operator[](size_t i) const { return values[i]; }
+        T *operator[](size_t i) { return values[i]; }
+        const T *operator[](size_t i) const { return values[i]; }
 
         // Multiplication: (X×Y) * (Y×Z) = (X×Z)
         template<unsigned int Z>
-        Matrix<X, Z, T> operator*(const Matrix<Y, Z, T>& rhs) const {
+        Matrix<X, Z, T> operator*(const Matrix<Y, Z, T> &rhs) const {
             Matrix<X, Z, T> result;
 
             for (unsigned int i = 0; i < X; ++i) {
@@ -71,7 +78,7 @@ namespace RayTracing {
             return result;
         }
 
-        Vector<X, T> operator*(const Vector<Y, T>& vec) const {
+        Vector<X, T> operator*(const Vector<Y, T> &vec) const {
             Vector<X, T> result;
             for (unsigned int i = 0; i < X; ++i) {
                 T sum = 0;
@@ -81,6 +88,8 @@ namespace RayTracing {
             }
             return result;
         }
-
     };
+
+    typedef Matrix<3, 3, float> Mat3x3;
+    typedef Matrix<4, 4, float> Mat4x4;
 }

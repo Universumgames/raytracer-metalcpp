@@ -10,7 +10,7 @@ using namespace RayTracing;
 
 #define BENCHMARK_LOG_FILE "../timeLog.csv"
 
-Image* benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteImg = true, bool deleteTracer = true) {
+Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteImg = true, bool deleteTracer = true) {
     auto start = std::chrono::high_resolution_clock::now();
     Image *raytraced = raytracer->raytrace(scene);
     auto end = std::chrono::high_resolution_clock::now();
@@ -21,9 +21,10 @@ Image* benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     std::ofstream timeLog;
     timeLog.open(BENCHMARK_LOG_FILE, std::ios::app);
     if (!exists) {
-        timeLog << "Implementation,Platform,Architecture,Filename,Duration(ms)" << std::endl;
+        timeLog << "Implementation,Platform,Architecture,Filename,Samples,Bounces,Duration(ms)" << std::endl;
     }
-    timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," << duration.count()
+    timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
+            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << duration.count()
             << std::endl;
     timeLog.close();
 
@@ -45,6 +46,11 @@ int main(int argc, char *argv[]) {
     RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 1);
     Image *uvTest = raytracer->uvTest();
     Image *raytraced = benchmarkRaytracer(raytracer, scene, false);
+
+    auto test = Sphere({0, 0, 0, 0}, {0, 0, 0}, {}, 3);
+    test.rotateEuler({0, 0, 0});
+    Vec3 p = {0, 0, 1};
+    Vec3 pn = test.getTranslatedPoint(test.getRotationMatrix(), p);
 
 
     auto imageHandler = new ImageHandler(windowSize);

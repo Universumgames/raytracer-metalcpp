@@ -1,17 +1,30 @@
 #pragma once
+#include "matrices.hpp"
 #include "vectors.hpp"
 
+#define deg2rad(deg) (deg * M_PI / 180.0)
+
 namespace RayTracing {
-
-
     struct RayTraceableObject {
         Color color;
         Vec3 position;
-        Vec4 orientation;
+        Quaternion quaternion;
+
+        [[nodiscard]] Mat3x3 getRotationMatrix() const;
+
+        [[nodiscard]] Vec3 getTranslatedPoint(const Mat3x3 &rotationMatrix, const Vec3 &point) const;
+
+        void rotateEuler(Vec3 rad);
     };
 
-    struct Sphere: RayTraceableObject {
+    struct Sphere : RayTraceableObject {
         float radius{};
+
+        Sphere() = default;
+
+        Sphere(Color color, const Vec3& position, const Quaternion& quaternion, float radius) : RayTraceableObject(color, position,
+            quaternion), radius(radius) {
+        }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Sphere, position, color, radius)
     };
@@ -29,11 +42,10 @@ namespace RayTracing {
 
     struct MeshedRayTraceableObject : public RayTraceableObject {
         std::string fileName;
-        Mesh* mesh = nullptr;
+        Mesh *mesh = nullptr;
 
-        void loadMesh(const std::string& stlFilePath);
+        void loadMesh(const std::string &stlFilePath);
 
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(MeshedRayTraceableObject, fileName, color, position, orientation)
-
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(MeshedRayTraceableObject, fileName, color, position, quaternion)
     };
 }

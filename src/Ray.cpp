@@ -3,7 +3,7 @@
 #include "vectors.hpp"
 
 namespace RayTracing {
-    Ray::HitInfo Ray::intersectTriangle(Vec3 triangle[3]) const {
+    Ray::HitInfo Ray::intersectTriangle(Vec3 triangle[3], Vec3 customNormal) const {
         constexpr float epsilon = std::numeric_limits<float>::epsilon();
 
         Vec3 edgeAB = triangle[1] - triangle[0];
@@ -23,7 +23,7 @@ namespace RayTracing {
         return {
             .hit = det > epsilon && dst >= 0 && u >= 0 && v >= 0 && w >= 0,
             .hitPoint = origin + (direction * dst),
-            .normal = Vec3::zero(), // triangle.normA * w + triangle.normB * u + triangle.normC * v
+            .normal = customNormal, // triangle.normA * w + triangle.normB * u + triangle.normC * v
             .dst = dst
         };
     }
@@ -53,4 +53,30 @@ namespace RayTracing {
             .hit = false
         };
     }
+
+    float randf() {
+        return rand() / (float) RAND_MAX;
+    }
+
+    Vec3 randomHemisphereReflection() {
+        return Vec3{randf(), randf(), randf()}.normalized();
+    }
+
+    float sign(float x) {
+        if (x > 0) return 1;
+        if (x < 0) return -1;
+        return 0;
+    }
+
+    Vec3 Ray::reflectAt(const Vec3& location, const Vec3 &normal, float totalReflection) {
+        this->origin = location;
+        float dot = Vec3::dot(direction, normal);
+        Vec3 totalReflectionVec = direction - (normal * dot) * 2;
+        Vec3 rhf = randomHemisphereReflection();
+        rhf = rhf * sign(Vec3::dot(normal, rhf));
+        //this->direction = (totalReflectionVec * totalReflection + rhf * (1-totalReflection)).normalized();
+        this->direction = totalReflectionVec;
+        return direction;
+    }
+
 }

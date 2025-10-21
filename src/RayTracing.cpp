@@ -15,6 +15,14 @@ namespace RayTracing {
         return Vec2{static_cast<float>(width), static_cast<float>(height)};
     }
 
+    unsigned RayTracer::getSamplesPerPixel() const {
+        return samplesPerPixel;
+    }
+
+    unsigned RayTracer::getBounces() const {
+        return bounces;
+    }
+
     Vec2 RayTracer::getViewBoxScaling() {
         Vec2 windowSize = this->windowSize();
         Vec2 desiredSize = {1,1};

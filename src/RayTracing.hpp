@@ -58,5 +58,8 @@ namespace RayTracing {
         virtual Image *uvTest() = 0;
 
         [[nodiscard]] Vec2 windowSize() const;
+
+        unsigned getSamplesPerPixel() const;
+        unsigned getBounces() const;
     };
 }

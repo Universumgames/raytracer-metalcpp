@@ -208,7 +208,7 @@ namespace RayTracing {
             return true;
         }
 
-        Vector &operator+=(const Vector &other) const {
+        Vector &operator+=(const Vector &other) {
             for (unsigned int i = 0; i < X; i++) {
                 values[i] += other.values[i];
             }
@@ -221,6 +221,10 @@ namespace RayTracing {
             values[2] += (T) other.b;
             values[3] += (T) other.a;
             return *this;
+        }
+
+        T operator[](unsigned i) const {
+            return values[i];
         }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector, values)
@@ -244,13 +248,20 @@ namespace RayTracing {
         static Vector forward() requires (X >= 3) { return Vector((T) 0).setValue(Z_AXIS, 1); }
         static Vector backward() requires (X >= 3) { return Vector((T) 0).setValue(Z_AXIS, -1); }
 
-        T &x() requires (X >= 1) { return values[0]; }
-        T &y() requires (X >= 2) { return values[1]; }
-        T &z() requires (X >= 3) { return values[2]; }
-        T &w() requires (X >= 4) { return values[3]; }
+        // for 2d to 3d the axis names stay identical
+        T &x() requires (X >= 1 && X <= 3) { return values[0]; }
+        T &y() requires (X >= 2 && X <= 3) { return values[1]; }
+        T &z() requires (X == 3) { return values[2]; }
+
+        // in 4d w get pushed before x so the indices change
+        T &w() requires (X >= 4) { return values[0]; }
+        T &x() requires (X >= 4) { return values[1]; }
+        T &y() requires (X >= 4) { return values[2]; }
+        T &z() requires (X >= 4) { return values[3]; }
     };
 
     typedef Vector<2, float> Vec2;
     typedef Vector<3, float> Vec3;
     typedef Vector<4, float> Vec4;
+    typedef Vector<4, double> Quaternion;
 }

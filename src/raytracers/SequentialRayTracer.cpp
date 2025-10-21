@@ -26,23 +26,36 @@ namespace RayTracing {
         auto *image = new Image(width, height);
         auto rays = calculateStartingRays();
 
-        for (auto &ray : rays) {
-            for (const auto& object : scene.objects) {
-                for (int i = 0; i < object.mesh->numTriangles; i++) {
-                    Vec3* startingPoint = &object.mesh->points[i * 3];
-                    Vec3 triangle[3] = {startingPoint[0] - object.position, startingPoint[1] - object.position, startingPoint[2] - object.position};
-                    auto intersection = ray.intersectTriangle(triangle);
-                    if (intersection.hit) {
-                        auto dot = Vec3::dot(ray.direction, intersection.normal);
-                        ray.colors.push_back((Vec4(object.color) * (1-dot)).asColor());
+        for (auto &ray: rays) {
+            for (int b = 0; b < bounces; b++) {
+                for (const auto &object: scene.objects) {
+                    auto rotMat = object.getRotationMatrix();
+                    for (int i = 0; i < object.mesh->numTriangles; i++) {
+                        Vec3 *startingPoint = &object.mesh->points[i * 3];
+                        Vec3 triangle[3] = {
+                            object.getTranslatedPoint(rotMat, startingPoint[0]),
+                            object.getTranslatedPoint(rotMat, startingPoint[1]),
+                            object.getTranslatedPoint(rotMat, startingPoint[2])
+                        };
+                        auto intersection = ray.intersectTriangle(triangle, object.mesh->normals[i]);
+                        if (intersection.hit) {
+                            auto dot = Vec3::dot(ray.direction, object.getTranslatedPoint(rotMat, intersection.normal));
+                            ray.colors.push_back((Vec4(object.color) * (cos(dot))).asColor());
+                            ray.reflectAt(intersection.hitPoint, intersection.normal);
+                            ray.dst += intersection.dst;
+                        }
                     }
                 }
-            }
 
-            for (const auto& sphere : scene.spheres) {
-                if (ray.intersectSphere(sphere.position * -1, sphere.radius).hit) {
-                     ray.colors.push_back(sphere.color);
-                 }
+                for (const auto &sphere: scene.spheres) {
+                    auto intersection = ray.intersectSphere(sphere.position * -1, sphere.radius);
+                    if (intersection.hit) {
+                        auto dot = Vec3::dot(ray.direction, intersection.normal);
+                        ray.colors.push_back((Vec4(sphere.color) * (cos(abs(dot)))).asColor());
+                        ray.reflectAt(intersection.hitPoint, intersection.normal);
+                        ray.dst += intersection.dst;
+                    }
+                }
             }
         }
 

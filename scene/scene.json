@@ -3,10 +3,10 @@
     {
       "fileName": "cube.stl",
       "position": {
-        "values": [3, -2, 5]
+        "values": [2, -2, 7]
       },
-      "orientation": {
-        "values": [0,0,0,0]
+      "quaternion": {
+        "values": [0.92,0,0.38,0]
       },
       "color": {
         "r": 0,
