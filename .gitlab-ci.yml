@@ -6,7 +6,7 @@ build:
     - apt update
     - apt install -y cmake build-essential make gcc git libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libx11-dev xserver-xorg-dev xorg-dev
   script:
-    - make build_cicd
+    - make build
     - make run_cicd
   artifacts:
     paths:

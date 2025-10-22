@@ -12,12 +12,5 @@ build: setup_cmake
 run: build
 	cd cmake-build-debug && ./RayTracer
 
-setup_cmake_cicd:
-	mkdir -p cmake-build-debug
-	cd cmake-build-debug && cmake .. -DCI_CD=true
-
-build_cicd: setup_cmake_cicd
-	cd cmake-build-debug && cmake --build .
-
-run_cicd: build_cicd
-	cd cmake-build-debug && ./RayTracer
+run_cicd: build
+	cd cmake-build-debug && ./RayTracer --no-window
