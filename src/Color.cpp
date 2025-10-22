@@ -22,7 +22,7 @@ namespace RayTracing {
 
     RGBf RGBf::blend(const std::vector<RGBf> &colors, ColorBlendMode mode) {
         if (colors.empty()) {
-            return {1,0,0,0};
+            return RGBf::BLACK();
         }
         switch (mode) {
             case AVERAGE: {
@@ -35,7 +35,7 @@ namespace RayTracing {
             case COUNT: {
                 return {1,1.f/colors.size(),1.f/colors.size(),1.f/colors.size()};
             }
-            default: return {1,0,0,0};
+            default: return RGBf::BLACK();
         }
     }
 

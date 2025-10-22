@@ -18,11 +18,11 @@ namespace RayTracing {
         Vec2 size;
 
         Camera(Vec3 position, Vec3 direction, float fov, Vec2 size) : transform({
-                                                                          position, Quaternion::fromEulerDegree(direction)
+                                                                          position, direction
                                                                       }), fov(fov), size(size) {
         }
 
-        Camera(const SerializableCamera &cam) : transform({cam.position, Quaternion::fromEulerDegree(cam.direction)}),
+        Camera(const SerializableCamera &cam) : transform({cam.position, cam.direction}),
                                                 fov(cam.fov), size(cam.size) {
         }
 

@@ -1,7 +1,8 @@
-import plotly.graph_objects as go
 import numpy as np
-import rays
+import plotly.graph_objects as go
+
 import pixels
+import rays
 
 # Example: vectors from the origin
 vectors = rays.vectors
@@ -15,8 +16,8 @@ if __name__ == "__main__":
         # Arrow line
         fig.add_trace(go.Scatter3d(
             x=[pixels[i][0], pixels[i][0] + vectors[i][0]],
-            z=[pixels[i][1], pixels[i][1] + vectors[i][1]],
-            y=[pixels[i][2], pixels[i][2] + vectors[i][2]],
+            y=[pixels[i][1], pixels[i][1] + vectors[i][1]],
+            z=[pixels[i][2], pixels[i][2] + vectors[i][2]],
             mode='lines+markers',
             line=dict(width=6, color='blue'),
             marker=dict(size=3, color='red')

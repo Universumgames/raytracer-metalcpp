@@ -34,7 +34,7 @@ namespace RayTracing {
         const double fov_adjustment = tan((camera->fov * M_PI / 180.0) / 2.0);
 
         Vec3 screenOrigin = Vec3::zero();
-        Vec3 screen00 = screenOrigin + Vec3(-(float) width / 2.0f, -(float) height / 2.0f, 0);
+        Vec3 screen00 = screenOrigin + Vec3(-(float) width / 2.0f, 0, -(float) height / 2.0f);
 
         Vec3 camForward = Vec3::forward();
         Vec3 camRight = Vec3::right();
@@ -53,9 +53,11 @@ namespace RayTracing {
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
                 for (const auto &offset: offsets) {
-                    Vec3 samplingPixelLocation = Vec3(Vec2(x, y) + offset, 0);
-                    Vec3 pixel = (screen00 + samplingPixelLocation) * Vec3(getViewBoxScaling(), 1);
-                    Vec3 rayDir = (camForward + (camRight * pixel.getX() * aspect_ratio * fov_adjustment) + (camUp * pixel.getY() * fov_adjustment)).normalized();
+                    Vec3 samplingPixelLocation = {x + offset.getX(), 0, y + offset.getY()};
+                    Vec3 pixel = (screen00 + samplingPixelLocation) * Vec3(
+                                     getViewBoxScaling().getX(), 1, getViewBoxScaling().getY());
+                    Vec3 rayDir = (camForward + (camRight * pixel.getX() * aspect_ratio * fov_adjustment) + (
+                                       camUp * pixel.getZ() * fov_adjustment)).normalized();
                     Ray ray = Ray(pixel, rayDir, {}, x, y);
                     rays.push_back(ray);
 #ifdef DEBUG_INITIAL_RAY_GENERATION

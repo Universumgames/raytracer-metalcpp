@@ -1,4 +1,3 @@
-
 #include "Image.hpp"
 
 namespace RayTracing {
@@ -17,10 +16,11 @@ namespace RayTracing {
     }
 
     void Image::setPixel(unsigned int x, unsigned int y, RGBA8 color) {
-        image[y][x] = color;
+        image[height - y - 1][x] = color;
+        // invert y axis to convert from (0,0) as bottom left (from camera) to as top left TODO find better solution
     }
 
     RGBA8 *Image::valueAt(unsigned int x, unsigned int y) {
-        return &image[y][x];
+        return &image[height - y - 1][x];
     }
 }

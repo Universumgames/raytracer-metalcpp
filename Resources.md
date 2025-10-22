@@ -24,3 +24,4 @@
 ## Other resources
 - Euler to Quaternions https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
 - Color Blend Modes https://en.wikipedia.org/wiki/Blend_modes
+- Transformation Matrices https://learnopengl.com/Getting-started/Transformations

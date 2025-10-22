@@ -25,24 +25,10 @@ namespace RayTracing {
         RayTraceableObject() = default;
 
         RayTraceableObject(const RGBf &color = {}, const Vec3 &position = {},
-                           const Quaternion &quaternion = {}) : color(color), transform({position, quaternion}) {
+                           const Vec3 rad = {}) : color(color), transform({position, rad}) {
         }
 
         virtual ~RayTraceableObject() = default;
-
-        Mat3x3 updateRotationMatrix();
-
-        __deprecated
-        Mat3x3 getRotationMatrix() const;
-
-        __deprecated
-        Vec3 getTranslatedRotatedPoint(const Mat3x3 &rotationMatrix, const Vec3 &point) const;
-
-        __deprecated
-        static Vec3 getRotatedNormal(const Mat3x3 &rotationMatrix, const Vec3 &normal);
-
-        __deprecated
-        void rotateEuler(Vec3 rad);
 
         virtual void updateBoundingBox() = 0;
     };

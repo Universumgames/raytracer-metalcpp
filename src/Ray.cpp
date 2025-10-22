@@ -98,7 +98,6 @@ namespace RayTracing {
         return false;
     }
 
-
     float randf() {
         return rand() / (float) RAND_MAX;
     }
@@ -133,7 +132,7 @@ namespace RayTracing {
     }
 
     LocalRay Ray::toLocalRay(Transform transform) {
-        auto rotMat = transform.getRotationMatrix();
+        //auto rotMat = transform.getRotationMatrix();
         // TODO
         return LocalRay{origin, direction};
     }

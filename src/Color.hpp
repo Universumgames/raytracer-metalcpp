@@ -18,22 +18,27 @@ namespace RayTracing {
             return {r, g, b};
         }
 
-        RGBA8 &operator+=(const RGBA8& value) {
+        RGBA8 &operator+=(const RGBA8 &value) {
             r += value.r;
             g += value.g;
             b += value.b;
             return *this;
         }
 
-        RGBA8(): r(0), g(0), b(0), a(0) {}
+        RGBA8() : r(0), g(0), b(0), a(0) {
+        }
 
-        RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : r(r), g(g), b(b), a(a) {}
+        RGBA8(uint8_t r, uint8_t g, uint8_t b, uint8_t a = 255) : r(r), g(g), b(b), a(a) {
+        }
 
-        RGBA8(double r, double g, double b, double a = 255) : r(floor(r)), g(floor(g)), b(floor(b)), a(floor(a)) {}
+        RGBA8(double r, double g, double b, double a = 255) : r(floor(r)), g(floor(g)), b(floor(b)), a(floor(a)) {
+        }
 
-        RGBA8(unsigned r, unsigned g, unsigned b, unsigned a = 255) : r(r), g(g), b(b), a(a) {}
+        RGBA8(unsigned r, unsigned g, unsigned b, unsigned a = 255) : r(r), g(g), b(b), a(a) {
+        }
 
-        RGBA8(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {}
+        RGBA8(int r, int g, int b, int a) : r(r), g(g), b(b), a(a) {
+        }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(RGBA8, r, g, b, a)
 
@@ -42,7 +47,7 @@ namespace RayTracing {
 
         /// warning this method should be used as confusion with the float-valued color encoding can occur
         [[nodiscard]] Vec4 forceVec4() const {
-            return Vec4{static_cast<float>(r), static_cast<float>(g),static_cast<float>(b), static_cast<float>(a)};
+            return Vec4{static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a)};
         }
 
         /// warning this method should be used as confusion with the float-valued color encoding can occur
@@ -55,7 +60,6 @@ namespace RayTracing {
             return {f[0] * 255, f[1] * 255, f[2] * 255, f[3] * 255};
         }
 #endif
-
     };
 
     enum ColorBlendMode {
@@ -65,28 +69,36 @@ namespace RayTracing {
 
     struct RGBf : public Vec4 {
     public:
-        RGBf(): Vec4(0, 0, 0, 0) {}
-        RGBf(float a, float r, float g, float b) : Vec4(a, r, g, b) {}
-        RGBf(const RGBf& other)= default;
-        RGBf(const Vec4& other): Vec4(other) {}
-        RGBf(const RGBA8& other): Vec4(other.a/255.f, other.r/255.f, other.g/255.f, other.b/255.f) {}
+        RGBf() : Vec4(0, 0, 0, 0) {
+        }
 
-        [[nodiscard]] float getA() const {return this->getW();}
-        [[nodiscard]] float getR() const {return this->getX();}
-        [[nodiscard]] float getG() const {return this->getY();}
-        [[nodiscard]] float getB() const {return this->getZ();}
+        RGBf(float r, float g, float b, float a) : Vec4(r, g, b, a) {
+        }
 
-        float& a() { return this->w();}
-        float& r() { return this->x();}
-        float& g() { return this->y();}
-        float& b()  { return this->z();}
+        RGBf(const RGBf &other) = default;
 
-        static RGBf blend(const std::vector<RGBf>& colors, ColorBlendMode mode = ColorBlendMode::AVERAGE);
+        RGBf(const Vec4 &other) : Vec4(other) {
+        }
 
-        RGBf operator*=(const RGBf& other);
+        RGBf(const RGBA8 &other) : Vec4(other.r / 255.f, other.g / 255.f, other.b / 255.f, other.a / 255.f) {
+        }
+
+        [[nodiscard]] float getA() const { return this->getW(); }
+        [[nodiscard]] float getR() const { return this->getX(); }
+        [[nodiscard]] float getG() const { return this->getY(); }
+        [[nodiscard]] float getB() const { return this->getZ(); }
+
+        float &a() { return this->w(); }
+        float &r() { return this->x(); }
+        float &g() { return this->y(); }
+        float &b() { return this->z(); }
+
+        static RGBf blend(const std::vector<RGBf> &colors, ColorBlendMode mode = ColorBlendMode::AVERAGE);
+
+        RGBf operator*=(const RGBf &other);
 
         [[nodiscard]] RGBA8 toRGBA8() const;
 
+        static RGBf BLACK() { return {0, 0, 0, 1}; }
     };
-
 }

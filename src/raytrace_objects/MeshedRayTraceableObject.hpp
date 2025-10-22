@@ -15,7 +15,7 @@ namespace RayTracing {
         unsigned numTriangles;
     };
 
-    struct SerializableMeshedRayTraceableObject: public SerializableRayTraceableObject{
+    struct SerializableMeshedRayTraceableObject : public SerializableRayTraceableObject {
         std::string fileName;
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableMeshedRayTraceableObject, color, position, rotation, fileName)
@@ -29,14 +29,14 @@ namespace RayTracing {
         MeshedRayTraceableObject() : RayTraceableObject({}, {}, {}) {
         };
 
-        MeshedRayTraceableObject(const RGBf &color, const Vec3 &position, const Quaternion &quaternion,
+        MeshedRayTraceableObject(const RGBf &color, const Vec3 &position, const Vec3 &rotation,
                                  const std::string &fileName)
-            : RayTraceableObject(color, position, quaternion),
+            : RayTraceableObject(color, position, rotation),
               fileName(fileName) {
         }
 
         MeshedRayTraceableObject(const SerializableMeshedRayTraceableObject &obj) : RayTraceableObject(
-            obj.color, obj.position, Quaternion::fromEulerDegree(obj.rotation)), fileName(obj.fileName) {
+                obj.color, obj.position, obj.rotation), fileName(obj.fileName) {
         }
 
         void loadMesh(std::string baseDir);

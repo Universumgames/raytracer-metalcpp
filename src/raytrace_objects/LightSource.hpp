@@ -12,17 +12,16 @@ namespace RayTracing {
     public:
         RGBf emittingColor{};
 
-        LightSource() : Sphere(RGBf{}, Vec3{}, Quaternion{}, 0) {
+        LightSource() : Sphere(RGBf{}, Vec3{}, 0) {
         }
 
-        LightSource(const RGBf &color, const Vec3 &position, const Quaternion &quaternion,
+        LightSource(const RGBf &color, const Vec3 &position,
                     float radius, const RGBf &emitting_color)
-            : Sphere(color, position, quaternion, radius),
+            : Sphere(color, position, radius),
               emittingColor(emitting_color) {
         }
 
-        LightSource(const SerializableLightSource &obj) : Sphere({}, obj.position,
-                                                                 {}, obj.radius),
+        LightSource(const SerializableLightSource &obj) : Sphere({}, obj.position, obj.radius),
                                                           emittingColor(obj.emittingColor) {
         }
     };

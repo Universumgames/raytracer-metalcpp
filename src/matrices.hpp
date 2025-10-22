@@ -16,36 +16,32 @@ namespace RayTracing {
         Matrix(T initial = 0) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
-                    values[i][j] = i;
+                    values[i][j] = initial;
                 }
             }
         }
 
-        Matrix(T values[X][Y]) {
-            setValues(values);
+        Matrix(T v[X][Y]) {
+            setValues(v);
         }
 
         /// [X][Y]
-        Matrix(std::vector<std::vector<T> > values) {
-            setValues(values);
+        Matrix(std::vector<std::vector<T> > v) {
+            setValues(v);
         }
 
-        explicit Matrix<X,Y,float>(double values[X][Y]) {
-            setValues(values);
-        }
-
-        void setValues(std::vector<std::vector<T> > values) {
+        void setValues(std::vector<std::vector<T> > v) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
-                    values[i][j] = values[i][j];
+                    this->values[i][j] = v[i][j];
                 }
             }
         }
 
-        void setValues(T values[X][Y]) {
+        void setValues(T v[X][Y]) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
-                    values[i][j] = values[i][j];
+                    this->values[i][j] = v[i][j];
                 }
             }
         }
@@ -79,12 +75,48 @@ namespace RayTracing {
         }
 
         Vector<X, T> operator*(const Vector<Y, T> &vec) const {
-            Vector<X, T> result;
+            Vector < X, T > result;
             for (unsigned int i = 0; i < X; ++i) {
                 T sum = 0;
                 for (unsigned int j = 0; j < Y; ++j)
                     sum += values[i][j] * vec.values[j];
                 result.values[i] = sum;
+            }
+            return result;
+        }
+
+        Matrix operator*(T v) const {
+            Matrix result;
+            for (unsigned int i = 0; i < X; ++i) {
+                for (unsigned int j = 0; j < Y; ++j) {
+                    result.values[i][j] = values[i][j] * v;
+                }
+            }
+            return result;
+        }
+
+        Matrix operator-() {
+            return negate();
+        }
+
+        Matrix negate() {
+            return *this * -1;
+        }
+
+        Matrix inverse() {
+            Matrix result;
+            for (unsigned int i = 0; i < X; ++i) {
+                for (unsigned int j = 0; j < Y; ++j) {
+                    result.values[i][j] = 1.0f / values[i][i];
+                }
+            }
+            return result;
+        }
+
+        static Matrix<X, X, T> identity() {
+            Matrix result;
+            for (unsigned int i = 0; i < X; ++i) {
+                result.values[i][i] = 1;
             }
             return result;
         }

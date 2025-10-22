@@ -4,41 +4,51 @@
 namespace RayTracing {
     struct Transform {
     private:
-        Mat3x3 rotationMatrix;
+        Mat4x4 transformationMatrix{};
+        Mat4x4 rotationMatrix{};
+        Mat4x4 scaleMatrix;
+        Mat4x4 translationMatrix{};
+        Vec3 position{};
+        //Quaternion quaternion;
+        Vec3 rotation{};
+        Vec3 scale{1, 1, 1};
 
     public:
-        Vec3 position;
-        Quaternion quaternion;
 
         Transform() = default;
 
-        Transform(const Vec3 &position, const Quaternion &quaternion) : position(position), quaternion(quaternion) {
+        Transform(const Vec3 &position, const Vec3 &rad, const Vec3 &scale = Vec3(1)) : position(position),
+            rotation(rad), scale(scale) {
         }
 
-        [[nodiscard]] Mat3x3 getRotationMatrix() const;
+        Vec3 getTranslation() const;
 
-        void updateRotationMatrix() {
-            auto q = quaternion;
-            std::vector<std::vector<double> > rotations = {
-                {
-                    2 * (q[1] * q[1] + q[2] * q[3]) - 1, 2 * (q[2] * q[3] - q[1] * q[0]),
-                    2 * (q[2] * q[0] + q[1] * q[3])
-                },
-                {
-                    2 * (q[2] * q[3] + q[1] * q[0]), 2 * (q[1] * q[1] + q[3] * q[3]) - 1,
-                    2 * (q[3] * q[0] - q[1] * q[2])
-                },
-                {
-                    2 * (q[2] * q[0] - q[1] * q[3]), 2 * (q[3] * q[0] + q[1] * q[2]),
-                    2 * (q[1] * q[1] + q[0] * q[0]) - 1
-                }
-            };
-            rotationMatrix = Mat3x3();
-            for (int row = 0; row < 3; row++) {
-                for (int col = 0; col < 3; col++) {
-                    rotationMatrix.setValue(row, col, (float) rotations[row][col]);
-                }
-            }
-        }
+        Vec3 getScale() const;
+
+        Vec3 getRotation() const;
+
+        void setTranslation(const Vec3 &translation);
+
+        void setScale(const Vec3 &scale);
+
+        void setRotation(const Vec3 &rotation);
+
+        void update();
+
+    private:
+        Mat4x4 calcTranslationMatrix();
+
+        Mat4x4 calcScaleMatrix();
+
+        Mat4x4 calcRotationMatrix();
+
+    protected:
+        Mat4x4 getTransformationMatrix() const;
+
+        Vec3 getTransformedPosition(const Vec3 &pos) const;
+
+        Vec3 getTransformedNormal(const Vec3 &pos) const;
+
+        friend class SequentialRayTracer;
     };
 }

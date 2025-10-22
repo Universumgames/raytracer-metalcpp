@@ -15,10 +15,18 @@
     {
       "fileName": "cube.stl",
       "position": {
-        "values": [-2, 2, 7]
+        "values": [
+          -2,
+          7,
+          -2
+        ]
       },
       "rotation": {
-        "values": [0,0,40]
+        "values": [
+          0,
+          0,
+          0
+        ]
       },
       "color": {
         "r": 255,
@@ -31,7 +39,11 @@
   "spheres": [
     {
       "position": {
-        "values": [0,0,7]
+        "values": [
+          1,
+          7,
+          1
+        ]
       },
       "radius": 1,
       "color": {
@@ -45,7 +57,11 @@
   "lights": [
     {
       "position": {
-        "values": [0,0,-30]
+        "values": [
+          0,
+          -30,
+          0
+        ]
       },
       "radius": 15,
       "emittingColor": {

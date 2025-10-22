@@ -30,7 +30,7 @@ namespace RayTracing {
 
         for (auto& object : scene.objects) {
             object->updateBoundingBox();
-            object->updateRotationMatrix();
+            object->transform.update();
         }
 
         for (auto &ray: rays) {
@@ -39,30 +39,24 @@ namespace RayTracing {
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
 
+                // TODO switch from transforming every vertex to transforming the ray
+
 
                 // check collision with complex objects
                 for (const auto object: scene.objects) {
                     // TODO check for bounding box intersection
-                    auto rotMat = object->getRotationMatrix();
                     auto localRay = ray.toLocalRay(object->transform);
                     for (int i = 0; i < object->mesh->numTriangles; i++) {
-                        Vec3 *startingPoint = &object->mesh->vertices[i * 3];
+                        int *startIndex = &object->mesh->indices[i * 3];
                         Vec3 triangle[3] = {
-                            object->getTranslatedRotatedPoint(rotMat, startingPoint[0]),
-                            object->getTranslatedRotatedPoint(rotMat, startingPoint[1]),
-                            object->getTranslatedRotatedPoint(rotMat, startingPoint[2])
+                            object->transform.getTransformedPosition(object->mesh->vertices[startIndex[0]]),
+                            object->transform.getTransformedPosition(object->mesh->vertices[startIndex[1]]),
+                            object->transform.getTransformedPosition(object->mesh->vertices[startIndex[2]])
                         };
-                        // TODO use indices instead of relyin on correct order
-                        // int* startIndex = &object->mesh->indices[i * 3];
-                        // Vec3 triangle[3] = {
-                        //     object->getTranslatedRotatedPoint(rotMat, object->mesh->vertices[startIndex[0]]),
-                        //     object->getTranslatedRotatedPoint(rotMat, object->mesh->vertices[startIndex[1]]),
-                        //     object->getTranslatedRotatedPoint(rotMat, object->mesh->vertices[startIndex[2]])
-                        // };
                         auto intersection = localRay.intersectTriangle(triangle, object->mesh->normals[i]);
                         if (intersection.hit && intersection.distance < currentHit.distance) {
                             currentHit = intersection;
-                            currentRotatedNormal = RayTraceableObject::getRotatedNormal(rotMat, intersection.normal);
+                            currentRotatedNormal = object->transform.getTransformedNormal(intersection.normal);
                             currentColor = object->color;
                         }
                     }
@@ -73,7 +67,6 @@ namespace RayTracing {
                     auto localRay = ray.toLocalRay(sphere->transform);
                     auto intersection = localRay.intersectSphere(sphere->transform.position, sphere->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
-                        auto rotMat = sphere->getRotationMatrix();
                         currentHit = intersection;
                         currentRotatedNormal = intersection.normal;
                         currentColor = sphere->color;
@@ -85,7 +78,6 @@ namespace RayTracing {
                     auto localRay = ray.toLocalRay(light->transform);
                     auto intersection = localRay.intersectSphere(light->transform.position, light->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
-                        auto rotMat = light->updateRotationMatrix();
                         currentHit = intersection;
                         currentHit.isLight = true;
                         currentRotatedNormal = {};

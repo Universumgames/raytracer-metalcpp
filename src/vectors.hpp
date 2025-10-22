@@ -33,21 +33,21 @@ namespace RayTracing {
         // }
 
         Vector(T x, T y) requires (X == 2) {
-            values[0] = x;
-            values[1] = y;
+            values[X_AXIS] = x;
+            values[Y_AXIS] = y;
         }
 
         Vector(T x, T y, T z) requires (X == 3) {
-            values[0] = x;
-            values[1] = y;
-            values[2] = z;
+            values[X_AXIS] = x;
+            values[Y_AXIS] = y;
+            values[Z_AXIS] = z;
         }
 
-        Vector(T w, T x, T y, T z) requires (X == 4) {
-            values[0] = w;
-            values[1] = x;
-            values[2] = y;
-            values[3] = z;
+        Vector(T x, T y, T z, T w) requires (X == 4) {
+            values[X_AXIS] = x;
+            values[Y_AXIS] = y;
+            values[Z_AXIS] = z;
+            values[W_AXIS] = w;
         }
 
         Vector(T values[X]) {
@@ -217,32 +217,31 @@ namespace RayTracing {
             return Vector((T) 0);
         }
 
-        static Vector up() requires (X >= 2) { return Vector((T) 0).setValue(Y_AXIS, 1); }
-        static Vector down() requires (X >= 2) { return Vector((T) 0).setValue(Y_AXIS, -1); }
-        static Vector left() requires (X >= 2) { return Vector((T) 0).setValue(X_AXIS, 0); }
+        static Vector up() requires (X >= 2) { return Vector((T) 0).setValue(Z_AXIS, 1); }
+        static Vector down() requires (X >= 2) { return Vector((T) 0).setValue(Z_AXIS, -1); }
         static Vector right() requires (X >= 2) { return Vector((T) 0).setValue(X_AXIS, 1); }
-        static Vector forward() requires (X >= 3) { return Vector((T) 0).setValue(Z_AXIS, 1); }
-        static Vector backward() requires (X >= 3) { return Vector((T) 0).setValue(Z_AXIS, -1); }
+        static Vector left() requires (X >= 2) { return Vector((T) 0).setValue(X_AXIS, -1); }
+        static Vector forward() requires (X >= 3) { return Vector((T) 0).setValue(Y_AXIS, 1); }
+        static Vector backward() requires (X >= 3) { return Vector((T) 0).setValue(Y_AXIS, -1); }
 
         // for 2d to 3d the axis names stay identical
-        T &x() requires (X >= 1 && X <= 3) { return values[0]; }
-        T &y() requires (X >= 2 && X <= 3) { return values[1]; }
-        T &z() requires (X == 3) { return values[2]; }
+        T &x() requires (X >= 1) { return values[X_AXIS]; }
+        T &y() requires (X >= 2) { return values[Y_AXIS]; }
+        T &z() requires (X >= 3) { return values[Z_AXIS]; }
+        T &w() requires (X >= 4) { return values[W_AXIS]; }
 
-        T getX() const requires (X >= 1 && X <= 3) { return values[0]; }
-        T getY() const requires (X >= 2 && X <= 3) { return values[1]; }
-        T getZ() const requires (X == 3) { return values[2]; }
+        T getX() const requires (X >= 1) { return values[X_AXIS]; }
+        T getY() const requires (X >= 2) { return values[Y_AXIS]; }
+        T getZ() const requires (X >= 3) { return values[Z_AXIS]; }
+        T getW() const requires (X >= 4) { return values[W_AXIS]; }
 
-        // in 4d w get pushed before x so the indices change
-        T &w() requires (X >= 4) { return values[0]; }
-        T &x() requires (X >= 4) { return values[1]; }
-        T &y() requires (X >= 4) { return values[2]; }
-        T &z() requires (X >= 4) { return values[3]; }
-
-        T getW() const requires (X >= 4) { return values[0]; }
-        T getX() const requires (X >= 4) { return values[1]; }
-        T getY() const requires (X >= 4) { return values[2]; }
-        T getZ() const requires (X >= 4) { return values[3]; }
+        Vector<X - 1, T> cutoff() {
+            Vector<X - 1, T> result;
+            for (unsigned int i = 0; i < X - 1; i++) {
+                result.values[i] = values[i];
+            }
+            return result;
+        }
     };
 
     typedef Vector<2, float> Vec2;
@@ -251,11 +250,11 @@ namespace RayTracing {
 
 #define deg2rad(deg) (deg * (float)M_PI / 180.0f)
 
-    struct Quaternion: public Vector<4, float> {
-        static Quaternion fromEuler(Vec3 rad) {
-            double roll = rad.x();
-            double pitch = rad.z();
-            double yaw = rad.y();
+    struct Quaternion : public Vector<4, float> {
+        static Quaternion fromEuler(const Vec3 &rad) {
+            double roll = rad.getY();
+            double pitch = rad.getX();
+            double yaw = rad.getZ();
             double cr = cos(roll * 0.5);
             double sr = sin(roll * 0.5);
             double cp = cos(pitch * 0.5);
@@ -264,10 +263,10 @@ namespace RayTracing {
             double sy = sin(yaw * 0.5);
 
             Quaternion q;
-            q.w() = cr * cp * cy + sr * sp * sy;
-            q.x() = sr * cp * cy - cr * sp * sy;
-            q.y() = cr * sp * cy + sr * cp * sy;
-            q.z() = cr * cp * sy - sr * sp * cy;
+            q.x() = cr * cp * cy + sr * sp * sy;
+            q.y() = sr * cp * cy - cr * sp * sy;
+            q.z() = cr * sp * cy + sr * cp * sy;
+            q.w() = cr * cp * sy - sr * sp * cy;
             return q;
         }
 
