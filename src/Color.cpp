@@ -20,18 +20,20 @@ namespace RayTracing {
         return RGBA8::forceFromVec4(avgColor / ((float)colors.size()));
     }
 
-    RGBf RGBf::geometricAVG(const std::vector<RGBf>& colors) {
+    RGBf RGBf::blend(const std::vector<RGBf> &colors, ColorBlendMode mode) {
         if (colors.empty()) {
             return {1,0,0,0};
         }
-        if (colors.size() > 1) {
-            std::cout<< ".";
+        switch (mode) {
+            case AVERAGE: {
+                RGBf sum{0,0,0,0};
+                for (auto & color : colors) {
+                    sum += color;
+                }
+                return sum / colors.size();
+            }
+            default: return {1,0,0,0};
         }
-        RGBf product{1,1,1,1};
-        for (auto & color : colors) {
-            product *= color;
-        }
-        return product;
     }
 
     RGBf RGBf::operator*=(const RGBf &other) {

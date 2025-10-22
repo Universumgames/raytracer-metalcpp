@@ -248,5 +248,31 @@ namespace RayTracing {
     typedef Vector<2, float> Vec2;
     typedef Vector<3, float> Vec3;
     typedef Vector<4, float> Vec4;
-    typedef Vector<4, double> Quaternion;
+
+#define deg2rad(deg) (deg * (float)M_PI / 180.0f)
+
+    struct Quaternion: public Vector<4, float> {
+        static Quaternion fromEuler(Vec3 rad) {
+            double roll = rad.x();
+            double pitch = rad.z();
+            double yaw = rad.y();
+            double cr = cos(roll * 0.5);
+            double sr = sin(roll * 0.5);
+            double cp = cos(pitch * 0.5);
+            double sp = sin(pitch * 0.5);
+            double cy = cos(yaw * 0.5);
+            double sy = sin(yaw * 0.5);
+
+            Quaternion q;
+            q.w() = cr * cp * cy + sr * sp * sy;
+            q.x() = sr * cp * cy - cr * sp * sy;
+            q.y() = cr * sp * cy + sr * cp * sy;
+            q.z() = cr * cp * sy - sr * sp * cy;
+            return q;
+        }
+
+        static Quaternion fromEulerDegree(Vec3 deg) {
+            return Quaternion::fromEuler(Vec3{deg2rad(deg.getX()),deg2rad(deg.getY()), deg2rad(deg.getZ())});
+        }
+    };
 }

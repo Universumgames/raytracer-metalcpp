@@ -42,18 +42,17 @@ int main(int argc, char *argv[]) {
     sf::Vector2u windowSize = sf::Vector2u(800, 600);
 
     Scene scene = Scene::loadFromFile(SCENE_BASE_DIR "scene.json");
+    auto imageHandler = new ImageHandler(windowSize);
+    RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 1, 1);
 
-    RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 1);
     Image *uvTest = raytracer->uvTest();
+    Image* rayTest = raytracer->rayTest(scene.camera);
+
+    imageHandler->saveImage("uvTest.jpg", uvTest);
+    imageHandler->saveImage("rayTest.jpg", rayTest);
+
     Image *raytraced = benchmarkRaytracer(raytracer, scene, false);
 
-    auto test = Sphere({0, 0, 0, 0}, {0, 0, 0}, {}, 3);
-    test.rotateEuler({0, 0, deg2rad(45)});
-    Vec3 p = {0, 0, 1};
-    Vec3 pn = test.getTranslatedRotatedPoint(test.getRotationMatrix(), p);
-
-
-    auto imageHandler = new ImageHandler(windowSize);
     imageHandler->saveImage("raytraced.jpg", raytraced);
 
 #ifndef RUNNING_CICD

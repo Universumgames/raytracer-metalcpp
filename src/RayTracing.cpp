@@ -29,12 +29,10 @@ namespace RayTracing {
         return desiredSize / windowSize;
     }
 
-    std::vector<Ray> RayTracer::calculateStartingRays() {
+    std::vector<Ray> RayTracer::calculateStartingRays(Camera* camera) {
         const double aspect_ratio = (double)width/ (double)height;
-        const double fov_adjustment = tan((fov * M_PI / 180.0) / 2.0);
+        const double fov_adjustment = tan((camera->fov * M_PI / 180.0) / 2.0);
 
-        float screenDistance = 5;
-        Vec3 rayOrigin = Vec3::backward() * screenDistance;
         Vec3 screenOrigin = Vec3::zero();
         Vec3 screen00 = screenOrigin + Vec3(-(float) width / 2.0f, -(float) height / 2.0f, 0);
 
@@ -57,24 +55,22 @@ namespace RayTracing {
                 for (const auto &offset: offsets) {
                     Vec3 samplingPixelLocation = Vec3(Vec2(x, y) + offset, 0);
                     Vec3 pixel = (screen00 + samplingPixelLocation) * Vec3(getViewBoxScaling(), 1);
-                    Vec3 rayDir = (camForward + (camRight * pixel.x() * aspect_ratio * fov_adjustment) + (camUp * pixel.y() * fov_adjustment)).normalized();
+                    Vec3 rayDir = (camForward + (camRight * pixel.getX() * aspect_ratio * fov_adjustment) + (camUp * pixel.getY() * fov_adjustment)).normalized();
                     Ray ray = Ray(pixel, rayDir, {}, x, y);
                     rays.push_back(ray);
 #ifdef DEBUG_INITIAL_RAY_GENERATION
                     if (y % 32 == 0 && x % 32 == 0 && offset == offsets[0]) {
-                        pixelFile << "[" << pixel.x() << ", " << pixel.y() << ", " << pixel.z() << "]," << std::endl;
-                        raysFile << "[" << rayDir.x() << ", " << rayDir.y() << ", " << rayDir.z() << "]," << std::endl;
+                        pixelFile << "[" << pixel.getX() << ", " << pixel.getY() << ", " << pixel.z() << "]," << std::endl;
+                        raysFile << "[" << rayDir.getX() << ", " << rayDir.getY() << ", " << rayDir.z() << "]," << std::endl;
                     }
 #endif
                 }
             }
         }
 #ifdef DEBUG_INITIAL_RAY_GENERATION
-        raysFile << "[0,0,0]])" << std::endl;
-        pixelFile << "[0,0,1]])" << std::endl;
+        raysFile << "])" << std::endl;
+        pixelFile << "])" << std::endl;
 #endif
-
-
         return rays;
     }
 
@@ -83,12 +79,14 @@ namespace RayTracing {
             for (unsigned y = 0; y < height; y++) {
                 std::vector<Ray> pixelRays;
                 std::vector<RGBf> pixelColors;
+                std::vector<RGBf> lightColors;
 
                 int startIndex = (y * width + x) * samplesPerPixel;
                 for (int i = 0; i < samplesPerPixel; i++) {
                     auto ray = rays[startIndex + i];
                     pixelRays.push_back(ray);
                     pixelColors.insert(pixelColors.end(), ray.colors.begin(), ray.colors.end());
+                    lightColors.push_back(ray.lightColor);
                 }
 
                 /*// find all rays assigned to specified pixel, when we are assuming that the order changed
@@ -102,7 +100,8 @@ namespace RayTracing {
                     ++it;
                 }*/
 
-                RGBf avg = RGBf::geometricAVG(pixelColors);
+                RGBf light = RGBf::blend(lightColors);
+                RGBf avg = RGBf::blend(pixelColors);// * light;
                 //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
                 image->setPixel(x, y, avg.toRGBA8());
             }
@@ -128,4 +127,20 @@ namespace RayTracing {
         }
         return offsets;
     }
+
+    Image *RayTracer::rayTest(Camera *camera) {
+        auto *image = new Image(width, height);
+        auto rays = calculateStartingRays(camera);
+
+        for (auto &ray: rays) {
+            auto dot = ray.direction.dot(Vec3::forward());
+            ray.colors.push_back(RGBf(dot,dot,dot, 1));
+            ray.lightColor = RGBf(1,1,1,1);
+        }
+
+        resolveRays(image, rays);
+
+        return image;
+    }
+
 }

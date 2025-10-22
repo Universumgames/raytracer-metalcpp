@@ -11,8 +11,6 @@ namespace RayTracing {
         unsigned bounces;
         unsigned samplesPerPixel;
 
-        unsigned fov = 90;
-
         /**
          * get the view box scaling to convert from screen space to world space
          * ratio of the view boc to the screen space
@@ -24,7 +22,7 @@ namespace RayTracing {
          * Calculate the starting rays for the raytrace
          * @return
          */
-        std::vector<Ray> calculateStartingRays();
+        std::vector<Ray> calculateStartingRays(Camera* camera);
 
         void resolveRays(Image* image, std::vector<Ray>& rays) const;
 
@@ -56,6 +54,8 @@ namespace RayTracing {
          * @return uv image
          */
         virtual Image *uvTest() = 0;
+
+        Image* rayTest(Camera* camera);
 
         [[nodiscard]] Vec2 windowSize() const;
 

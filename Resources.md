@@ -17,6 +17,10 @@
 ## CUDA
 -
 
-## Other resources and documentations
+## Libraries
 - JSON library https://github.com/nlohmann/json
 - STL Library https://github.com/sreiter/stl_reader
+
+## Other resources
+- Euler to Quaternions https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
+- Color Blend Modes https://en.wikipedia.org/wiki/Blend_modes

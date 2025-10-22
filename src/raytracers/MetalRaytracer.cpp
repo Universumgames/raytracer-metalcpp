@@ -120,7 +120,7 @@ namespace RayTracing {
 
     Image *MetalRaytracer::raytrace(Scene scene) {
         auto *image = new Image(width, height);
-        auto rays = calculateStartingRays();
+        auto rays = calculateStartingRays(scene.camera);
         return image;
     }
 

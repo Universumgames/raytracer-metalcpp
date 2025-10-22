@@ -58,6 +58,10 @@ namespace RayTracing {
 
     };
 
+    enum ColorBlendMode {
+        AVERAGE
+    };
+
     struct RGBf : public Vec4 {
     public:
         RGBf(): Vec4(0, 0, 0, 0) {}
@@ -77,6 +81,8 @@ namespace RayTracing {
         float& b()  { return this->z();}
 
         static RGBf geometricAVG(const std::vector<RGBf>& colors);
+
+        static RGBf blend(const std::vector<RGBf>& colors, ColorBlendMode mode = ColorBlendMode::AVERAGE);
 
         RGBf operator*=(const RGBf& other);
 
