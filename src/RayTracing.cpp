@@ -36,7 +36,7 @@ namespace RayTracing {
         Vec3 screenOrigin = Vec3::zero();
         Vec3 screen00 = screenOrigin + Vec3(-(float) width / 2.0f, -(float) height / 2.0f, 0);
 
-        Vec3 camForward = Vec3::backward();
+        Vec3 camForward = Vec3::forward();
         Vec3 camRight = Vec3::right();
         Vec3 camUp = Vec3::up();
 

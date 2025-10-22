@@ -71,11 +71,11 @@ namespace RayTracing {
                 // check collision for spheres
                 for (const auto sphere: scene.spheres) {
                     auto localRay = ray.toLocalRay(sphere->transform);
-                    auto intersection = localRay.intersectSphere(sphere->transform.position * -1, sphere->radius);
+                    auto intersection = localRay.intersectSphere(sphere->transform.position, sphere->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
                         auto rotMat = sphere->getRotationMatrix();
                         currentHit = intersection;
-                        currentRotatedNormal = RayTraceableObject::getRotatedNormal(rotMat, intersection.normal);
+                        currentRotatedNormal = intersection.normal;
                         currentColor = sphere->color;
                     }
                 }
@@ -83,11 +83,12 @@ namespace RayTracing {
                 // check collision for light sources
                 for (const auto& light : scene.lights) {
                     auto localRay = ray.toLocalRay(light->transform);
-                    auto intersection = localRay.intersectSphere(light->transform.position * -1, light->radius);
+                    auto intersection = localRay.intersectSphere(light->transform.position, light->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
                         auto rotMat = light->updateRotationMatrix();
                         currentHit = intersection;
-                        currentRotatedNormal = RayTraceableObject::getRotatedNormal(rotMat, intersection.normal);
+                        currentHit.isLight = true;
+                        currentRotatedNormal = {};
                         currentColor = light->emittingColor;
                     }
                 }
@@ -102,7 +103,7 @@ namespace RayTracing {
                     }else {
                         ray.colors.emplace_back(currentColor);
                     }
-                    ray.reflectAt(currentHit.hitPoint, currentRotatedNormal);
+                    ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal);
                     ray.totalDistance += currentHit.distance;
                 }
             }

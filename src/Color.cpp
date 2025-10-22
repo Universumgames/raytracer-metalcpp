@@ -32,6 +32,9 @@ namespace RayTracing {
                 }
                 return sum / colors.size();
             }
+            case COUNT: {
+                return {1,1.f/colors.size(),1.f/colors.size(),1.f/colors.size()};
+            }
             default: return {1,0,0,0};
         }
     }

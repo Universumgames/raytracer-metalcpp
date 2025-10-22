@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 
     Scene scene = Scene::loadFromFile(SCENE_BASE_DIR "scene.json");
     auto imageHandler = new ImageHandler(windowSize);
-    RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 1, 1);
+    RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 1);
 
     Image *uvTest = raytracer->uvTest();
     Image* rayTest = raytracer->rayTest(scene.camera);

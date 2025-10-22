@@ -1,8 +1,5 @@
 #include "RayTracableObject.hpp"
 
-#include <iostream>
-#include <stl_reader.h>
-
 namespace RayTracing {
     Mat3x3 RayTraceableObject::updateRotationMatrix() {
         transform.updateRotationMatrix();
@@ -14,7 +11,7 @@ namespace RayTracing {
     }
 
     Vec3 RayTraceableObject::getTranslatedRotatedPoint(const Mat3x3 &rotationMatrix, const Vec3& point) const {
-        return rotationMatrix * point - transform.position;
+        return transform.position - rotationMatrix * point;
     }
 
     Vec3 RayTraceableObject::getRotatedNormal(const Mat3x3 &rotationMatrix, const Vec3 &normal) {
