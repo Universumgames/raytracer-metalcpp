@@ -1,7 +1,7 @@
 #pragma once
 #include "Color.hpp"
 #include "raytrace_objects/RayTracableObject.hpp"
-#include "vectors.hpp"
+#include "math/vectors.hpp"
 
 namespace RayTracing {
     struct LocalRay;

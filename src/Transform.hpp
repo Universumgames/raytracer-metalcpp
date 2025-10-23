@@ -1,5 +1,5 @@
 #pragma once
-#include "matrices.hpp"
+#include "math/matrices.hpp"
 
 namespace RayTracing {
     struct Transform {

@@ -3,7 +3,7 @@
 #include <vector>
 #include <nlohmann/json.hpp>
 
-#include "vectors.hpp"
+#include "math/vectors.hpp"
 #include "SFML/Graphics/Color.hpp"
 
 #ifdef USE_SHADER_METAL

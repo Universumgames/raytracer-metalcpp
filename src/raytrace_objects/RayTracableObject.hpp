@@ -1,9 +1,6 @@
 #pragma once
-#include <utility>
-
 #include "../Color.hpp"
-#include "../matrices.hpp"
-#include "../vectors.hpp"
+#include "../math/vectors.hpp"
 #include "BoundigBox.hpp"
 #include "../Transform.hpp"
 

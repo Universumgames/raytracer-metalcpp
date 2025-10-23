@@ -2,7 +2,7 @@
 #include "Image.hpp"
 #include "Ray.hpp"
 #include "Scene.hpp"
-#include "vectors.hpp"
+#include "math/vectors.hpp"
 
 namespace RayTracing {
     class RayTracer {

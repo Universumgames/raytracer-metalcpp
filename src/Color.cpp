@@ -1,8 +1,6 @@
 #include "Color.hpp"
 
-#include <iostream>
-
-#include "vectors.hpp"
+#include "math/vectors.hpp"
 
 namespace RayTracing {
 

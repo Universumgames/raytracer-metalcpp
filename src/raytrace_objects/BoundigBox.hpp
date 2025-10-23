@@ -1,6 +1,6 @@
 #pragma once
-#include "../vectors.hpp"
-#include "../matrices.hpp"
+#include "../math/vectors.hpp"
+#include "../math/matrices.hpp"
 
 namespace RayTracing {
     struct BoundingBox {

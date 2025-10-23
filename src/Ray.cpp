@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include "vectors.hpp"
+#include "math/vectors.hpp"
 
 namespace RayTracing {
     HitInfo LocalRay::intersectTriangle(Vec3 triangle[3], Vec3 customNormal) const {
