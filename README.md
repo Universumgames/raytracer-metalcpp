@@ -12,3 +12,8 @@ We did not come up with all the formulas and ideas on our own and used some libr
 For a detailed list of all resources and libraries we used along the journey we compiled an overview in [`Resources.md`](./Resources.md)
 
 TODO
+
+An important note concerning the shader programming and raytracing with CUDA and Metal is the use of the compute
+pipelines.
+We did not use the rendering pipeline and their raytracing features, we used the normal compute pipelines and needed to
+implement our own data structure like vertex buffers.

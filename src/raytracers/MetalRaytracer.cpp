@@ -42,7 +42,7 @@ namespace RayTracing {
         for (unsigned y = 0; y < height; ++y) {
             for (unsigned x = 0; x < width; ++x) {
                 pixelCoords[y * width + x] = simd::uint2{x, y};
-                uvs[y * width + x] = simd::float2{x / (float) width, y / (float) height};
+                uvs[y * width + x] = simd::float2{(float) x / (float) width, (float) y / (float) height};
             }
         }
         bufferPixel = device->newBuffer(sizeof(simd::uint2) * width * height, MTL::ResourceStorageModeShared);
@@ -106,6 +106,32 @@ namespace RayTracing {
         computeEncoder->dispatchThreads(gridSize, threadgroupSize);
     }
 
+    Image *MetalRaytracer::uvTest() {
+        auto *variables = loadFunction("uvTest");
+        sendComputeCommand(variables, &MetalRaytracer::encodeUVTestData);
+
+        return outputBufferToImage();
+    }
+
+    void MetalRaytracer::encodeRaytracingData(KernelFunctionVariables *variables,
+                                              MTL::ComputeCommandEncoder *computeEncoder) {
+        computeEncoder->setComputePipelineState(variables->functionPSO);
+    }
+
+    Image *MetalRaytracer::raytrace(Scene scene) {
+        auto *image = new Image(width, height);
+        auto variables = loadFunction("raytrace");
+        auto rays = calculateStartingRays(scene.camera);
+
+
+        sendComputeCommand(variables, &MetalRaytracer::encodeRaytracingData);
+        // TODO prepare date for gpu
+        // TODO run on gpu
+        // TODO extract image from buffer
+        outputBufferToImage();
+        return image;
+    }
+
     Image *MetalRaytracer::outputBufferToImage() {
         auto *image = new Image(width, height);
         for (unsigned y = 0; y < height; ++y) {
@@ -115,20 +141,6 @@ namespace RayTracing {
             }
         }
         return image;
-    }
-
-
-    Image *MetalRaytracer::raytrace(Scene scene) {
-        auto *image = new Image(width, height);
-        auto rays = calculateStartingRays(scene.camera);
-        return image;
-    }
-
-    Image *MetalRaytracer::uvTest() {
-        auto *variables = loadFunction("uvTest");
-        sendComputeCommand(variables, &MetalRaytracer::encodeUVTestData);
-
-        return outputBufferToImage();
     }
 }
 #endif

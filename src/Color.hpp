@@ -42,9 +42,6 @@ namespace RayTracing {
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(RGBA8, r, g, b, a)
 
-        __deprecated
-        static RGBA8 avg(std::vector<RGBA8> colors);
-
         /// warning this method should be used as confusion with the float-valued color encoding can occur
         [[nodiscard]] Vec4 forceVec4() const {
             return Vec4{static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a)};
@@ -80,7 +77,8 @@ namespace RayTracing {
         RGBf(const Vec4 &other) : Vec4(other) {
         }
 
-        RGBf(const RGBA8 &other) : Vec4(other.r / 255.f, other.g / 255.f, other.b / 255.f, other.a / 255.f) {
+        RGBf(const RGBA8 &other) : Vec4((float) other.r / 255.f, (float) other.g / 255.f, (float) other.b / 255.f,
+                                        (float) other.a / 255.f) {
         }
 
         [[nodiscard]] float getA() const { return this->getW(); }

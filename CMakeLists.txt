@@ -21,6 +21,7 @@ endif ()
 # Alle .cpp-Dateien automatisch einbinden
 file(GLOB_RECURSE SRC_FILES src/*.cpp)
 add_executable(${PROJECT_NAME} ${SRC_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/)
 
 ## adding metal and cuda libraries
 add_subdirectory(lib)

@@ -4,20 +4,6 @@
 
 namespace RayTracing {
 
-    RGBA8 RGBA8::avg(std::vector<RGBA8> colors) {
-        if (colors.empty()) {
-            return {};
-        }
-        if (colors.size() == 1) {
-            return colors[0];
-        }
-        Vec4 avgColor = colors[0].forceVec4();
-        for (int i = 1; i < colors.size(); i++) {
-            avgColor += colors[i].forceVec4();
-        }
-        return RGBA8::forceFromVec4(avgColor / ((float)colors.size()));
-    }
-
     RGBf RGBf::blend(const std::vector<RGBf> &colors, ColorBlendMode mode) {
         if (colors.empty()) {
             return RGBf::BLACK();
@@ -28,10 +14,10 @@ namespace RayTracing {
                 for (auto & color : colors) {
                     sum += color;
                 }
-                return sum / colors.size();
+                return sum / (float) colors.size();
             }
             case COUNT: {
-                return {1,1.f/colors.size(),1.f/colors.size(),1.f/colors.size()};
+                return {1, 1.f / (float) colors.size(), 1.f / (float) colors.size(), 1.f / (float) colors.size()};
             }
             default: return RGBf::BLACK();
         }

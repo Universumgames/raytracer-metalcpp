@@ -33,14 +33,16 @@ namespace RayTracing {
                                 void (MetalRaytracer::*function)(KernelFunctionVariables *,
                                                                  MTL::ComputeCommandEncoder *));
 
-        void encodeUVTestData(KernelFunctionVariables *, MTL::ComputeCommandEncoder *commandEncoder);
+        void encodeUVTestData(KernelFunctionVariables *, MTL::ComputeCommandEncoder *computeEncoder);
+
+        void encodeRaytracingData(KernelFunctionVariables *, MTL::ComputeCommandEncoder *computeEncoder);
 
         Image* outputBufferToImage();
 
     public:
         MetalRaytracer(unsigned width, unsigned height, unsigned bounces, unsigned samplesPerPixel);
 
-        ~MetalRaytracer();
+        ~MetalRaytracer() override;
 
         Image *raytrace(Scene scene) override;
 
