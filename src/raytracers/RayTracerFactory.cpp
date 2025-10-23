@@ -1,0 +1,28 @@
+#include "RayTracerFactory.hpp"
+
+#include "CudaRayTracer.hpp"
+#include "MetalRaytracer.hpp"
+#include "SequentialRayTracer.hpp"
+
+namespace RayTracing {
+    void RayTracerFactory::init(const Vec2 &windowSize, int bounces, int samplesPerPixel) {
+        instance = new RayTracerFactory(windowSize, bounces, samplesPerPixel);
+    }
+
+    RayTracerFactory *RayTracerFactory::getInstance() {
+        if (instance == nullptr) {
+            throw std::runtime_error("RayTracerFactory was not initialized");
+        }
+        return instance;
+    }
+
+    RayTracerFactory::RayTracerFactory(const Vec2 &windowSize, int bounces, int samplesPerPixel) {
+        this->sequentialRayTracer = new SequentialRayTracer(windowSize.getY(), windowSize.getX(), bounces,
+                                                            samplesPerPixel);
+#ifdef USE_SHADER_METAL
+        this->parallelRayTracer = new MetalRaytracer(windowSize.getY(), windowSize.getX(), bounces, samplesPerPixel);
+#elifdef USE_SHADER_CUDA
+        this->sequentialRayTracer = new CudaRayTracer(windowSize.getY(), windowSize.getX(), bounces, samplesPerPixel);
+#endif
+    }
+}

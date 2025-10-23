@@ -24,7 +24,7 @@ namespace RayTracing {
          */
         std::vector<Ray> calculateStartingRays(Camera* camera);
 
-        void resolveRays(Image* image, std::vector<Ray>& rays) const;
+        void resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode = AVERAGE) const;
 
     private:
         /**
@@ -55,7 +55,7 @@ namespace RayTracing {
          */
         virtual Image *uvTest() = 0;
 
-        Image* rayTest(Camera* camera);
+        virtual Image *rayTest(Camera *camera) = 0;
 
         [[nodiscard]] Vec2 windowSize() const;
 

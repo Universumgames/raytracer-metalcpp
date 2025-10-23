@@ -78,7 +78,7 @@ namespace RayTracing {
         return rays;
     }
 
-    void RayTracer::resolveRays(Image *image, std::vector<Ray> &rays) const {
+    void RayTracer::resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode) const {
         for (unsigned x = 0; x < width; x++) {
             for (unsigned y = 0; y < height; y++) {
                 std::vector<Ray> pixelRays;
@@ -108,7 +108,7 @@ namespace RayTracing {
                 if (light == Vec4::zero() && !pixelColors.empty()) {
                     light = {0.2, 0.2, 0.2, 1};
                 }
-                RGBf avg = RGBf::blend(pixelColors) * light;
+                RGBf avg = RGBf::blend(pixelColors, mode); // * light;
                 //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
                 image->setPixel(x, y, avg.toRGBA8());
             }
@@ -133,20 +133,5 @@ namespace RayTracing {
             }
         }
         return offsets;
-    }
-
-    Image *RayTracer::rayTest(Camera *camera) {
-        auto *image = new Image(width, height);
-        auto rays = calculateStartingRays(camera);
-
-        for (auto &ray: rays) {
-            auto dot = ray.direction.dot(Vec3::forward());
-            ray.colors.push_back(RGBf(dot, dot, dot, 1));
-            ray.lightColor = RGBf(1, 1, 1, 1);
-        }
-
-        resolveRays(image, rays);
-
-        return image;
     }
 }

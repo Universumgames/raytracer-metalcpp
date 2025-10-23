@@ -16,7 +16,8 @@ if (APPLE)
     set(USE_SHADER_METAL ON)
     set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 endif ()
-#set(USER_SHADER_CUDA OFF)
+## TODO add appropriate if block
+#set(USE_SHADER_CUDA OFF)
 
 # Alle .cpp-Dateien automatisch einbinden
 file(GLOB_RECURSE SRC_FILES src/*.cpp)

@@ -105,4 +105,20 @@ namespace RayTracing {
 
         return image;
     }
+
+    Image *SequentialRayTracer::rayTest(Camera *camera) {
+        auto *image = new Image(width, height);
+        auto rays = calculateStartingRays(camera);
+
+        for (auto &ray: rays) {
+            auto dot = ray.direction.dot(Vec3::forward());
+            dot = dot * dot * dot * dot;
+            ray.colors.push_back(RGBf(dot, dot, dot, 1));
+            ray.lightColor = RGBf(0, 0, 1, 1);
+        }
+
+        resolveRays(image, rays);
+
+        return image;
+    }
 }

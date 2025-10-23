@@ -142,5 +142,10 @@ namespace RayTracing {
         }
         return image;
     }
+
+    Image *MetalRaytracer::rayTest(Camera *camera) {
+        auto *image = new Image(width, height);
+        return image;
+    }
 }
 #endif

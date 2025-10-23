@@ -10,6 +10,8 @@ namespace RayTracing {
 
         Image *uvTest() override;
 
+        Image *rayTest(Camera *camera) override;
+
         std::string identifier() override { return "SequentialRayTracer"; }
     };
 }
