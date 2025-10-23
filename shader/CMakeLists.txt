@@ -1,6 +1,8 @@
 if(USE_SHADER_METAL)
     add_subdirectory(metal)
-    add_dependencies(${PROJECT_NAME} METAL_SHADERS)
+    add_dependencies(${PROJECT_NAME} COPIED_METAL_SHADERS)
+    include_directories(metal)
+    source_group("MetalSources" ".*/\.metal")
 endif ()
 
 if(USE_SHADER_CUDA)

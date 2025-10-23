@@ -4,6 +4,12 @@ project(RayTracer)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
+
+include(CPM)
+include(sfml)
+include(json)
+include(stl_reader)
 
 #### Set shader language to compile with
 if (APPLE)
@@ -11,8 +17,6 @@ if (APPLE)
     set(CMAKE_XCODE_GENERATE_SCHEME TRUE)
 endif ()
 #set(USER_SHADER_CUDA OFF)
-
-include(cmake/CMakeLists.txt)
 
 # Alle .cpp-Dateien automatisch einbinden
 file(GLOB_RECURSE SRC_FILES src/*.cpp)

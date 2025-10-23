@@ -1,4 +1,5 @@
 #include <metal_stdlib>
+#include "shader_types.hpp"
 using namespace metal;
 
 /// This is a Metal Shading Language (MSL) function equivalent to the SequentialRayTracer::uvTest() C++ function, used to perform the calculation on a GPU.
