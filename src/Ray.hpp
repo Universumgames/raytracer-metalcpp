@@ -16,7 +16,7 @@ namespace RayTracing {
         RGBf lightColor{0,0,0,0};
         float totalDistance = 0;
 
-        Vec3 reflectAt(const Vec3& location, const Vec3 &normal, float totalReflection = 1);
+        Vec3 reflectAt(const Vec3 &location, const Vec3 &normal, float totalReflection = 0.9);
 
         bool intersectsBoundingBox(BoundingBox box);
 

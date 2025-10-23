@@ -25,12 +25,12 @@ namespace RayTracing {
 
     Vec2 RayTracer::getViewBoxScaling() {
         Vec2 windowSize = this->windowSize();
-        Vec2 desiredSize = {1,1};
+        Vec2 desiredSize = {1, 1};
         return desiredSize / windowSize;
     }
 
-    std::vector<Ray> RayTracer::calculateStartingRays(Camera* camera) {
-        const double aspect_ratio = (double)width/ (double)height;
+    std::vector<Ray> RayTracer::calculateStartingRays(Camera *camera) {
+        const double aspect_ratio = (double) width / (double) height;
         const double fov_adjustment = tan((camera->fov * M_PI / 180.0) / 2.0);
 
         Vec3 screenOrigin = Vec3::zero();
@@ -62,8 +62,10 @@ namespace RayTracing {
                     rays.push_back(ray);
 #ifdef DEBUG_INITIAL_RAY_GENERATION
                     if (y % 32 == 0 && x % 32 == 0 && offset == offsets[0]) {
-                        pixelFile << "[" << pixel.getX() << ", " << pixel.getY() << ", " << pixel.z() << "]," << std::endl;
-                        raysFile << "[" << rayDir.getX() << ", " << rayDir.getY() << ", " << rayDir.z() << "]," << std::endl;
+                        pixelFile << "[" << pixel.getX() << ", " << pixel.getY() << ", " << pixel.z() << "]," <<
+                                std::endl;
+                        raysFile << "[" << rayDir.getX() << ", " << rayDir.getY() << ", " << rayDir.z() << "]," <<
+                                std::endl;
                     }
 #endif
                 }
@@ -103,7 +105,10 @@ namespace RayTracing {
                 }*/
 
                 RGBf light = RGBf::blend(lightColors);
-                RGBf avg = RGBf::blend(pixelColors);// * light;
+                if (light == Vec4::zero() && !pixelColors.empty()) {
+                    light = {0.2, 0.2, 0.2, 1};
+                }
+                RGBf avg = RGBf::blend(pixelColors) * light;
                 //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
                 image->setPixel(x, y, avg.toRGBA8());
             }
@@ -136,13 +141,12 @@ namespace RayTracing {
 
         for (auto &ray: rays) {
             auto dot = ray.direction.dot(Vec3::forward());
-            ray.colors.push_back(RGBf(dot,dot,dot, 1));
-            ray.lightColor = RGBf(1,1,1,1);
+            ray.colors.push_back(RGBf(dot, dot, dot, 1));
+            ray.lightColor = RGBf(1, 1, 1, 1);
         }
 
         resolveRays(image, rays);
 
         return image;
     }
-
 }

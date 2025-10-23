@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 
     Scene scene = Scene::loadFromFile(sceneFile);
     auto imageHandler = new ImageHandler(windowSize);
-    RayTracer *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 1);
+    auto *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 2);
 
     if (renderTests) {
         Image *uvTest = raytracer->uvTest();
