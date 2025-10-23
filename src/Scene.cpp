@@ -5,7 +5,7 @@ namespace RayTracing {
     Scene Scene::loadFromFile(const std::string& path) {
         std::ifstream file(path);
         if (!file.is_open()) {
-            throw std::runtime_error("Could not open file " + path);
+            throw std::runtime_error("Could not open file " + std::filesystem::current_path().string() + '/' + path);
         }
         nlohmann::json data = nlohmann::json::parse(file);
         auto serializableScene  = data.get<SerializableScene>();

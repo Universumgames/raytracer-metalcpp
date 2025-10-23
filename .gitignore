@@ -1,3 +1,5 @@
 /cmake-build-debug/
 /cmake-build-release/
+cmake-xcode
 .gitlab-ci-local
+XCode

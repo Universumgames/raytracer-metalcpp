@@ -14,3 +14,8 @@ run: build
 
 run_cicd: build
 	cd cmake-build-debug && ./RayTracer --no-window
+
+xcode_create:
+	mkdir -p cmake-xcode
+	cd cmake-xcode && cmake .. -G Xcode
+	cd cmake-xcode && open RayTracer.xcodeproj
