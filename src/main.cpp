@@ -3,6 +3,7 @@
 #include "RayTracing.hpp"
 #include "Renderer.h"
 #include "raytracers/MetalRaytracer.hpp"
+#include "raytracers/RayTracerFactory.hpp"
 #include "raytracers/SequentialRayTracer.hpp"
 #include "SFML/System/Vector2.hpp"
 
@@ -87,11 +88,12 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    sf::Vector2u windowSize = sf::Vector2u(800, 600);
+    auto windowSize = Vec2u(800, 600);
 
     Scene scene = Scene::loadFromFile(sceneFile);
     auto imageHandler = new ImageHandler(windowSize);
-    auto *raytracer = new SequentialRayTracer(windowSize.x, windowSize.y, 3, 2);
+    auto raytracerFactory = RayTracerFactory::init(windowSize, 3, 2);
+    auto *raytracer = raytracerFactory->getSequentialImplementation();
 
     if (renderTests) {
         Image *uvTest = raytracer->uvTest();

@@ -2,10 +2,10 @@
 #include <iostream>
 #include <sstream>
 
-ImageHandler::ImageHandler(sf::Vector2u imageSize) {
+ImageHandler::ImageHandler(const RayTracing::Vec2u &imageSize) {
     this->imageSize = imageSize;
     // schwarzes Bild erstellen
-    this->image = new sf::Image(imageSize, sf::Color::Black);
+    this->image = new sf::Image({imageSize.getX(), imageSize.getY()}, sf::Color::Black);
 }
 
 sf::Image* ImageHandler::getImage() {
@@ -16,33 +16,33 @@ ImageHandler::~ImageHandler() {
     delete image;
 }
 
-bool ImageHandler::saveImage(std::string path, RayTracing::Image *imageSrc) {
+bool ImageHandler::saveImage(const std::string &path, RayTracing::Image *imageSrc) {
     if (imageSrc != nullptr) updateImage(imageSrc);
     return image->saveToFile(path);
 }
 
 void ImageHandler::updateImage(RayTracing::Image *imageSrc) {
-    for (unsigned x = 0; x < imageSize.x; ++x)
-        for (unsigned y = 0; y < imageSize.y; ++y)
+    for (unsigned x = 0; x < imageSize.getX(); ++x)
+        for (unsigned y = 0; y < imageSize.getY(); ++y)
             image->setPixel({x, y}, imageSrc->getPixel(x, y).toSFMLColor());
 }
 
 
-Renderer::Renderer(sf::Vector2u windowSize) {
+Renderer::Renderer(const RayTracing::Vec2u &windowSize) {
     this->windowSize = windowSize;
     this->imageHandler = new ImageHandler(windowSize);
 
     init();
 }
 
-Renderer::Renderer(sf::Vector2u windowSize, ImageHandler *imageHandler) {
+Renderer::Renderer(const RayTracing::Vec2u &windowSize, ImageHandler *imageHandler) {
     this->windowSize = windowSize;
     this->imageHandler = imageHandler;
     init();
 }
 
 void Renderer::init() {
-    window = new sf::RenderWindow(sf::VideoMode(windowSize), std::string("Raytracer"));
+    window = new sf::RenderWindow(sf::VideoMode({windowSize.getX(), windowSize.getX()}), std::string("Raytracer"));
     window->setFramerateLimit(50);
 
     // Font
@@ -53,10 +53,10 @@ void Renderer::init() {
     this->statusText = new sf::Text(*font);
     statusText->setFont(*font);
     statusText->setFillColor(sf::Color::Red);
-    statusText->setPosition({10.f, static_cast<float>(windowSize.y - 50)});
+    statusText->setPosition({10.f, static_cast<float>(windowSize.getY() - 50)});
 
     // Texture initialisieren
-    texture = new sf::Texture(windowSize);
+    texture = new sf::Texture(sf::Vector2u{windowSize.getX(), windowSize.getY()});
     texture->update(*imageHandler->getImage());
     sprite = new sf::Sprite(*texture);
 }

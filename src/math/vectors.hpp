@@ -81,7 +81,7 @@ namespace RayTracing {
             return *this;
         }
 
-        T getValue(unsigned dim) const {
+        [[nodiscard]] T getValue(unsigned dim) const {
             return values[dim];
         }
 
@@ -93,7 +93,7 @@ namespace RayTracing {
             return sqrt(sum);
         }
 
-        Vector normalized() const {
+        [[nodiscard]] Vector normalized() const {
             float length = this->length();
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -102,7 +102,7 @@ namespace RayTracing {
             return Vector(v);
         }
 
-        float dot(const Vector &other) const {
+        [[nodiscard]] float dot(const Vector &other) const {
             float sum = 0;
             for (unsigned int i = 0; i < X; i++) {
                 sum += values[i] * other.values[i];
@@ -247,6 +247,7 @@ namespace RayTracing {
     typedef Vector<2, float> Vec2;
     typedef Vector<3, float> Vec3;
     typedef Vector<4, float> Vec4;
+    typedef Vector<2, unsigned> Vec2u;
 
 #define deg2rad(deg) (deg * (float)M_PI / 180.0f)
 
@@ -270,7 +271,7 @@ namespace RayTracing {
             return q;
         }
 
-        static Quaternion fromEulerDegree(Vec3 deg) {
+        static Quaternion fromEulerDegree(const Vec3 &deg) {
             return Quaternion::fromEuler(Vec3{deg2rad(deg.getX()),deg2rad(deg.getY()), deg2rad(deg.getZ())});
         }
     };

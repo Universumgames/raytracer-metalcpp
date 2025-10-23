@@ -5,8 +5,14 @@
 #include "SequentialRayTracer.hpp"
 
 namespace RayTracing {
-    void RayTracerFactory::init(const Vec2 &windowSize, int bounces, int samplesPerPixel) {
+    RayTracerFactory *RayTracerFactory::instance = nullptr;
+
+    RayTracerFactory *RayTracerFactory::init(const Vec2u &windowSize, int bounces, int samplesPerPixel) {
+        if (instance != nullptr) {
+            return instance;
+        }
         instance = new RayTracerFactory(windowSize, bounces, samplesPerPixel);
+        return instance;
     }
 
     RayTracerFactory *RayTracerFactory::getInstance() {
@@ -16,7 +22,7 @@ namespace RayTracing {
         return instance;
     }
 
-    RayTracerFactory::RayTracerFactory(const Vec2 &windowSize, int bounces, int samplesPerPixel) {
+    RayTracerFactory::RayTracerFactory(const Vec2u &windowSize, int bounces, int samplesPerPixel) {
         this->sequentialRayTracer = new SequentialRayTracer(windowSize.getY(), windowSize.getX(), bounces,
                                                             samplesPerPixel);
 #ifdef USE_SHADER_METAL

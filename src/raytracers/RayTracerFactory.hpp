@@ -9,10 +9,12 @@ namespace RayTracing {
         RayTracer *sequentialRayTracer = nullptr;
         RayTracer *parallelRayTracer = nullptr;
 
-        RayTracerFactory(const Vec2 &windowSize, int bounces, int samplesPerPixel);
+        RayTracerFactory(const Vec2u &windowSize, int bounces, int samplesPerPixel);
 
     public:
-        static void init(const Vec2 &windowSize, int bounces, int samplesPerPixel);
+        ~RayTracerFactory() = delete;
+
+        static RayTracerFactory *init(const Vec2u &windowSize, int bounces, int samplesPerPixel);
 
         static RayTracerFactory *getInstance();
 

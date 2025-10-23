@@ -8,13 +8,16 @@
 class ImageHandler {
 private:
     sf::Image *image;
-    sf::Vector2u imageSize;
+    RayTracing::Vec2u imageSize;
+
 public:
-    explicit ImageHandler(sf::Vector2u imageSize);
+    explicit ImageHandler(const RayTracing::Vec2u &imageSize);
+
     ~ImageHandler();
     sf::Image *getImage();
     void updateImage(RayTracing::Image* imageSrc);
-    bool saveImage(std::string path, RayTracing::Image *imageSrc = nullptr);
+
+    bool saveImage(const std::string &path, RayTracing::Image *imageSrc = nullptr);
 };
 
 class Renderer {
@@ -29,14 +32,14 @@ private:
     unsigned fps = 0;
     unsigned sps = 0;
 
-    sf::Vector2u windowSize;
+    RayTracing::Vec2u windowSize;
 
     void init();
 
 public:
-    explicit Renderer(sf::Vector2u windowSize);
+    explicit Renderer(const RayTracing::Vec2u &windowSize);
 
-    Renderer(sf::Vector2u windowSize, ImageHandler *imageHandler);
+    Renderer(const RayTracing::Vec2u &windowSize, ImageHandler *imageHandler);
 
     [[nodiscard]] bool isOpen() const;
 
