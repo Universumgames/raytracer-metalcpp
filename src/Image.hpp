@@ -13,7 +13,12 @@ namespace RayTracing {
 
         Image(unsigned int width, unsigned int height);
 
+        Image(const Vec2u &imageSize) : Image(imageSize.getX(), imageSize.getY()) {
+        }
+
         void setPixel(unsigned int x, unsigned int y, RGBA8 color);
+
+        void setPixel(unsigned int x, unsigned int y, RGBf color);
 
         RGBA8 getPixel(unsigned int x, unsigned int y);
 

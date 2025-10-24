@@ -1,10 +1,10 @@
 #pragma once
-#include "../RayTracing.hpp"
+#include "../RayTracer.hpp"
 
 namespace RayTracing {
     class SequentialRayTracer : public RayTracer {
     public:
-        SequentialRayTracer(unsigned width, unsigned height, unsigned bounces, unsigned samplesPerPixel);
+        SequentialRayTracer(Vec2u windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         Image *raytrace(Scene scene) override;
 

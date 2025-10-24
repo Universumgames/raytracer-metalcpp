@@ -7,7 +7,7 @@
 namespace RayTracing {
     class RayTracer {
     protected:
-        unsigned int width, height;
+        Vec2u windowSize;
         unsigned bounces;
         unsigned samplesPerPixel;
 
@@ -22,7 +22,7 @@ namespace RayTracing {
          * Calculate the starting rays for the raytrace
          * @return
          */
-        std::vector<Ray> calculateStartingRays(Camera* camera);
+        std::vector<Ray> calculateStartingRays(Camera *camera);
 
         void resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode = AVERAGE) const;
 
@@ -36,7 +36,7 @@ namespace RayTracing {
     public:
         RayTracer() = delete;
 
-        RayTracer(unsigned width, unsigned height, unsigned bounces, unsigned samplesPerPixel);
+        RayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         virtual ~RayTracer();
 
@@ -57,9 +57,10 @@ namespace RayTracing {
 
         virtual Image *rayTest(Camera *camera) = 0;
 
-        [[nodiscard]] Vec2 windowSize() const;
+        Vec2u getWindowSize() { return windowSize; }
 
         unsigned getSamplesPerPixel() const;
+
         unsigned getBounces() const;
     };
 }

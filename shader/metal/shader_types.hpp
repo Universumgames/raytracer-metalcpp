@@ -17,4 +17,4 @@ struct Metal_Intersection {
 
 Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, float sphereRadius);
 
-Metal_Intersection intersectTriangle(Metal_Ray ray, float3 triangle[3], float3 customNormal);
+Metal_Intersection intersectTriangle(Metal_Ray ray, simd::float3 triangle[3], simd::float3 customNormal);

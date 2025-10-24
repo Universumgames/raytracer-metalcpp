@@ -23,12 +23,12 @@ namespace RayTracing {
     }
 
     RayTracerFactory::RayTracerFactory(const Vec2u &windowSize, int bounces, int samplesPerPixel) {
-        this->sequentialRayTracer = new SequentialRayTracer(windowSize.getY(), windowSize.getX(), bounces,
+        this->sequentialRayTracer = new SequentialRayTracer(windowSize, bounces,
                                                             samplesPerPixel);
 #ifdef USE_SHADER_METAL
-        this->parallelRayTracer = new MetalRaytracer(windowSize.getY(), windowSize.getX(), bounces, samplesPerPixel);
+        this->parallelRayTracer = new MetalRaytracer(windowSize, bounces, samplesPerPixel);
 #elifdef USE_SHADER_CUDA
-        this->sequentialRayTracer = new CudaRayTracer(windowSize.getY(), windowSize.getX(), bounces, samplesPerPixel);
+        this->sequentialRayTracer = new CudaRayTracer(windowSize, bounces, samplesPerPixel);
 #endif
     }
 }

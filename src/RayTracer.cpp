@@ -1,18 +1,13 @@
-#include "RayTracing.hpp"
+#include "RayTracer.hpp"
 
 namespace RayTracing {
-    RayTracer::RayTracer(unsigned width, unsigned height, unsigned bounces, unsigned samplesPerPixel) {
-        this->width = width;
-        this->height = height;
+    RayTracer::RayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel) {
+        this->windowSize = windowSize;
         this->bounces = bounces;
         this->samplesPerPixel = samplesPerPixel;
     }
 
     RayTracer::~RayTracer() {
-    }
-
-    Vec2 RayTracer::windowSize() const {
-        return Vec2{static_cast<float>(width), static_cast<float>(height)};
     }
 
     unsigned RayTracer::getSamplesPerPixel() const {
@@ -24,17 +19,17 @@ namespace RayTracing {
     }
 
     Vec2 RayTracer::getViewBoxScaling() {
-        Vec2 windowSize = this->windowSize();
+        Vec2 windowSize = {(float) this->windowSize.getX(), (float) this->windowSize.getY()};
         Vec2 desiredSize = {1, 1};
         return desiredSize / windowSize;
     }
 
     std::vector<Ray> RayTracer::calculateStartingRays(Camera *camera) {
-        const double aspect_ratio = (double) width / (double) height;
+        const double aspect_ratio = (double) windowSize.getX() / (double) windowSize.getY();
         const double fov_adjustment = tan((camera->fov * M_PI / 180.0) / 2.0);
 
         Vec3 screenOrigin = Vec3::zero();
-        Vec3 screen00 = screenOrigin + Vec3(-(float) width / 2.0f, 0, -(float) height / 2.0f);
+        Vec3 screen00 = screenOrigin + Vec3(-(float) windowSize.getX() / 2.0f, 0, -(float) windowSize.getY() / 2.0f);
 
         Vec3 camForward = Vec3::forward();
         Vec3 camRight = Vec3::right();
@@ -50,8 +45,8 @@ namespace RayTracing {
 
         std::vector<Vec2> offsets = getSamplingOffsets();
 
-        for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
+        for (int y = 0; y < windowSize.getY(); y++) {
+            for (int x = 0; x < windowSize.getX(); x++) {
                 for (const auto &offset: offsets) {
                     Vec3 samplingPixelLocation = {x + offset.getX(), 0, y + offset.getY()};
                     Vec3 pixel = (screen00 + samplingPixelLocation) * Vec3(
@@ -79,13 +74,13 @@ namespace RayTracing {
     }
 
     void RayTracer::resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode) const {
-        for (unsigned x = 0; x < width; x++) {
-            for (unsigned y = 0; y < height; y++) {
+        for (unsigned x = 0; x < windowSize.getX(); x++) {
+            for (unsigned y = 0; y < windowSize.getY(); y++) {
                 std::vector<Ray> pixelRays;
                 std::vector<RGBf> pixelColors;
                 std::vector<RGBf> lightColors;
 
-                int startIndex = (y * width + x) * samplesPerPixel;
+                int startIndex = (y * windowSize.getX() + x) * samplesPerPixel;
                 for (int i = 0; i < samplesPerPixel; i++) {
                     auto ray = rays[startIndex + i];
                     pixelRays.push_back(ray);

@@ -43,7 +43,12 @@ namespace RayTracing {
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(RGBA8, r, g, b, a)
 
         /// warning this method should be used as confusion with the float-valued color encoding can occur
-        [[nodiscard]] Vec4 forceVec4() const {
+        [[nodiscard]] Vec4 forceVec4
+
+        (
+        )
+        const
+ {
             return Vec4{static_cast<float>(r), static_cast<float>(g), static_cast<float>(b), static_cast<float>(a)};
         }
 
@@ -98,5 +103,11 @@ namespace RayTracing {
         [[nodiscard]] RGBA8 toRGBA8() const;
 
         static RGBf BLACK() { return {0, 0, 0, 1}; }
+
+#ifdef USE_SHADER_METAL
+        static RGBf fromFloat4(simd::float4 f) {
+            return {f[0], f[1], f[2], f[3]};
+        }
+#endif
     };
 }

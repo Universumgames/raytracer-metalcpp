@@ -2,8 +2,10 @@
 #ifdef USE_SHADER_METAL
 #include <Foundation/Foundation.hpp>
 #include <Metal/MTLDevice.hpp>
-#include "../RayTracing.hpp"
+#include "../RayTracer.hpp"
 #include <Metal/MTLComputeCommandEncoder.hpp>
+
+#include "../../shader/metal/shader_types.hpp"
 
 namespace RayTracing {
     class MetalRaytracer : public RayTracer {
@@ -16,6 +18,8 @@ namespace RayTracing {
         MTL::Buffer* bufferPixel = nullptr;
         MTL::Buffer* bufferScreenSize = nullptr;
         MTL::Buffer* bufferUV = nullptr;
+        MTL::Buffer *bufferForward = nullptr;
+        MTL::Buffer *bufferRays = nullptr;
 
         MTL::Buffer* bufferResult = nullptr;
 
@@ -25,6 +29,7 @@ namespace RayTracing {
         struct KernelFunctionVariables {
             MTL::Function *function = nullptr;
             MTL::ComputePipelineState *functionPSO = nullptr;
+            std::vector<Metal_Ray> *metalRays = nullptr;
         };
 
         KernelFunctionVariables *loadFunction(const std::string &name);
@@ -37,10 +42,14 @@ namespace RayTracing {
 
         void encodeRaytracingData(KernelFunctionVariables *, MTL::ComputeCommandEncoder *computeEncoder);
 
+        void encodeRayTestData(KernelFunctionVariables *, MTL::ComputeCommandEncoder *computeEncoder);
+
         Image* outputBufferToImage();
 
+        static std::vector<Metal_Ray> raysToMetal(const std::vector<Ray> &rays);
+
     public:
-        MetalRaytracer(unsigned width, unsigned height, unsigned bounces, unsigned samplesPerPixel);
+        MetalRaytracer(Vec2u windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         ~MetalRaytracer() override;
 

@@ -1,5 +1,5 @@
 #pragma once
-#include "../RayTracing.hpp"
+#include "../RayTracer.hpp"
 
 namespace RayTracing {
     class RayTracerFactory {

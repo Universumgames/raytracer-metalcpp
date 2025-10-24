@@ -5,17 +5,17 @@
 #include "SFML/System/Vector2.hpp"
 
 namespace RayTracing {
-    SequentialRayTracer::SequentialRayTracer(unsigned width, unsigned height, unsigned bounces,
+    SequentialRayTracer::SequentialRayTracer(Vec2u windowSize, unsigned bounces,
                                              unsigned samplesPerPixel) : RayTracer(
-        width, height, bounces, samplesPerPixel) {
+        windowSize, bounces, samplesPerPixel) {
     }
 
     Image *SequentialRayTracer::uvTest() {
-        auto *image = new Image(width, height);
+        auto *image = new Image(windowSize);
 
-        for (unsigned y = 0; y < height; y++) {
-            for (unsigned x = 0; x < width; x++) {
-                sf::Vector2 uv = {y / (double) height, x / (double) width};
+        for (unsigned y = 0; y < windowSize.getY(); y++) {
+            for (unsigned x = 0; x < windowSize.getX(); x++) {
+                sf::Vector2 uv = {x / (double) windowSize.getX(), y / (double) windowSize.getY()};
                 image->setPixel(x, y, {uv.x * 255, uv.y * 255, 0});
             }
         }
@@ -25,7 +25,7 @@ namespace RayTracing {
 
 
     Image *SequentialRayTracer::raytrace(Scene scene) {
-        auto *image = new Image(width, height);
+        auto *image = new Image(windowSize);
         auto rays = calculateStartingRays(scene.camera);
 
         for (auto& object : scene.objects) {
@@ -107,7 +107,7 @@ namespace RayTracing {
     }
 
     Image *SequentialRayTracer::rayTest(Camera *camera) {
-        auto *image = new Image(width, height);
+        auto *image = new Image(windowSize);
         auto rays = calculateStartingRays(camera);
 
         for (auto &ray: rays) {

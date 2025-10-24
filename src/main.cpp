@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "RayTracing.hpp"
+#include "RayTracer.hpp"
 #include "Renderer.h"
 #include "raytracers/MetalRaytracer.hpp"
 #include "raytracers/RayTracerFactory.hpp"
@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
 
     Scene scene = Scene::loadFromFile(sceneFile);
     auto imageHandler = new ImageHandler(windowSize);
-    auto raytracerFactory = RayTracerFactory::init(windowSize, 3, 2);
-    auto *raytracer = raytracerFactory->getSequentialImplementation();
+    auto raytracerFactory = RayTracerFactory::init(windowSize, 3, 1);
+    auto *raytracer = raytracerFactory->getParallelImplementation();
 
     if (renderTests) {
         Image *uvTest = raytracer->uvTest();
