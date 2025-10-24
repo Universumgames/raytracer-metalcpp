@@ -7,7 +7,7 @@ namespace RayTracing {
         static RayTracerFactory *instance;
 
         RayTracer *sequentialRayTracer = nullptr;
-        RayTracer *parallelRayTracer = nullptr;
+        RayTracer *shaderRayTracer = nullptr;
 
         RayTracerFactory(const Vec2u &windowSize, int bounces, int samplesPerPixel);
 
@@ -22,6 +22,6 @@ namespace RayTracing {
         RayTracer *getSequentialImplementation() { return sequentialRayTracer; }
 
         /// get the supported GPU raytracer
-        RayTracer *getParallelImplementation() { return parallelRayTracer; }
+        RayTracer *getShaderImplementation() { return shaderRayTracer; }
     };
 }

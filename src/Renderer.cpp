@@ -18,7 +18,9 @@ ImageHandler::~ImageHandler() {
 
 bool ImageHandler::saveImage(const std::string &path, RayTracing::Image *imageSrc) {
     if (imageSrc != nullptr) updateImage(imageSrc);
-    return image->saveToFile(path);
+    bool ret = image->saveToFile(path);
+    std::cout << "Saved an image to " << path << (ret ? "" : "failed") << std::endl;
+    return ret;
 }
 
 void ImageHandler::updateImage(RayTracing::Image *imageSrc) {

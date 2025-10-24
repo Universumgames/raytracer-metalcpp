@@ -12,6 +12,7 @@ using namespace RayTracing;
 bool openWindow = true;
 bool renderTests = true;
 bool helped = false;
+bool sequential = false;
 std::string outputFile = "raytraced.jpg";
 std::string sceneFile = "scene/scene.json";
 std::string benchmarkFile = "../timeLog.csv";
@@ -56,6 +57,7 @@ void decodeArguments(int argc, char *argv[]) {
             std::cout << "\t--no-tests\t no test images are rendered" << std::endl;
             std::cout << "\t-s <json file>\t specify path to scene file" << std::endl;
             std::cout << "\t-b <file>\t specify benchmark csv file" << std::endl;
+            std::cout << "\t--sequential\t use the sequential raytracer implementation instead of the gpu" << std::endl;
         } else if (arg == "--no-window") {
             openWindow = false;
         }else if (arg == "-of") {
@@ -78,6 +80,8 @@ void decodeArguments(int argc, char *argv[]) {
             }
             benchmarkFile = argv[i + 1];
             i++;
+        }else if (arg == "--sequential") {
+            sequential = true;
         }
     }
 }
@@ -90,10 +94,12 @@ int main(int argc, char *argv[]) {
 
     auto windowSize = Vec2u(800, 600);
 
-    Scene scene = Scene::loadFromFile(sceneFile);
     auto imageHandler = new ImageHandler(windowSize);
     auto raytracerFactory = RayTracerFactory::init(windowSize, 3, 1);
-    auto *raytracer = raytracerFactory->getParallelImplementation();
+    auto *raytracer = sequential ? raytracerFactory->getSequentialImplementation() : raytracerFactory->getShaderImplementation();
+    std::cout << "Using raytracer implementation: " << raytracer->identifier() << std::endl;
+
+    Scene scene = Scene::loadFromFile(sceneFile);
 
     if (renderTests) {
         Image *uvTest = raytracer->uvTest();

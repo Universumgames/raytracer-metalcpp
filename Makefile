@@ -13,7 +13,7 @@ run: build
 	cd cmake-build-debug && ./RayTracer
 
 run_cicd: build
-	cd cmake-build-debug && ./RayTracer --no-window
+	cd cmake-build-debug && ./RayTracer --no-window --sequential
 
 xcode_create:
 	mkdir -p cmake-xcode
