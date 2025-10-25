@@ -2,10 +2,7 @@
 
 #include "RayTracer.hpp"
 #include "Renderer.h"
-#include "raytracers/MetalRaytracer.hpp"
 #include "raytracers/RayTracerFactory.hpp"
-#include "raytracers/SequentialRayTracer.hpp"
-#include "SFML/System/Vector2.hpp"
 
 using namespace RayTracing;
 
@@ -80,7 +77,7 @@ void decodeArguments(int argc, char *argv[]) {
             }
             benchmarkFile = argv[i + 1];
             i++;
-        }else if (arg == "--sequential") {
+        } else if (arg == "--sequential") {
             sequential = true;
         }
     }
@@ -96,7 +93,9 @@ int main(int argc, char *argv[]) {
 
     auto imageHandler = new ImageHandler(windowSize);
     auto raytracerFactory = RayTracerFactory::init(windowSize, 3, 1);
-    auto *raytracer = sequential ? raytracerFactory->getSequentialImplementation() : raytracerFactory->getShaderImplementation();
+    auto *raytracer = sequential
+                          ? raytracerFactory->getSequentialImplementation()
+                          : raytracerFactory->getShaderImplementation();
     std::cout << "Using raytracer implementation: " << raytracer->identifier() << std::endl;
 
     Scene scene = Scene::loadFromFile(sceneFile);

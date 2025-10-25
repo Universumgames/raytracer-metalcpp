@@ -13,6 +13,7 @@
 - Compile Metal Shaders manually https://developer.apple.com/documentation/metal/building-a-shader-library-by-precompiling-source-files
 - Clever way to add Metall Cpp as dependency in CMake https://github.com/LeeTeng2001/metal-cpp-cmake/tree/main
 - Learning Information collection https://github.com/mikeroyal/Metal-Guide#Metal-learning-resources
+- Metal CPP tutorial upload https://github.com/tako3/learn-metal-cpp
 
 ## CUDA
 -

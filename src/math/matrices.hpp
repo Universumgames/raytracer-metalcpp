@@ -1,6 +1,9 @@
 #pragma once
 #include <type_traits>
 #include <vector>
+#ifdef USE_SHADER_METAL
+#include <simd/simd.h>
+#endif
 
 #include "vectors.hpp"
 
@@ -120,6 +123,18 @@ namespace RayTracing {
             }
             return result;
         }
+
+#ifdef USE_SHADER_METAL
+        simd::float4x4 toMetal() requires (X == 4 && Y == 4 && std::is_same<T, float>::value) {
+            simd::float4 columns[4] = {};
+            for (unsigned int i = 0; i < 4; i++) {
+                for (unsigned int j = 0; j < 4; j++) {
+                    columns[j][i] = values[i][j];
+                }
+            }
+            return {columns[0], columns[1], columns[2], columns[3]};
+        }
+#endif
     };
 
     typedef Matrix<3, 3, float> Mat3x3;

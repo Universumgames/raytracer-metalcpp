@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdarg>
 #include <nlohmann/json.hpp>
+#ifdef USE_SHADER_METAL
+#include <simd/simd.h>
+#endif
 
 namespace RayTracing {
     template<unsigned int X,
@@ -242,6 +245,16 @@ namespace RayTracing {
             }
             return result;
         }
+
+#ifdef USE_SHADER_METAL
+        simd::float3 toMetal() requires (X == 3 && std::is_same<T, float>::value) {
+            return simd::float3{values[0], values[1], values[2]};
+        }
+
+        simd::float4 toMetal() requires (X == 4 && std::is_same<T, float>::value) {
+            return simd::float4{values[0], values[1], values[2], values[3]};
+        }
+#endif
     };
 
     typedef Vector<2, float> Vec2;

@@ -14,6 +14,7 @@ run: build
 
 run_cicd: build
 	cd cmake-build-debug && ./RayTracer --no-window --sequential
+	cp cmake-build-debug/raytraced.jpg .
 
 xcode_create:
 	mkdir -p cmake-xcode

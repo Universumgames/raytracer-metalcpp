@@ -11,3 +11,4 @@ build:
   artifacts:
     paths:
       - timeLog.csv
+      - raytraced.jpg

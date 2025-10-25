@@ -1,7 +1,5 @@
 #include "Transform.hpp"
 
-#include <complex>
-
 namespace RayTracing {
     Mat4x4 Transform::calcTranslationMatrix() {
         return Mat4x4({
@@ -76,5 +74,9 @@ namespace RayTracing {
 
     Vec3 Transform::getTransformedNormal(const Vec3 &pos) const {
         return (rotationMatrix * Vec4(pos, 0)).cutoff();
+    }
+
+    Mat4x4 Transform::getTransformMatrix() const {
+        return transformationMatrix;
     }
 }

@@ -14,7 +14,6 @@ namespace RayTracing {
         Vec3 scale{1, 1, 1};
 
     public:
-
         Transform() = default;
 
         Transform(const Vec3 &position, const Vec3 &rad, const Vec3 &scale = Vec3(1)) : position(position),
@@ -35,6 +34,8 @@ namespace RayTracing {
 
         void update();
 
+        [[nodiscard]] Mat4x4 getTransformMatrix() const;
+
     private:
         Mat4x4 calcTranslationMatrix();
 
@@ -43,11 +44,11 @@ namespace RayTracing {
         Mat4x4 calcRotationMatrix();
 
     protected:
-        Mat4x4 getTransformationMatrix() const;
+        [[nodiscard]] Mat4x4 getTransformationMatrix() const;
 
-        Vec3 getTransformedPosition(const Vec3 &pos) const;
+        [[nodiscard]] Vec3 getTransformedPosition(const Vec3 &pos) const;
 
-        Vec3 getTransformedNormal(const Vec3 &pos) const;
+        [[nodiscard]] Vec3 getTransformedNormal(const Vec3 &pos) const;
 
         friend class SequentialRayTracer;
     };

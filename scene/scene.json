@@ -34,6 +34,29 @@
         "b": 128,
         "a": 128
       }
+    },
+    {
+      "fileName": "Low_poly_dragon.stl",
+      "position": {
+        "values": [
+          4,
+          5,
+          4
+        ]
+      },
+      "rotation": {
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "color": {
+        "r": 128,
+        "g": 255,
+        "b": 128,
+        "a": 255
+      }
     }
   ],
   "spheres": [

@@ -70,109 +70,99 @@ namespace RayTracing {
         bufferForward = device->newBuffer(sizeof(simd::float3), MTL::ResourceStorageModeShared);
         auto *forward = new simd::float3{Vec3::forward().getX(), Vec3::forward().getY(), Vec3::forward().getZ()};
         memcpy(bufferForward->contents(), forward, sizeof(simd::float3));
+
+        bufferRayTraceSettings = device->newBuffer(sizeof(Metal_RayTraceSettings), MTL::ResourceStorageModeShared);
+        // data to be filled on encode
     }
 
-    MetalRaytracer::KernelFunctionVariables *MetalRaytracer::loadFunction(const std::string &name) {
+    MetalRaytracer::KernelFunctionVariables MetalRaytracer::loadFunction(const std::string &name) {
         NS::Error *error = nullptr;
         MTL::Function *kernelFunction = defaultLibrary->newFunction(
             NS::String::string(name.c_str(), NS::UTF8StringEncoding));
         if (!kernelFunction) {
             std::cerr << "Failed to find the " << name << " function" << std::endl;
-            return nullptr;
+            return {};
         }
         auto *kernelFunctionPSO = device->newComputePipelineState(kernelFunction, &error);
         if (!kernelFunctionPSO) {
             std::cerr << "Failed to created pipeline state object, error" << error->localizedDescription() << std::endl;
             kernelFunction->release();
-            return nullptr;
+            return {};
         }
-        return new KernelFunctionVariables{kernelFunction, kernelFunctionPSO};
+        return KernelFunctionVariables{kernelFunction, kernelFunctionPSO};
     }
 
-    void MetalRaytracer::sendComputeCommand(KernelFunctionVariables *variables,
+    void MetalRaytracer::sendComputeCommand(MetalEncodingData data,
                                             void (MetalRaytracer::*function)(
-                                                KernelFunctionVariables *, MTL::ComputeCommandEncoder *)) {
+                                                MetalEncodingData, MTL::ComputeCommandEncoder *)) {
         MTL::CommandBuffer *commandBuffer = commandQueue->commandBuffer();
         assert(commandBuffer != nullptr);
 
         MTL::ComputeCommandEncoder *computeEncoder = commandBuffer->computeCommandEncoder();
         assert(computeEncoder != nullptr);
 
-        (this->*function)(variables, computeEncoder);
+        (this->*function)(data, computeEncoder);
 
         computeEncoder->endEncoding();
         commandBuffer->commit();
         commandBuffer->waitUntilCompleted();
     }
 
-    void MetalRaytracer::encodeUVTestData(KernelFunctionVariables *variables,
+    void MetalRaytracer::encodeUVTestData(MetalEncodingData data,
                                           MTL::ComputeCommandEncoder *computeEncoder) {
-        computeEncoder->setComputePipelineState(variables->functionPSO);
+        auto variables = data.variables;
+        computeEncoder->setComputePipelineState(variables.functionPSO);
         computeEncoder->setBuffer(bufferResult, 0, 0);
         computeEncoder->setBuffer(bufferScreenSize, 0, 1);
 
         MTL::Size gridSize = MTL::Size(windowSize.getX(), windowSize.getY(), 1);
 
-        NS::UInteger threadGroupSize = variables->functionPSO->maxTotalThreadsPerThreadgroup();
+        NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
         MTL::Size threadgroupSize(threadGroupSize, 1, 1);
 
         computeEncoder->dispatchThreads(gridSize, threadgroupSize);
     }
 
     Image *MetalRaytracer::uvTest() {
-        auto *variables = loadFunction("uvTest");
-        sendComputeCommand(variables, &MetalRaytracer::encodeUVTestData);
+        auto variables = loadFunction("uvTest");
+        sendComputeCommand({variables, nullptr}, &MetalRaytracer::encodeUVTestData);
 
         return outputBufferToImage();
     }
 
-    void MetalRaytracer::encodeRaytracingData(KernelFunctionVariables *variables,
-                                              MTL::ComputeCommandEncoder *computeEncoder) {
-        computeEncoder->setComputePipelineState(variables->functionPSO);
-        // TODO encode scene data
-    }
-
-    Image *MetalRaytracer::raytrace(Scene scene) {
-        auto *image = new Image(windowSize.getX(), windowSize.getY());
-        auto variables = loadFunction("raytrace");
-        auto rays = calculateStartingRays(scene.camera);
-
-
-        sendComputeCommand(variables, &MetalRaytracer::encodeRaytracingData);
-        // TODO prepare date for gpu
-        // TODO run on gpu
-        // TODO extract image from buffer
-        outputBufferToImage();
-        return image;
-    }
-
-    void MetalRaytracer::encodeRayTestData(KernelFunctionVariables *variables,
+    void MetalRaytracer::encodeRayTestData(MetalEncodingData data,
                                            MTL::ComputeCommandEncoder *computeEncoder) {
-        auto rayArray = variables->metalRays->data();
+        auto variables = data.variables;
+        auto rays = calculateStartingRays(data.scene->camera);
+        auto metalRays = raysToMetal(rays);
+        auto rayArray = metalRays.data();
         memcpy(bufferRays->contents(), rayArray, windowSize.getX() * windowSize.getY() * sizeof(Metal_Ray));
 
-        computeEncoder->setComputePipelineState(variables->functionPSO);
+        computeEncoder->setComputePipelineState(variables.functionPSO);
         computeEncoder->setBuffer(bufferRays, 0, 0);
         computeEncoder->setBuffer(bufferForward, 0, 1);
         computeEncoder->setBuffer(bufferResult, 0, 2);
 
         MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), 1);
 
-        NS::UInteger threadGroupSize = variables->functionPSO->maxTotalThreadsPerThreadgroup();
+        NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
         MTL::Size threadgroupSize = MTL::Size::Make(threadGroupSize, 1, 1);
 
         computeEncoder->dispatchThreads(gridSize, threadgroupSize);
     }
 
-
     Image *MetalRaytracer::rayTest(Camera *camera) {
         auto variables = loadFunction("rayTest");
-        assert(variables != nullptr);
-        auto rays = calculateStartingRays(camera);
+        assert(variables.functionPSO != nullptr);
 
-        auto metalRays = raysToMetal(rays);
-        variables->metalRays = &metalRays;
-        sendComputeCommand(variables, &MetalRaytracer::encodeRayTestData);
+        auto scene = new Scene{camera};
+
+        auto data = MetalEncodingData{
+            .variables = variables,
+            .scene = scene
+        };
+        sendComputeCommand(data, &MetalRaytracer::encodeRayTestData);
+        delete scene;
 
         return outputBufferToImage();
     }
@@ -198,6 +188,91 @@ namespace RayTracing {
             ));
         }
         return result;
+    }
+
+    MetalRaytracer::Metal_MeshTransformationReturn MetalRaytracer::meshObjectsToMetal(
+        const std::vector<MeshedRayTraceableObject *> &objects) {
+        std::vector<Metal_MeshRayTraceableObject> meshObjects;
+        std::vector<simd::float3> vertices;
+        std::vector<float> indices;
+
+        for (auto &object: objects) {
+            meshObjects.push_back(Metal_MeshRayTraceableObject{
+                .transform = object->transform.getTransformMatrix().toMetal(),
+                .color = object->color.toMetal(),
+                .vertIndicesOffset = (unsigned) indices.size(),
+                .vertIndicesCount = (unsigned) object->mesh->indices.size(),
+                .vertPositionsOffset = (unsigned) vertices.size(),
+            });
+            for (auto &vertex: object->mesh->vertices) {
+                vertices.push_back(vertex.toMetal());
+            }
+            for (auto &index: object->mesh->indices) {
+                indices.push_back(index);
+            }
+        }
+        return {
+            .meshObjects = meshObjects,
+            .vertices = vertices,
+            .indices = indices,
+        };
+    }
+
+    std::vector<Metal_SphereRayTraceableObject> MetalRaytracer::sphereObjectsToMetal(
+        const std::vector<SphereRayTraceableObject *> &objects) {
+        std::vector<Metal_SphereRayTraceableObject> result;
+        for (auto &object: objects) {
+            result.push_back(Metal_SphereRayTraceableObject{
+                .transform = object->transform.getTransformMatrix().toMetal(),
+                .radius = object->radius,
+                .color = object->color.toMetal(),
+            });
+        }
+        return result;
+    }
+
+    std::vector<Metal_Light> MetalRaytracer::lightsToMetal(const std::vector<LightSource *> &lights) {
+        std::vector<Metal_Light> result;
+        for (auto &light: lights) {
+            result.push_back(Metal_Light{
+                .transform = light->transform.getTransformMatrix().toMetal(),
+                .intensity = 1,
+                .color = light->emittingColor.toMetal(),
+                .radius = light->radius
+            });
+        }
+        return result;
+    }
+
+    void MetalRaytracer::encodeRaytracingData(MetalEncodingData data,
+                                              MTL::ComputeCommandEncoder *computeEncoder) {
+        auto variables = data.variables;
+        auto scene = *(data.scene);
+        computeEncoder->setComputePipelineState(variables.functionPSO);
+
+        auto rays = calculateStartingRays(scene.camera);
+        auto meshObjects = meshObjectsToMetal(scene.objects);
+        auto sphereObjects = sphereObjectsToMetal(scene.spheres);
+        auto lights = lightsToMetal(scene.lights);
+
+        auto *settings = new Metal_RayTraceSettings{
+            .bounces = this->bounces,
+            .samplesPerPixel = this->samplesPerPixel,
+            .meshObjectCount = 0,
+            .sphereObjectCount = 0,
+            .lightsCount = 0
+        };
+        memcpy(bufferRayTraceSettings->contents(), settings, sizeof(Metal_RayTraceSettings));
+        TODO(); // TODO Finish encoding scene data
+    }
+
+    Image *MetalRaytracer::raytrace(Scene scene) {
+        auto *image = new Image(windowSize.getX(), windowSize.getY());
+        auto variables = loadFunction("raytrace");
+
+        sendComputeCommand({variables, &scene}, &MetalRaytracer::encodeRaytracingData);
+        outputBufferToImage();
+        return image;
     }
 }
 #endif
