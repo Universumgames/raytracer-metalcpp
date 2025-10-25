@@ -49,9 +49,9 @@ namespace RayTracing {
                     for (int i = 0; i < object->mesh->numTriangles; i++) {
                         int *startIndex = &object->mesh->indices[i * 3];
                         Vec3 triangle[3] = {
-                            object->transform.getTransformedPosition(object->mesh->vertices[startIndex[0]]),
-                            object->transform.getTransformedPosition(object->mesh->vertices[startIndex[1]]),
-                            object->transform.getTransformedPosition(object->mesh->vertices[startIndex[2]])
+                            object->mesh->vertices[startIndex[0]],
+                            object->mesh->vertices[startIndex[1]],
+                            object->mesh->vertices[startIndex[2]]
                         };
                         auto intersection = localRay.intersectTriangle(triangle, object->mesh->normals[i]);
                         if (intersection.hit && intersection.distance < currentHit.distance) {
@@ -64,8 +64,7 @@ namespace RayTracing {
 
                 // check collision for spheres
                 for (const auto sphere: scene.spheres) {
-                    auto localRay = ray.toLocalRay(sphere->transform);
-                    auto intersection = localRay.intersectSphere(sphere->transform.position, sphere->radius);
+                    auto intersection = ray.intersectSphere(sphere->transform.position, sphere->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
                         currentHit = intersection;
                         currentRotatedNormal = intersection.normal;
@@ -75,8 +74,7 @@ namespace RayTracing {
 
                 // check collision for light sources
                 for (const auto& light : scene.lights) {
-                    auto localRay = ray.toLocalRay(light->transform);
-                    auto intersection = localRay.intersectSphere(light->transform.position, light->radius);
+                    auto intersection = ray.intersectSphere(light->transform.position, light->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
                         currentHit = intersection;
                         currentHit.isLight = true;
@@ -87,8 +85,6 @@ namespace RayTracing {
 
                 if (currentHit.hit) {
                     // hacky way to get some shading without light sources
-                    //auto dot = Vec3::dot(ray.direction, currentRotatedNormal);
-                    //ray.colors.push_back((Vec4(currentColor) * (cos(dot))).asColor());
                     if (currentHit.isLight) {
                         ray.lightColor = currentColor;
                         b = bounces; // after ray intersects with light source, stop bouncing

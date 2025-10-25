@@ -30,7 +30,7 @@ namespace RayTracing {
         };
     }
 
-    HitInfo LocalRay::intersectSphere(Vec3 sphereCenter, float sphereRadius) const {
+    HitInfo Ray::intersectSphere(Vec3 sphereCenter, float sphereRadius) const {
         Vec3 offsetRayOrigin = origin - sphereCenter;
 
         float a = Vec3::dot(direction, direction);
@@ -86,7 +86,7 @@ namespace RayTracing {
                 }
                 tMin = std::max(tMin, t1);
                 tMax = std::min(tMax, t2);
-            }else {
+            } else {
                 if (local_origin[axis] < localBoxMin[axis] || local_ray_origin[axis] > localBoxMax[axis]) {
                     return false;
                 }
@@ -108,11 +108,11 @@ namespace RayTracing {
         return 0;
     }
 
-    Vec3 randomHemisphereReflection(const Vec3& normal) {
+    Vec3 randomHemisphereReflection(const Vec3 &normal) {
         static float sigma = 0.8f;
         static thread_local std::mt19937 gen(std::random_device{}());
         std::normal_distribution<float> dist(0.0f, sigma);
-        Vec3 randVec{ dist(gen), dist(gen), dist(gen) };
+        Vec3 randVec{dist(gen), dist(gen), dist(gen)};
         Vec3 result = (normal + randVec).normalized();
 
         // Ensure the new vector is in the same hemisphere as dir
@@ -121,20 +121,22 @@ namespace RayTracing {
         return result;
     }
 
-    Vec3 Ray::reflectAt(const Vec3& location, const Vec3 &normal, float totalReflection) {
+    Vec3 Ray::reflectAt(const Vec3 &location, const Vec3 &normal, float totalReflection) {
         this->origin = location;
         float dot = Vec3::dot(direction, normal);
         Vec3 totalReflectionVec = direction - (normal * dot) * 2;
         Vec3 rhf = randomHemisphereReflection(normal);
-        this->direction = (totalReflectionVec * totalReflection + rhf * (1-totalReflection)).normalized();
+        this->direction = (totalReflectionVec * totalReflection + rhf * (1 - totalReflection)).normalized();
         //this->direction = totalReflectionVec;
         return direction;
     }
 
-    LocalRay Ray::toLocalRay(Transform transform) {
-        //auto rotMat = transform.getRotationMatrix();
-        // TODO
-        return LocalRay{origin, direction};
+    LocalRay Ray::toLocalRay(const Transform &transform) {
+        return LocalRay{
+            transform.getInverseTransformedPosition(origin), transform.getTransformedRayDirection(direction)
+        };
+        // return LocalRay{
+        //     origin, direction
+        // };
     }
-
 }

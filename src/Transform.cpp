@@ -1,16 +1,20 @@
 #include "Transform.hpp"
 
 namespace RayTracing {
-    Mat4x4 Transform::calcTranslationMatrix() {
+    Mat4x4 Transform::calcTranslationMatrix(const Vec3 &translation) {
         return Mat4x4({
-            {1, 0, 0, position.getX()},
-            {0, 1, 0, position.getY()},
-            {0, 0, 1, position.getZ()},
+            {1, 0, 0, translation.getX()},
+            {0, 1, 0, translation.getY()},
+            {0, 0, 1, translation.getZ()},
             {0, 0, 0, 1}
         });
     }
 
-    Mat4x4 Transform::calcScaleMatrix() {
+    Mat4x4 Transform::calcInverseTranslationMatrix() {
+        return calcTranslationMatrix(position * -1.0f);
+    }
+
+    Mat4x4 Transform::calcScaleMatrix(Vec3 scale) {
         return Mat4x4({
             {scale.getX(), 0, 0, 0},
             {0, scale.getY(), 0, 0},
@@ -19,7 +23,16 @@ namespace RayTracing {
         });
     }
 
-    Mat4x4 Transform::calcRotationMatrix() {
+    Mat4x4 Transform::calcInverseScaleMatrix() {
+        return calcScaleMatrix(Vec3(
+            1.0f / scale.getX(),
+            1.0f / scale.getY(),
+            1.0f / scale.getZ()
+        ));
+    }
+
+
+    Mat4x4 Transform::calcRotationMatrix(Vec3 rotation) {
         auto q = Quaternion::fromEuler(rotation);
         float w = q.getW(), x = q.getX(), y = q.getY(), z = q.getZ();
 
@@ -31,6 +44,10 @@ namespace RayTracing {
         });
 
         return localRotMat;
+    }
+
+    Mat4x4 Transform::calcInverseRotationMatrix() {
+        return calcRotationMatrix(rotation * -1.0f);
     }
 
     Vec3 Transform::getTranslation() const {
@@ -62,10 +79,14 @@ namespace RayTracing {
     }
 
     void Transform::update() {
-        scaleMatrix = calcScaleMatrix();
-        rotationMatrix = calcRotationMatrix();
-        translationMatrix = calcTranslationMatrix();
+        scaleMatrix = calcScaleMatrix(position);
+        inverseScaleMatrix = calcInverseScaleMatrix();
+        rotationMatrix = calcRotationMatrix(rotation);
+        inverseRotationMatrix = calcInverseRotationMatrix();
+        translationMatrix = calcTranslationMatrix(scale);
+        inverseTranslationMatrix = calcInverseTranslationMatrix();
         transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
+        inverseTransformationMatrix = inverseScaleMatrix * inverseRotationMatrix * inverseTranslationMatrix;
     }
 
     Vec3 Transform::getTransformedPosition(const Vec3 &pos) const {
@@ -73,10 +94,34 @@ namespace RayTracing {
     }
 
     Vec3 Transform::getTransformedNormal(const Vec3 &pos) const {
-        return (rotationMatrix * Vec4(pos, 0)).cutoff();
+        return (rotationMatrix * Vec4(pos, 1)).cutoff();
+    }
+
+    Vec3 Transform::getTransformedRayDirection(const Vec3 &dir) const {
+        return (inverseRotationMatrix * Vec4(dir, 1)).cutoff();
+    }
+
+    Vec3 Transform::getInverseTransformedPosition(const Vec3 &pos) const {
+        return (inverseTransformationMatrix * Vec4(pos, 1)).cutoff();
     }
 
     Mat4x4 Transform::getTransformMatrix() const {
         return transformationMatrix;
+    }
+
+    Mat4x4 Transform::getTranslationMatrix() const {
+        return translationMatrix;
+    }
+
+    Mat4x4 Transform::getRotationMatrix() const {
+        return rotationMatrix;
+    }
+
+    Mat4x4 Transform::getInverseRotationMatrix() const {
+        return inverseRotationMatrix;
+    }
+
+    Mat4x4 Transform::getScaleMatrix() const {
+        return scaleMatrix;
     }
 }

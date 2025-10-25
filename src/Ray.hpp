@@ -6,6 +6,14 @@
 namespace RayTracing {
     struct LocalRay;
 
+    struct HitInfo {
+        bool hit;
+        Vec3 hitPoint;
+        Vec3 normal;
+        float distance;
+        bool isLight = false;
+    };
+
     struct Ray {
         Vec3 origin;
         Vec3 direction;
@@ -20,15 +28,9 @@ namespace RayTracing {
 
         bool intersectsBoundingBox(BoundingBox box);
 
-        LocalRay toLocalRay(Transform transform);
-    };
+        LocalRay toLocalRay(const Transform &transform);
 
-    struct HitInfo {
-        bool hit;
-        Vec3 hitPoint;
-        Vec3 normal;
-        float distance;
-        bool isLight = false;
+        [[nodiscard]] HitInfo intersectSphere(Vec3 sphereCenter, float sphereRadius) const;
     };
 
     struct LocalRay: public Ray {
@@ -40,6 +42,5 @@ namespace RayTracing {
          */
         [[nodiscard]] HitInfo intersectTriangle(Vec3 triangle[3], Vec3 normal) const;
 
-        [[nodiscard]] HitInfo intersectSphere(Vec3 sphereCenter, float sphereRadius) const;
     };
 }
