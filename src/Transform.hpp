@@ -45,11 +45,11 @@ namespace RayTracing {
 
         Mat4x4 calcInverseTranslationMatrix();
 
-        Mat4x4 calcScaleMatrix(Vec3 scale);
+        Mat4x4 calcScaleMatrix(const Vec3 &scale);
 
         Mat4x4 calcInverseScaleMatrix();
 
-        Mat4x4 calcRotationMatrix(Vec3 rotation);
+        Mat4x4 calcRotationMatrix(const Vec3 &rotation);
 
         Mat4x4 calcInverseRotationMatrix();
 

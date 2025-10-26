@@ -37,5 +37,17 @@ namespace RayTracing {
         }
 
         static Scene loadFromFile(const std::string &path);
+
+        [[nodiscard]] unsigned totalTriangleCount() const {
+            unsigned count = 0;
+            for (const auto &obj: objects) {
+                count += obj->mesh->numTriangles;
+            }
+            return count;
+        }
+
+        [[nodiscard]] unsigned totalSphericalCount() const {
+            return spheres.size() + lights.size();
+        }
     };
 }

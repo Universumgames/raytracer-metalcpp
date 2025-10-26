@@ -14,7 +14,7 @@ namespace RayTracing {
         return calcTranslationMatrix(position * -1.0f);
     }
 
-    Mat4x4 Transform::calcScaleMatrix(Vec3 scale) {
+    Mat4x4 Transform::calcScaleMatrix(const Vec3 &scale) {
         return Mat4x4({
             {scale.getX(), 0, 0, 0},
             {0, scale.getY(), 0, 0},
@@ -32,7 +32,7 @@ namespace RayTracing {
     }
 
 
-    Mat4x4 Transform::calcRotationMatrix(Vec3 rotation) {
+    Mat4x4 Transform::calcRotationMatrix(const Vec3 &rotation) {
         auto q = Quaternion::fromEuler(rotation);
         float w = q.getW(), x = q.getX(), y = q.getY(), z = q.getZ();
 
@@ -79,11 +79,11 @@ namespace RayTracing {
     }
 
     void Transform::update() {
-        scaleMatrix = calcScaleMatrix(position);
+        scaleMatrix = calcScaleMatrix(scale);
         inverseScaleMatrix = calcInverseScaleMatrix();
         rotationMatrix = calcRotationMatrix(rotation);
         inverseRotationMatrix = calcInverseRotationMatrix();
-        translationMatrix = calcTranslationMatrix(scale);
+        translationMatrix = calcTranslationMatrix(position);
         inverseTranslationMatrix = calcInverseTranslationMatrix();
         transformationMatrix = translationMatrix * rotationMatrix * scaleMatrix;
         inverseTransformationMatrix = inverseScaleMatrix * inverseRotationMatrix * inverseTranslationMatrix;

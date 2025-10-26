@@ -9,7 +9,7 @@ using namespace RayTracing;
 bool openWindow = true;
 bool renderTests = true;
 bool helped = false;
-bool sequential = false;
+bool sequential = true;
 std::string outputFile = "raytraced.jpg";
 std::string sceneFile = "scene/scene.json";
 std::string benchmarkFile = "../timeLog.csv";
@@ -25,10 +25,12 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     std::ofstream timeLog;
     timeLog.open(benchmarkFile, std::ios::app);
     if (!exists) {
-        timeLog << "Implementation,Platform,Architecture,Filename,Samples,Bounces,Duration(ms)" << std::endl;
+        timeLog << "Implementation,Platform,Architecture,Filename,Samples,Bounces,Triangles,Spheres,Duration(ms)" <<
+                std::endl;
     }
     timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
-            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << duration.count()
+            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << scene.totalTriangleCount() <<
+            "," << scene.totalSphericalCount() << "," << duration.count()
             << std::endl;
     timeLog.close();
 

@@ -1,0 +1,112 @@
+{
+  "camera":{
+    "position": {
+      "values": [0,0,0]
+    },
+    "direction": {
+      "values": [0,0,0]
+    },
+    "fov": 90,
+    "size": {
+      "values": [0,0]
+    }
+  },
+  "objects": [
+    {
+      "fileName": "cube.stl",
+      "position": {
+        "values": [
+          -2,
+          7,
+          -2
+        ]
+      },
+      "rotation": {
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "color": {
+        "r": 255,
+        "g": 255,
+        "b": 128,
+        "a": 128
+      },
+      "scale": {
+        "values": [
+          1,
+          1,
+          1
+        ]
+      }
+    },
+    {
+      "fileName": "low_poly_dragon_origin_fixed.stl",
+      "position": {
+        "values": [
+          2,
+          5,
+          2
+        ]
+      },
+      "rotation": {
+        "values": [
+          0,
+          0,
+          0
+        ]
+      },
+      "color": {
+        "r": 128,
+        "g": 255,
+        "b": 128,
+        "a": 255
+      },
+      "scale": {
+        "values": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      }
+    }
+  ],
+  "spheres": [
+    {
+      "position": {
+        "values": [
+          1,
+          7,
+          1
+        ]
+      },
+      "radius": 1,
+      "color": {
+        "r": 128,
+        "g": 128,
+        "b": 255,
+        "a": 255
+      }
+    }
+  ],
+  "lights": [
+    {
+      "position": {
+        "values": [
+          0,
+          -30,
+          0
+        ]
+      },
+      "radius": 25,
+      "emittingColor": {
+        "r": 255,
+        "g": 255,
+        "b": 255,
+        "a": 255
+      }
+    }
+  ]
+}

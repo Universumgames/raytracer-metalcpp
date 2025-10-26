@@ -12,7 +12,10 @@ build: setup_cmake
 run: build
 	cd cmake-build-debug && ./RayTracer
 
-run_cicd: build
+init_scene:
+	cd scene && make use_simple_dragon
+
+run_cicd: build init_scene
 	cd cmake-build-debug && ./RayTracer --no-window --sequential
 	cp cmake-build-debug/raytraced.jpg .
 

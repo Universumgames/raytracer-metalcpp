@@ -84,7 +84,7 @@ namespace RayTracing {
             return *this;
         }
 
-        [[nodiscard]] T getValue(unsigned dim) const {
+        [[nodiscard]] T getValue(Direction dim) const {
             return values[dim];
         }
 

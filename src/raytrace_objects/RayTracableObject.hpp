@@ -21,8 +21,8 @@ namespace RayTracing {
 
         RayTraceableObject() = default;
 
-        RayTraceableObject(const RGBf &color = {}, const Vec3 &position = {},
-                           const Vec3 rad = {}) : color(color), transform({position, rad}) {
+        RayTraceableObject(const RGBf &color = {}, const Vec3 &position = {}, const Vec3 &scale = Vec3(1),
+                           const Vec3 rad = {}) : color(color), transform({position, rad, scale}) {
         }
 
         virtual ~RayTraceableObject() = default;

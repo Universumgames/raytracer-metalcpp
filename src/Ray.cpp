@@ -56,46 +56,25 @@ namespace RayTracing {
         };
     }
 
-    bool Ray::intersectsBoundingBox(BoundingBox box) {
-        auto local_origin = origin + box.center();
-        auto local_ray_origin = Vec3{
-            local_origin.dot(box.right()),
-            local_origin.dot(box.up()),
-            local_origin.dot(box.forward())
-        };
-        auto local_ray_direction = Vec3{
-            direction.dot(box.right()),
-            direction.dot(box.up()),
-            direction.dot(box.forward())
-        };
+    bool LocalRay::intersectsBoundingBox(const BoundingBox &box) {
+        float tmin = -INFINITY;
+        float tmax = INFINITY;
 
-        auto boxSize = box.size();
-        auto boxSizeHalf = boxSize / 2;
-        auto localBoxMin = boxSizeHalf * -1;
-        auto localBoxMax = boxSizeHalf;
-
-        float tMin = -INFINITY;
-        float tMax = INFINITY;
-        for (unsigned axis = 0; axis < 3; axis++) {
-            if (local_ray_direction[axis] != 0) {
-                auto t1 = (localBoxMin[axis] - local_ray_origin[axis]) / local_ray_direction[axis];
-                auto t2 = (localBoxMax[axis] - local_ray_origin[axis]) / local_ray_direction[axis];
-
-                if (t1 > t2) {
+        for (auto axis: {Vec3::Direction::X_AXIS, Vec3::Direction::Y_AXIS, Vec3::Direction::Z_AXIS}) {
+            if (direction[axis] != 0) {
+                float t1 = (box.minPos[axis] - origin[axis]) / direction[axis];
+                float t2 = (box.maxPos[axis] - origin[axis]) / direction[axis];
+                if (t1 > t2)
                     std::swap(t1, t2);
-                }
-                tMin = std::max(tMin, t1);
-                tMax = std::min(tMax, t2);
+                tmin = std::max(tmin, t1);
+                tmax = std::min(tmax, t2);
             } else {
-                if (local_origin[axis] < localBoxMin[axis] || local_ray_origin[axis] > localBoxMax[axis]) {
+                if (origin[axis] < box.minPos[axis] || origin[axis] > box.maxPos[axis]) {
                     return false;
                 }
             }
         }
-
-        if (tMax >= tMin || tMax > 0)
-            return true;
-        return false;
+        return tmax >= tmin && tmin >= 0;
     }
 
     float randf() {

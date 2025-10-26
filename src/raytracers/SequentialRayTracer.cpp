@@ -28,10 +28,20 @@ namespace RayTracing {
         auto *image = new Image(windowSize);
         auto rays = calculateStartingRays(scene.camera);
 
-        for (auto& object : scene.objects) {
+        float maxDepth = 0;
+        for (auto &object: scene.objects) {
             object->updateBoundingBox();
             object->transform.update();
+            object->updateNestedBoundingBox(300);
+            maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
         }
+        std::cout << "[" << identifier() << "] Starting raytrace with "
+                << rays.size() << " rays, "
+                << scene.objects.size() << " mesh objects, "
+                << scene.spheres.size() << " spheres and "
+                << scene.lights.size() << " light sources"
+                << std::endl;
+        std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
 
         for (auto &ray: rays) {
             for (int b = 0; b < bounces; b++) {
@@ -39,13 +49,15 @@ namespace RayTracing {
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
 
-                // TODO switch from transforming every vertex to transforming the ray
-
-
                 // check collision with complex objects
                 for (const auto object: scene.objects) {
-                    // TODO check for bounding box intersection
                     auto localRay = ray.toLocalRay(object->transform);
+
+                    // if (!localRay.intersectsBoundingBox(object->boundingBox)) {
+                    //     continue;
+                    // }
+
+                    // TODO check nested bounding boxes here
                     for (int i = 0; i < object->mesh->numTriangles; i++) {
                         int *startIndex = &object->mesh->indices[i * 3];
                         Vec3 triangle[3] = {
@@ -73,7 +85,7 @@ namespace RayTracing {
                 }
 
                 // check collision for light sources
-                for (const auto& light : scene.lights) {
+                for (const auto &light: scene.lights) {
                     auto intersection = ray.intersectSphere(light->transform.position, light->radius);
                     if (intersection.hit && intersection.distance < currentHit.distance) {
                         currentHit = intersection;
@@ -88,7 +100,7 @@ namespace RayTracing {
                     if (currentHit.isLight) {
                         ray.lightColor = currentColor;
                         b = bounces; // after ray intersects with light source, stop bouncing
-                    }else {
+                    } else {
                         ray.colors.emplace_back(currentColor);
                     }
                     ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal);
