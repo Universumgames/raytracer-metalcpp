@@ -7,7 +7,7 @@
 namespace RayTracing {
     RayTracerFactory *RayTracerFactory::instance = nullptr;
 
-    RayTracerFactory *RayTracerFactory::init(const Vec2u &windowSize, int bounces, int samplesPerPixel) {
+    RayTracerFactory *RayTracerFactory::init(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel) {
         if (instance != nullptr) {
             return instance;
         }
@@ -22,7 +22,7 @@ namespace RayTracing {
         return instance;
     }
 
-    RayTracerFactory::RayTracerFactory(const Vec2u &windowSize, int bounces, int samplesPerPixel) {
+    RayTracerFactory::RayTracerFactory(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel) {
         this->sequentialRayTracer = new SequentialRayTracer(windowSize, bounces,
                                                             samplesPerPixel);
 #ifdef USE_SHADER_METAL

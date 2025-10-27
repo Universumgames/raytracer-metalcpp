@@ -1,5 +1,6 @@
 #pragma once
 #include <fstream>
+#include <utility>
 #include <vector>
 
 #include <nlohmann/json.hpp>
@@ -21,7 +22,7 @@ namespace RayTracing {
 
     struct Scene {
     public:
-        Camera *camera;
+        Camera *camera = nullptr;
         std::vector<MeshedRayTraceableObject *> objects;
         std::vector<SphereRayTraceableObject *> spheres;
         std::vector<LightSource *> lights;
@@ -30,10 +31,11 @@ namespace RayTracing {
     public:
         Scene() = default;
 
-        Scene(Camera *camera, std::vector<MeshedRayTraceableObject *> objects = {},
-              std::vector<SphereRayTraceableObject *> spheres = {},
-              std::vector<LightSource *> lights = {}, const std::string &fileName = "")
-            : camera(camera), objects(objects), spheres(spheres), lights(lights), fileName(fileName) {
+        explicit Scene(Camera *camera, std::vector<MeshedRayTraceableObject *> objects = {},
+                       std::vector<SphereRayTraceableObject *> spheres = {},
+                       std::vector<LightSource *> lights = {}, std::string fileName = "")
+            : camera(camera), objects(std::move(objects)), spheres(std::move(spheres)), lights(std::move(lights)),
+              fileName(std::move(fileName)) {
         }
 
         static Scene loadFromFile(const std::string &path);

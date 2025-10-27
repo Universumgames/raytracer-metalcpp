@@ -5,7 +5,7 @@
 #include "math/vectors.hpp"
 
 namespace RayTracing {
-    HitInfo LocalRay::intersectTriangle(Vec3 triangle[3], Vec3 customNormal) const {
+    HitInfo LocalRay::intersectTriangle(Vec3 triangle[3], const Vec3 &customNormal) const {
         constexpr float epsilon = std::numeric_limits<float>::epsilon();
 
         Vec3 edgeAB = triangle[1] - triangle[0];
@@ -30,7 +30,7 @@ namespace RayTracing {
         };
     }
 
-    HitInfo Ray::intersectSphere(Vec3 sphereCenter, float sphereRadius) const {
+    HitInfo Ray::intersectSphere(const Vec3 &sphereCenter, float sphereRadius) const {
         Vec3 offsetRayOrigin = origin - sphereCenter;
 
         float a = Vec3::dot(direction, direction);
@@ -77,10 +77,6 @@ namespace RayTracing {
         return tmax >= tmin && tmin >= 0;
     }
 
-    float randf() {
-        return rand() / (float) RAND_MAX;
-    }
-
     float sign(float x) {
         if (x > 0) return 1;
         if (x < 0) return -1;
@@ -110,7 +106,7 @@ namespace RayTracing {
         return direction;
     }
 
-    LocalRay Ray::toLocalRay(const Transform &transform) {
+    LocalRay Ray::toLocalRay(const Transform &transform) const {
         return LocalRay{
             transform.getInverseTransformedPosition(origin), transform.getTransformedRayDirection(direction)
         };

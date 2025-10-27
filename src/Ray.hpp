@@ -26,18 +26,19 @@ namespace RayTracing {
 
         Vec3 reflectAt(const Vec3 &location, const Vec3 &normal, float totalReflection = 0.9);
 
-        LocalRay toLocalRay(const Transform &transform);
+        [[nodiscard]] LocalRay toLocalRay(const Transform &transform) const;
 
-        [[nodiscard]] HitInfo intersectSphere(Vec3 sphereCenter, float sphereRadius) const;
+        [[nodiscard]] HitInfo intersectSphere(const Vec3 &sphereCenter, float sphereRadius) const;
     };
 
     struct LocalRay : public Ray {
         /**
          * Calculate hit information of triangle
          * @param triangle points of the triangle
+         * @param customNormal
          * @return intersection point on triangle
          */
-        [[nodiscard]] HitInfo intersectTriangle(Vec3 triangle[3], Vec3 normal) const;
+        [[nodiscard]] HitInfo intersectTriangle(Vec3 triangle[], const Vec3 &customNormal) const;
 
         bool intersectsBoundingBox(const BoundingBox &box);
     };

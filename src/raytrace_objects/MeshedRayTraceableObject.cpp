@@ -106,7 +106,7 @@ namespace RayTracing {
         };
     }
 
-    BoundingBox MeshedRayTraceableObject::calculateBoundingBoxForIndices(const std::vector<int> &indices) {
+    BoundingBox MeshedRayTraceableObject::calculateBoundingBoxForIndices(const std::vector<int> &indices) const {
         Vec3 minLoc = {INFINITY, INFINITY, INFINITY};
         Vec3 maxLoc = {-INFINITY, -INFINITY, -INFINITY};
         for (auto index: indices) {

@@ -36,7 +36,7 @@ namespace RayTracing {
 
         struct MetalEncodingData {
             KernelFunctionVariables variables;
-            Scene *scene;
+            Scene *scene = nullptr;
         };
 
         void sendComputeCommand(MetalEncodingData data,
@@ -56,7 +56,7 @@ namespace RayTracing {
         struct Metal_MeshTransformationReturn {
             std::vector<Metal_MeshRayTraceableObject> meshObjects;
             std::vector<simd::float3> vertices;
-            std::vector<float> indices;
+            std::vector<int> indices;
         };
 
         static Metal_MeshTransformationReturn
@@ -68,7 +68,7 @@ namespace RayTracing {
         static std::vector<Metal_Light> lightsToMetal(const std::vector<LightSource *> &lights);
 
     public:
-        MetalRaytracer(Vec2u windowSize, unsigned bounces, unsigned samplesPerPixel);
+        MetalRaytracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         ~MetalRaytracer() override;
 

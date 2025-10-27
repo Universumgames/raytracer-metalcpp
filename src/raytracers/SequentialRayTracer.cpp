@@ -5,7 +5,7 @@
 #include "SFML/System/Vector2.hpp"
 
 namespace RayTracing {
-    SequentialRayTracer::SequentialRayTracer(Vec2u windowSize, unsigned bounces,
+    SequentialRayTracer::SequentialRayTracer(const Vec2u &windowSize, unsigned bounces,
                                              unsigned samplesPerPixel) : RayTracer(
         windowSize, bounces, samplesPerPixel) {
     }
@@ -44,7 +44,7 @@ namespace RayTracing {
         std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
 
         for (auto &ray: rays) {
-            for (int b = 0; b < bounces; b++) {
+            for (unsigned b = 0; b < bounces; b++) {
                 HitInfo currentHit{.hit = false, .distance = MAXFLOAT};
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
@@ -121,7 +121,7 @@ namespace RayTracing {
         for (auto &ray: rays) {
             auto dot = ray.direction.dot(Vec3::forward());
             dot = dot * dot * dot * dot;
-            ray.colors.push_back(RGBf(dot, dot, dot, 1));
+            ray.colors.emplace_back(dot, dot, dot, 1);
             ray.lightColor = RGBf(0, 0, 1, 1);
         }
 

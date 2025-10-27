@@ -1,5 +1,6 @@
 #pragma once
 #include <nlohmann/json.hpp>
+#include <utility>
 #include <vector>
 
 #include "RayTracableObject.hpp"
@@ -35,12 +36,12 @@ namespace RayTracing {
         };
 
         MeshedRayTraceableObject(const RGBf &color, const Vec3 &position, const Vec3 &rotation,
-                                 const std::string &fileName)
+                                 std::string fileName)
             : RayTraceableObject(color, position, {1, 1, 1}, rotation),
-              fileName(fileName) {
+              fileName(std::move(fileName)) {
         }
 
-        MeshedRayTraceableObject(const SerializableMeshedRayTraceableObject &obj) : RayTraceableObject(
+        explicit MeshedRayTraceableObject(const SerializableMeshedRayTraceableObject &obj) : RayTraceableObject(
                 obj.color, obj.position, obj.scale, obj.rotation), fileName(obj.fileName) {
         }
 
@@ -54,6 +55,6 @@ namespace RayTracing {
         NestedBoundingBox updateNestedBoundingBoxRecursive(const std::vector<int> &indices,
                                                            unsigned maxTrianglesPerBox);
 
-        BoundingBox calculateBoundingBoxForIndices(const std::vector<int> &indices);
+        [[nodiscard]] BoundingBox calculateBoundingBoxForIndices(const std::vector<int> &indices) const;
     };
 }

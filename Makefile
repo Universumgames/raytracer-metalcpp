@@ -12,11 +12,8 @@ build: setup_cmake
 run: build
 	cd cmake-build-debug && ./RayTracer
 
-init_scene:
-	cd scene && make use_simple_dragon
-
-run_cicd: build init_scene
-	cd cmake-build-debug && ./RayTracer --no-window --sequential
+run_cicd: build
+	cd cmake-build-debug && ./RayTracer --no-window --sequential -s scene_simple.json -o raytraced.jpg
 	cp cmake-build-debug/raytraced.jpg .
 
 xcode_create:

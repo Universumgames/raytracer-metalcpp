@@ -9,12 +9,12 @@ namespace RayTracing {
         RayTracer *sequentialRayTracer = nullptr;
         RayTracer *shaderRayTracer = nullptr;
 
-        RayTracerFactory(const Vec2u &windowSize, int bounces, int samplesPerPixel);
+        RayTracerFactory(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
     public:
         ~RayTracerFactory() = delete;
 
-        static RayTracerFactory *init(const Vec2u &windowSize, int bounces, int samplesPerPixel);
+        static RayTracerFactory *init(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         static RayTracerFactory *getInstance();
 

@@ -24,11 +24,11 @@ namespace RayTracing {
             rotation(rad), scale(scale) {
         }
 
-        Vec3 getTranslation() const;
+        [[nodiscard]] Vec3 getTranslation() const;
 
-        Vec3 getScale() const;
+        [[nodiscard]] Vec3 getScale() const;
 
-        Vec3 getRotation() const;
+        [[nodiscard]] Vec3 getRotation() const;
 
         void setTranslation(const Vec3 &translation);
 
@@ -58,19 +58,19 @@ namespace RayTracing {
 
         [[nodiscard]] Vec3 getTransformedPosition(const Vec3 &pos) const;
 
-        Vec3 getInverseTransformedPosition(const Vec3 &pos) const;
+        [[nodiscard]] Vec3 getInverseTransformedPosition(const Vec3 &pos) const;
 
         [[nodiscard]] Vec3 getTransformedNormal(const Vec3 &pos) const;
 
-        Vec3 getTransformedRayDirection(const Vec3 &dir) const;
+        [[nodiscard]] Vec3 getTransformedRayDirection(const Vec3 &dir) const;
 
-        Mat4x4 getTranslationMatrix() const;
+        [[nodiscard]] Mat4x4 getTranslationMatrix() const;
 
-        Mat4x4 getRotationMatrix() const;
+        [[nodiscard]] Mat4x4 getRotationMatrix() const;
 
-        Mat4x4 getInverseRotationMatrix() const;
+        [[nodiscard]] Mat4x4 getInverseRotationMatrix() const;
 
-        Mat4x4 getScaleMatrix() const;
+        [[nodiscard]] Mat4x4 getScaleMatrix() const;
 
         friend class SequentialRayTracer;
         friend struct Ray;

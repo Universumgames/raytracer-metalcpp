@@ -13,6 +13,9 @@ bool sequential = true;
 std::string outputFile = "raytraced.jpg";
 std::string sceneFile = "scene/scene.json";
 std::string benchmarkFile = "../timeLog.csv";
+unsigned bounces = 3;
+unsigned samples = 1;
+Vec2u windowSize = Vec2u(800, 600);
 
 Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteImg = true, bool deleteTracer = true) {
     auto start = std::chrono::high_resolution_clock::now();
@@ -50,30 +53,37 @@ void decodeArguments(int argc, char *argv[]) {
         if (arg == "-h" || arg == "--help") {
             helped = true;
             std::cout << "Command line arguments:" << std::endl;
-            std::cout << "\t-h or --help\t opens this help page" << std::endl;
-            std::cout << "\t--no-window\t no window opens" << std::endl;
-            std::cout << "\t-of <file>\t specify raytraced file path" << std::endl;
-            std::cout << "\t--no-tests\t no test images are rendered" << std::endl;
-            std::cout << "\t-s <json file>\t specify path to scene file" << std::endl;
-            std::cout << "\t-b <file>\t specify benchmark csv file" << std::endl;
-            std::cout << "\t--sequential\t use the sequential raytracer implementation instead of the gpu" << std::endl;
+            std::cout << "\t-h or --help\t\t\t opens this help page" << std::endl;
+            std::cout << "\t--no-window\t\t\t no window opens" << std::endl;
+            std::cout << "\t-of <file>\t\t\t specify raytraced file path (default: " << outputFile << ")" << std::endl;
+            std::cout << "\t--no-tests\t\t\t no test images are rendered" << std::endl;
+            std::cout << "\t-s <json file>\t\t\t specify path to scene file (default: " << sceneFile << ")" <<
+                    std::endl;
+            std::cout << "\t-b <file>\t\t\t specify benchmark csv file (default: " << benchmarkFile << ")" << std::endl;
+            std::cout << "\t--sequential\t\t\t use the sequential raytracer implementation instead of the gpu" <<
+                    std::endl;
+            std::cout << "\t--bounces <num>\t\t\t specify number of bounces (default: " << bounces << ")" << std::endl;
+            std::cout << "\t--samples <num>\t\t\t specify number of samples per pixel (default: " << samples << ")" <<
+                    std::endl;
+            std::cout << "\t--window-size <width> <height>\t specify window size (default: " << windowSize.getX() << "x"
+                    << windowSize.getY() << ")" << std::endl;
         } else if (arg == "--no-window") {
             openWindow = false;
-        }else if (arg == "-of") {
+        } else if (arg == "-of") {
             if (argc < i + 1) {
                 std::cerr << "Missing argument for -of" << std::endl;
             }
             outputFile = argv[i + 1];
             i++;
-        }else if (arg == "--no-tests") {
+        } else if (arg == "--no-tests") {
             renderTests = false;
-        }else if (arg == "-s") {
+        } else if (arg == "-s") {
             if (argc < i + 1) {
                 std::cerr << "Missing argument for -s" << std::endl;
             }
             sceneFile = argv[i + 1];
             i++;
-        }else if (arg == "-b") {
+        } else if (arg == "-b") {
             if (argc < i + 1) {
                 std::cerr << "Missing argument for -b" << std::endl;
             }
@@ -81,6 +91,26 @@ void decodeArguments(int argc, char *argv[]) {
             i++;
         } else if (arg == "--sequential") {
             sequential = true;
+        } else if (arg == "--bounces") {
+            if (argc < i + 1) {
+                std::cerr << "Missing argument for --bounces" << std::endl;
+            }
+            bounces = std::stoi(argv[i + 1]);
+            i++;
+        } else if (arg == "--samples") {
+            if (argc < i + 1) {
+                std::cerr << "Missing argument for --samples" << std::endl;
+            }
+            samples = std::stoi(argv[i + 1]);
+            i++;
+        } else if (arg == "--window-size") {
+            if (argc < i + 2) {
+                std::cerr << "Missing argument for --window-size" << std::endl;
+            }
+            unsigned width = std::stoi(argv[i + 1]);
+            unsigned height = std::stoi(argv[i + 2]);
+            windowSize = Vec2u(width, height);
+            i += 2;
         }
     }
 }
@@ -88,13 +118,11 @@ void decodeArguments(int argc, char *argv[]) {
 int main(int argc, char *argv[]) {
     decodeArguments(argc, argv);
     if (helped) {
-        return 1;
+        return 0;
     }
 
-    auto windowSize = Vec2u(800, 600);
-
     auto imageHandler = new ImageHandler(windowSize);
-    auto raytracerFactory = RayTracerFactory::init(windowSize, 3, 1);
+    auto raytracerFactory = RayTracerFactory::init(windowSize, bounces, samples);
     auto *raytracer = sequential
                           ? raytracerFactory->getSequentialImplementation()
                           : raytracerFactory->getShaderImplementation();
@@ -114,7 +142,8 @@ int main(int argc, char *argv[]) {
 
     imageHandler->saveImage(outputFile, raytraced);
 
-    std::cout << "[" << raytracer->identifier() << "] Rendered raytrace image from scene " << sceneFile << " to " << outputFile << std::endl;
+    std::cout << "[" << raytracer->identifier() << "] Rendered raytrace image from scene " << sceneFile << " to " <<
+            outputFile << std::endl;
 
 #ifndef RUNNING_CICD
     if (openWindow) {

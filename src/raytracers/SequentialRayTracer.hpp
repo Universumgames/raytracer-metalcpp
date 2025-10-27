@@ -4,7 +4,7 @@
 namespace RayTracing {
     class SequentialRayTracer : public RayTracer {
     public:
-        SequentialRayTracer(Vec2u windowSize, unsigned bounces, unsigned samplesPerPixel);
+        SequentialRayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         Image *raytrace(Scene scene) override;
 

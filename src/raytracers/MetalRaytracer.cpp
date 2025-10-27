@@ -15,7 +15,7 @@
 
 
 namespace RayTracing {
-    MetalRaytracer::MetalRaytracer(Vec2u windowSize, unsigned bounces, unsigned samplesPerPixel)
+    MetalRaytracer::MetalRaytracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel)
         : RayTracer(windowSize, bounces, samplesPerPixel) {
         pAutoreleasePool = NS::AutoreleasePool::alloc()->init();
         initialize();
@@ -194,7 +194,7 @@ namespace RayTracing {
         const std::vector<MeshedRayTraceableObject *> &objects) {
         std::vector<Metal_MeshRayTraceableObject> meshObjects;
         std::vector<simd::float3> vertices;
-        std::vector<float> indices;
+        std::vector<int> indices;
 
         for (auto &object: objects) {
             meshObjects.push_back(Metal_MeshRayTraceableObject{
