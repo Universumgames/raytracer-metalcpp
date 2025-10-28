@@ -2,12 +2,14 @@
 #include "SphereRayTraceableObject.hpp"
 
 namespace RayTracing {
+    /// Serializable representation of a light source
     struct SerializableLightSource : public SerializableSphere {
         RGBA8 emittingColor;
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableLightSource, position, radius, emittingColor)
     };
 
+    /// Light source represented as a sphere that emits light
     class LightSource : public SphereRayTraceableObject {
     public:
         RGBf emittingColor{};

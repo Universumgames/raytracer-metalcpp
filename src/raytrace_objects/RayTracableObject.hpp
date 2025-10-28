@@ -6,12 +6,14 @@
 
 
 namespace RayTracing {
+    /// Serializable representation of a ray traceable object - base struct
     struct SerializableRayTraceableObject {
         RGBA8 color;
         Vec3 position;
         Vec3 rotation;
     };
 
+    /// Base class for all ray traceable objects
     class RayTraceableObject {
     private:
     public:
@@ -27,6 +29,7 @@ namespace RayTracing {
 
         virtual ~RayTraceableObject() = default;
 
+        /// Update the bounding box of the object
         virtual void updateBoundingBox() = 0;
     };
 }

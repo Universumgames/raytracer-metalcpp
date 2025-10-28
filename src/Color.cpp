@@ -3,21 +3,20 @@
 #include "math/vectors.hpp"
 
 namespace RayTracing {
-
     RGBf RGBf::blend(const std::vector<RGBf> &colors, ColorBlendMode mode) {
         if (colors.empty()) {
             return RGBf::BLACK();
         }
         switch (mode) {
             case AVERAGE: {
-                RGBf sum{0,0,0,0};
-                for (auto & color : colors) {
+                RGBf sum{0, 0, 0, 0};
+                for (auto &color: colors) {
                     sum += color;
                 }
                 return sum / (float) colors.size();
             }
             case COUNT: {
-                return {1, 1.f / (float) colors.size(), 1.f / (float) colors.size(), 1.f / (float) colors.size()};
+                return {1.f / (float) colors.size(), 1.f / (float) colors.size(), 1.f / (float) colors.size(), 1.f};
             }
             default: return RGBf::BLACK();
         }

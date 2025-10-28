@@ -8,6 +8,7 @@
 #include "vectors.hpp"
 
 namespace RayTracing {
+    /// Matrix class
     template<unsigned int X,
         unsigned int Y,
         typename T,
@@ -102,10 +103,12 @@ namespace RayTracing {
             return negate();
         }
 
+        /// Negate the matrix
         Matrix negate() {
             return *this * -1;
         }
 
+        /// Inverse the matrix (only for diagonal matrices) (1/a_ii)
         Matrix inverse() {
             Matrix result;
             for (unsigned int i = 0; i < X; ++i) {
@@ -116,6 +119,7 @@ namespace RayTracing {
             return result;
         }
 
+        /// Create an identity matrix
         static Matrix<X, X, T> identity() {
             Matrix result;
             for (unsigned int i = 0; i < X; ++i) {
@@ -125,6 +129,7 @@ namespace RayTracing {
         }
 
 #ifdef USE_SHADER_METAL
+        /// Convert to Metal simd float4x4
         simd::float4x4 toMetal() requires (X == 4 && Y == 4 && std::is_same<T, float>::value) {
             simd::float4 columns[4] = {};
             for (unsigned int i = 0; i < 4; i++) {

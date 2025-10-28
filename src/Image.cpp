@@ -20,6 +20,11 @@ namespace RayTracing {
         // invert y axis to convert from (0,0) as bottom left (from camera) to as top left TODO find better solution
     }
 
+    void Image::setPixel(unsigned int x, unsigned int y, RGBf color) {
+        image[height - y - 1][x] = color.toRGBA8();
+        // invert y axis to convert from (0,0) as bottom left (from camera) to as top left TODO find better solution
+    }
+
     RGBA8 *Image::valueAt(unsigned int x, unsigned int y) {
         return &image[height - y - 1][x];
     }

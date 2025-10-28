@@ -38,8 +38,17 @@ namespace RayTracing {
               fileName(std::move(fileName)) {
         }
 
+        /**
+         * Load a scene from a file
+         * @param path Path to the scene file
+         * @return The loaded scene
+         */
         static Scene loadFromFile(const std::string &path);
 
+        /**
+         * Get the total number of triangles in all meshed objects in the scene
+         * @return Total triangle count
+         */
         [[nodiscard]] unsigned totalTriangleCount() const {
             unsigned count = 0;
             for (const auto &obj: objects) {
@@ -48,6 +57,10 @@ namespace RayTracing {
             return count;
         }
 
+        /**
+         * Get the total number of spherical objects (spheres and lights) in the scene
+         * @return Total spherical object count
+         */
         [[nodiscard]] unsigned totalSphericalCount() const {
             return spheres.size() + lights.size();
         }

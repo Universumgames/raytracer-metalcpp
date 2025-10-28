@@ -8,6 +8,7 @@
 #include "../../shader/metal/shader_types.hpp"
 
 namespace RayTracing {
+    /// Ray tracer implementation using Apple's Metal API
     class MetalRaytracer : public RayTracer {
     private:
         NS::AutoreleasePool *pAutoreleasePool = nullptr;
@@ -76,13 +77,28 @@ namespace RayTracing {
 
         ~MetalRaytracer() override;
 
+        /**
+         * Raytrace a scene and generate image
+         * @param scene scene to raytrace
+         * @return raytraced image
+         */
         Image *raytrace(Scene scene) override;
 
+        /**
+         * Simple UV Space image test, used to test basic compute pipeline
+         * @return uv image
+         */
         Image *uvTest() override;
 
+        /**
+         * Simple ray test to check ray generation
+         * @param camera camera to generate rays from
+         * @return image with ray directions encoded as colors
+         */
         Image *rayTest(Camera *camera) override;
 
-        std::string identifier() override { return "MetalRaytracer"; }
+        /// Get the identifier of the raytracer
+        std::string identifier() override { return "MetalRayTracer"; }
     };
 }
 

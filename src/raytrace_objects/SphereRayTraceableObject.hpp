@@ -2,12 +2,14 @@
 #include "RayTracableObject.hpp"
 
 namespace RayTracing {
+    /// Serializable representation of a sphere ray traceable object
     struct SerializableSphere : public SerializableRayTraceableObject {
         float radius{};
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableSphere, position, color, radius)
     };
 
+    /// Ray traceable object represented by a sphere
     class SphereRayTraceableObject : public RayTraceableObject {
     public:
         float radius{};

@@ -40,6 +40,7 @@ namespace RayTracing {
 
         virtual ~RayTracer();
 
+        /// Get the identifier of the raytracer
         virtual std::string identifier() = 0;
 
         /**
@@ -55,12 +56,20 @@ namespace RayTracing {
          */
         virtual Image *uvTest() = 0;
 
+        /**
+         * Simple ray test to check ray generation
+         * @param camera camera to generate rays from
+         * @return image with ray directions encoded as colors
+         */
         virtual Image *rayTest(Camera *camera) = 0;
 
+        /// Get the window size
         Vec2u getWindowSize() { return windowSize; }
 
+        /// Get the number of samples per pixel
         unsigned getSamplesPerPixel() const;
 
+        /// Get the number of bounces
         unsigned getBounces() const;
     };
 }
