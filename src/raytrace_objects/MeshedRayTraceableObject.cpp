@@ -32,7 +32,7 @@ namespace RayTracing {
                 Vec3 v = Vec3(c[0], c[1], c[2]);
                 mesh->vertices.push_back(v);
                 minLoc = Vec3(std::min(minLoc.getX(), v.getX()), std::min(minLoc.getY(), v.getY()),
-                                  std::min(minLoc.getZ(), v.getZ()));
+                              std::min(minLoc.getZ(), v.getZ()));
                 maxLoc = Vec3(std::max(maxLoc.getX(), v.getX()), std::min(minLoc.getY(), v.getY()),
                               std::max(minLoc.getZ(), v.getZ()));
             }
