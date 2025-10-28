@@ -18,10 +18,10 @@ float3 randomHemisphereReflection(float3 normal){
 
 Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, float totalReflection){
     float dotProduct = dot(ray.direction, normal);
-    float3 totalReflectionVec = ray.direction -  (2.0f * dotProduct);
+    float3 totalReflectionVec = ray.direction -  (normal * dotProduct) * 2.0f;
     float3 rhf = randomHemisphereReflection(normal);
     return {
-        .origin = point,
+        .origin = point - ray.direction * 0.01f,
         .direction = normalize(totalReflectionVec * totalReflection + rhf * (1 - totalReflection))
     };
 }
