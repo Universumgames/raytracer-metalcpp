@@ -15,12 +15,16 @@ namespace RayTracing {
         MTL::CommandQueue *commandQueue = nullptr;
         MTL::Library *defaultLibrary = nullptr;
 
-        MTL::Buffer *bufferPixel = nullptr;
         MTL::Buffer *bufferScreenSize = nullptr;
-        MTL::Buffer *bufferUV = nullptr;
         MTL::Buffer *bufferForward = nullptr;
-        MTL::Buffer *bufferRays = nullptr;
+
         MTL::Buffer *bufferRayTraceSettings = nullptr;
+        MTL::Buffer *bufferRays = nullptr;
+        MTL::Buffer *bufferMeshObjects = nullptr;
+        MTL::Buffer *bufferMeshVertices = nullptr;
+        MTL::Buffer *bufferMeshIndices = nullptr;
+        MTL::Buffer *bufferSphereObjects = nullptr;
+        MTL::Buffer *bufferLights = nullptr;
 
         MTL::Buffer *bufferResult = nullptr;
 

@@ -78,6 +78,14 @@ namespace RayTracing {
         return transformationMatrix;
     }
 
+    Mat4x4 Transform::getInverseTransformMatrix() const {
+        return inverseTransformationMatrix;
+    }
+
+    Mat4x4 Transform::getInverseRotationMatrix() const {
+        return inverseRotationMatrix;
+    }
+
     void Transform::update() {
         scaleMatrix = calcScaleMatrix(scale);
         inverseScaleMatrix = calcInverseScaleMatrix();
@@ -115,10 +123,6 @@ namespace RayTracing {
 
     Mat4x4 Transform::getRotationMatrix() const {
         return rotationMatrix;
-    }
-
-    Mat4x4 Transform::getInverseRotationMatrix() const {
-        return inverseRotationMatrix;
     }
 
     Mat4x4 Transform::getScaleMatrix() const {

@@ -9,7 +9,7 @@ using namespace RayTracing;
 bool openWindow = true;
 bool renderTests = true;
 bool helped = false;
-bool sequential = true;
+bool sequential = false;
 std::string outputFile = "raytraced.jpg";
 std::string sceneFile = "scene/scene.json";
 std::string benchmarkFile = "../timeLog.csv";

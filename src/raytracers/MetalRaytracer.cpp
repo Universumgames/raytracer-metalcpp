@@ -50,29 +50,23 @@ namespace RayTracing {
                 };
             }
         }
-        bufferPixel = device->newBuffer(sizeof(simd::uint2) * windowSize.getX() * windowSize.getY(),
-                                        MTL::ResourceStorageModeShared);
-        memcpy(bufferPixel->contents(), pixelCoords, sizeof(simd::uint2) * windowSize.getX() * windowSize.getY());
 
         auto *screenSize = new simd::uint2{windowSize.getX(), windowSize.getY()};
         bufferScreenSize = device->newBuffer(sizeof(simd::uint2), MTL::ResourceStorageModeShared);
         memcpy(bufferScreenSize->contents(), screenSize, sizeof(simd::uint2));
 
-        bufferUV = device->newBuffer(sizeof(simd::float2) * windowSize.getX() * windowSize.getY(),
-                                     MTL::ResourceStorageModeShared);
-        memcpy(bufferUV->contents(), uvs, sizeof(simd::float2) * windowSize.getX() * windowSize.getY());
-
-        bufferResult = device->newBuffer(sizeof(simd::float4) * windowSize.getX() * windowSize.getY(),
-                                         MTL::ResourceStorageModeShared);
-
-        bufferRays = device->newBuffer(sizeof(Metal_Ray) * windowSize.getX() * windowSize.getY(),
-                                       MTL::ResourceStorageModeShared);
         bufferForward = device->newBuffer(sizeof(simd::float3), MTL::ResourceStorageModeShared);
         auto *forward = new simd::float3{Vec3::forward().getX(), Vec3::forward().getY(), Vec3::forward().getZ()};
         memcpy(bufferForward->contents(), forward, sizeof(simd::float3));
 
-        bufferRayTraceSettings = device->newBuffer(sizeof(Metal_RayTraceSettings), MTL::ResourceStorageModeShared);
+        bufferResult = device->newBuffer(sizeof(simd::float4) * windowSize.getX() * windowSize.getY(),
+                                         MTL::ResourceStorageModeShared);
+
+        bufferRays = device->newBuffer(sizeof(Metal_Ray) * windowSize.getX() * windowSize.getY() * samplesPerPixel,
+                                       MTL::ResourceStorageModeShared);
+
         // data to be filled on encode
+        bufferRayTraceSettings = device->newBuffer(sizeof(Metal_RayTraceSettings), MTL::ResourceStorageModeShared);
     }
 
     MetalRaytracer::KernelFunctionVariables MetalRaytracer::loadFunction(const std::string &name) {
@@ -184,7 +178,8 @@ namespace RayTracing {
             result.push_back(Metal_Ray(
                 simd::float3{ray.origin.getX(), ray.origin.getY(), ray.origin.getZ()},
                 simd::float3{ray.direction.getX(), ray.direction.getY(), ray.direction.getZ()},
-                {}
+                {},
+                0
             ));
         }
         return result;
@@ -198,7 +193,10 @@ namespace RayTracing {
 
         for (auto &object: objects) {
             meshObjects.push_back(Metal_MeshRayTraceableObject{
+                .boundingBox = object->boundingBox.toMetal(),
                 .transform = object->transform.getTransformMatrix().toMetal(),
+                .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
+                .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
                 .color = object->color.toMetal(),
                 .vertIndicesOffset = (unsigned) indices.size(),
                 .vertIndicesCount = (unsigned) object->mesh->indices.size(),
@@ -223,6 +221,7 @@ namespace RayTracing {
         std::vector<Metal_SphereRayTraceableObject> result;
         for (auto &object: objects) {
             result.push_back(Metal_SphereRayTraceableObject{
+                .boundingBox = object->boundingBox.toMetal(),
                 .transform = object->transform.getTransformMatrix().toMetal(),
                 .radius = object->radius,
                 .color = object->color.toMetal(),
@@ -235,6 +234,7 @@ namespace RayTracing {
         std::vector<Metal_Light> result;
         for (auto &light: lights) {
             result.push_back(Metal_Light{
+                .boundingBox = light->boundingBox.toMetal(),
                 .transform = light->transform.getTransformMatrix().toMetal(),
                 .intensity = 1,
                 .color = light->emittingColor.toMetal(),
@@ -244,26 +244,70 @@ namespace RayTracing {
         return result;
     }
 
+    void prepBuffer(MTL::Buffer **buffer, MTL::Device *device, size_t size) {
+        if (*buffer != nullptr)
+            (*buffer)->release();
+        *buffer = device->newBuffer(size, MTL::ResourceStorageModeShared);
+    }
+
     void MetalRaytracer::encodeRaytracingData(MetalEncodingData data,
                                               MTL::ComputeCommandEncoder *computeEncoder) {
         auto variables = data.variables;
         auto scene = *(data.scene);
         computeEncoder->setComputePipelineState(variables.functionPSO);
 
-        auto rays = calculateStartingRays(scene.camera);
-        auto meshObjects = meshObjectsToMetal(scene.objects);
-        auto sphereObjects = sphereObjectsToMetal(scene.spheres);
-        auto lights = lightsToMetal(scene.lights);
-
+        // prep data for buffers
         auto *settings = new Metal_RayTraceSettings{
+            .screenSize = {windowSize.getX(), windowSize.getY()},
             .bounces = this->bounces,
             .samplesPerPixel = this->samplesPerPixel,
             .meshObjectCount = 0,
             .sphereObjectCount = 0,
-            .lightsCount = 0
+            .lightsCount = 0,
+            .maxColorsPerRay = 6
         };
+        auto rays = calculateStartingRays(scene.camera);
+        auto metalRays = raysToMetal(rays);
+        auto meshObjects = meshObjectsToMetal(scene.objects);
+        auto sphereObjects = sphereObjectsToMetal(scene.spheres);
+        auto lights = lightsToMetal(scene.lights);
+
+        // prep buffers
+        prepBuffer(&bufferMeshObjects, device, sizeof(Metal_MeshRayTraceableObject) * meshObjects.meshObjects.size());
+        prepBuffer(&bufferMeshVertices, device, sizeof(simd::float3) * meshObjects.vertices.size());
+        prepBuffer(&bufferMeshIndices, device, sizeof(int) * meshObjects.indices.size());
+        prepBuffer(&bufferSphereObjects, device, sizeof(Metal_SphereRayTraceableObject) * sphereObjects.size());
+        prepBuffer(&bufferLights, device, sizeof(Metal_Light) * lights.size());
+
+
+        // copy data to buffers
         memcpy(bufferRayTraceSettings->contents(), settings, sizeof(Metal_RayTraceSettings));
-        TODO(); // TODO Finish encoding scene data
+        memcpy(bufferRays->contents(), metalRays.data(), metalRays.size() * sizeof(Metal_Ray));
+        memcpy(bufferMeshObjects->contents(), meshObjects.meshObjects.data(),
+               meshObjects.meshObjects.size() * sizeof(Metal_MeshRayTraceableObject));
+        memcpy(bufferMeshVertices->contents(), meshObjects.vertices.data(),
+               meshObjects.vertices.size() * sizeof(simd::float3));
+        memcpy(bufferMeshIndices->contents(), meshObjects.indices.data(),
+               meshObjects.indices.size() * sizeof(int));
+        memcpy(bufferSphereObjects->contents(), sphereObjects.data(),
+               sphereObjects.size() * sizeof(Metal_SphereRayTraceableObject));
+        memcpy(bufferLights->contents(), lights.data(), lights.size() * sizeof(Metal_Light));
+
+        computeEncoder->setBuffer(bufferRayTraceSettings, 0, 0);
+        computeEncoder->setBuffer(bufferRays, 0, 1);
+        computeEncoder->setBuffer(bufferMeshObjects, 0, 2);
+        computeEncoder->setBuffer(bufferMeshVertices, 0, 3);
+        computeEncoder->setBuffer(bufferMeshIndices, 0, 4);
+        computeEncoder->setBuffer(bufferSphereObjects, 0, 5);
+        computeEncoder->setBuffer(bufferLights, 0, 6);
+        computeEncoder->setBuffer(bufferResult, 0, 7);
+
+        MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), samplesPerPixel);
+
+        NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
+        MTL::Size threadgroupSize = MTL::Size::Make(threadGroupSize, 1, 1);
+
+        computeEncoder->dispatchThreads(gridSize, threadgroupSize);
     }
 
     Image *MetalRaytracer::raytrace(Scene scene) {

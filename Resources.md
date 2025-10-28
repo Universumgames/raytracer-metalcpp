@@ -14,6 +14,7 @@
 - Clever way to add Metall Cpp as dependency in CMake https://github.com/LeeTeng2001/metal-cpp-cmake/tree/main
 - Learning Information collection https://github.com/mikeroyal/Metal-Guide#Metal-learning-resources
 - Metal CPP tutorial upload https://github.com/tako3/learn-metal-cpp
+- Metal Shading Language Specification https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
 
 ## CUDA
 -

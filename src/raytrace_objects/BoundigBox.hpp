@@ -1,6 +1,9 @@
 #pragma once
 #include "../math/vectors.hpp"
 #include "../math/matrices.hpp"
+#ifdef USE_SHADER_METAL
+#include "../../shader/metal/shader_types.hpp"
+#endif
 
 namespace RayTracing {
     struct BoundingBox {
@@ -37,6 +40,12 @@ namespace RayTracing {
                    (p.getY() >= minPos.getY() && p.getY() <= maxPos.getY()) &&
                    (p.getZ() >= minPos.getZ() && p.getZ() <= maxPos.getZ());
         }
+
+#ifdef USE_SHADER_METAL
+        Metal_BoundingBox toMetal() {
+            return {minPos.toMetal(), maxPos.toMetal()};
+        }
+#endif
     };
 
     struct NestedBoundingBox : public BoundingBox {

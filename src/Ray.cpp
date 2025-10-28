@@ -110,8 +110,5 @@ namespace RayTracing {
         return LocalRay{
             transform.getInverseTransformedPosition(origin), transform.getTransformedRayDirection(direction)
         };
-        // return LocalRay{
-        //     origin, direction
-        // };
     }
 }

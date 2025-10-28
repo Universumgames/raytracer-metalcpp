@@ -40,6 +40,10 @@ namespace RayTracing {
 
         [[nodiscard]] Mat4x4 getTransformMatrix() const;
 
+        [[nodiscard]] Mat4x4 getInverseTransformMatrix() const;
+
+        [[nodiscard]] Mat4x4 getInverseRotationMatrix() const;
+
     private:
         Mat4x4 calcTranslationMatrix(const Vec3 &translation);
 
@@ -67,8 +71,6 @@ namespace RayTracing {
         [[nodiscard]] Mat4x4 getTranslationMatrix() const;
 
         [[nodiscard]] Mat4x4 getRotationMatrix() const;
-
-        [[nodiscard]] Mat4x4 getInverseRotationMatrix() const;
 
         [[nodiscard]] Mat4x4 getScaleMatrix() const;
 
