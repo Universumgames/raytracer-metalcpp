@@ -195,20 +195,26 @@ namespace RayTracing {
         std::vector<Metal_MeshRayTraceableObject> meshObjects;
         std::vector<simd::float3> vertices;
         std::vector<int> indices;
+        std::vector<simd::float3> normals;
 
         for (auto &object: objects) {
             meshObjects.push_back(Metal_MeshRayTraceableObject{
                 .boundingBox = object->boundingBox.toMetal(),
                 .transform = object->transform.getTransformMatrix().toMetal(),
                 .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
+                .rotation = object->transform.getRotationMatrix().toMetal(),
                 .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
                 .color = object->color.toMetal(),
                 .indicesOffset = (unsigned) indices.size(),
                 .triangleCount = (unsigned) object->mesh->numTriangles,
                 .vertexOffset = (unsigned) vertices.size(),
+                .normalsOffset = (unsigned) normals.size(),
             });
             for (auto &vertex: object->mesh->vertices) {
                 vertices.push_back(vertex.toMetal());
+            }
+            for (auto &normal: object->mesh->normals) {
+                normals.push_back(normal.toMetal());
             }
             indices.insert(indices.end(), object->mesh->indices.begin(), object->mesh->indices.end());
         }
@@ -238,7 +244,7 @@ namespace RayTracing {
         for (auto &light: lights) {
             result.push_back(Metal_Light{
                 .boundingBox = light->boundingBox.toMetal(),
-                .transform = light->transform.getTransformMatrix().toMetal(),
+                .center = light->transform.getTranslation().toMetal(),
                 .intensity = 1,
                 .color = light->emittingColor.toMetal(),
                 .radius = light->radius
@@ -279,6 +285,7 @@ namespace RayTracing {
         prepBuffer(&bufferMeshObjects, device, sizeof(Metal_MeshRayTraceableObject) * meshObjects.meshObjects.size());
         prepBuffer(&bufferMeshVertices, device, sizeof(simd::float3) * meshObjects.vertices.size());
         prepBuffer(&bufferMeshIndices, device, sizeof(int) * meshObjects.indices.size());
+        prepBuffer(&bufferNormals, device, sizeof(simd::float3) * meshObjects.normals.size());
         prepBuffer(&bufferSphereObjects, device, sizeof(Metal_SphereRayTraceableObject) * sphereObjects.size());
         prepBuffer(&bufferLights, device, sizeof(Metal_Light) * lights.size());
 
@@ -292,6 +299,8 @@ namespace RayTracing {
                meshObjects.vertices.size() * sizeof(simd::float3));
         memcpy(bufferMeshIndices->contents(), meshObjects.indices.data(),
                meshObjects.indices.size() * sizeof(int));
+        memcpy(bufferNormals->contents(), meshObjects.normals.data(),
+               meshObjects.normals.size() * sizeof(simd::float3));
         memcpy(bufferSphereObjects->contents(), sphereObjects.data(),
                sphereObjects.size() * sizeof(Metal_SphereRayTraceableObject));
         memcpy(bufferLights->contents(), lights.data(), lights.size() * sizeof(Metal_Light));
@@ -304,9 +313,10 @@ namespace RayTracing {
         computeEncoder->setBuffer(bufferMeshObjects, 0, 2);
         computeEncoder->setBuffer(bufferMeshVertices, 0, 3);
         computeEncoder->setBuffer(bufferMeshIndices, 0, 4);
-        computeEncoder->setBuffer(bufferSphereObjects, 0, 5);
-        computeEncoder->setBuffer(bufferLights, 0, 6);
-        computeEncoder->setBuffer(bufferResult, 0, 7);
+        computeEncoder->setBuffer(bufferNormals, 0, 5);
+        computeEncoder->setBuffer(bufferSphereObjects, 0, 6);
+        computeEncoder->setBuffer(bufferLights, 0, 7);
+        computeEncoder->setBuffer(bufferResult, 0, 8);
 
         MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), samplesPerPixel);
 

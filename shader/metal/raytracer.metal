@@ -4,8 +4,6 @@
 
 using namespace metal;
 
-#define ray rays[idx]
-
 /// This is a Metal Shading Language (MSL) function equivalent to the SequentialRayTracer::raytrace() C++ function, used to perform the calculation on a GPU.
 kernel void raytrace(
                      constant Metal_RayTraceSettings& settings [[ buffer(0) ]],
@@ -13,14 +11,15 @@ kernel void raytrace(
                      device Metal_MeshRayTraceableObject* meshObjects [[ buffer(2) ]],
                      device float3* meshVertices [[ buffer(3) ]],
                      device int* meshIndices [[ buffer(4) ]],
-                     device Metal_SphereRayTraceableObject* sphereObjects [[ buffer(5) ]],
-                     device Metal_Light* lights [[ buffer(6) ]],
-                     device float4* result [[ buffer(7) ]],
+                     device float3* meshNormals [[ buffer(5) ]],
+                     device Metal_SphereRayTraceableObject* sphereObjects [[ buffer(6) ]],
+                     device Metal_Light* lights [[ buffer(7) ]],
+                     device float4* result [[ buffer(8) ]],
                      uint3 gid [[thread_position_in_grid]],
                      uint3 gridSize [[threads_per_grid]])
 {
     uint idx = gid.y * gridSize.x + gid.x * gridSize.z + gid.z;
-    Metal_Ray currentRay = ray;
+    Metal_Ray currentRay = rays[idx];
     unsigned colorCount = 0;
     for(unsigned b = 0; b < settings.bounces; b++){
         Metal_Intersection currentHit = {
@@ -30,6 +29,7 @@ kernel void raytrace(
         float3 currentRotatedNormal = float3(0.0);
         float4 currentColor = float4(0.0);
 
+        // Meshes
         for(unsigned o = 0; o < settings.meshObjectCount; o++){
             Metal_MeshRayTraceableObject meshObject = meshObjects[o];
             Metal_LocalRay localRay = toLocalRay(currentRay, meshObject.inverseTransform, meshObject.inverseRotate);
@@ -44,32 +44,35 @@ kernel void raytrace(
                     meshVertices[vertexOffset + meshIndices[startIndicesIndex + 1]],
                     meshVertices[vertexOffset + meshIndices[startIndicesIndex + 2]],
                 };
-                Metal_Intersection intersection = intersectTriangle(localRay, triangle);
+                Metal_Intersection intersection = intersectTriangle(localRay, triangle, meshNormals[meshObject.normalsOffset + i]);
                 if(intersection.hit && intersection.distance < currentHit.distance){
                     currentHit = intersection;
-                    currentRotatedNormal = rotateNormal(meshObject.inverseRotate, intersection.normal);
+                    currentRotatedNormal = rotateNormal(meshObject.rotation, intersection.normal);
                     currentColor = meshObject.color;
                 }
             }
+        }
 
-            for(unsigned s = 0; s < settings.sphereObjectCount; s++){
-                Metal_SphereRayTraceableObject sphereObject = sphereObjects[s];
-                Metal_Intersection intersection = intersectSphere(currentRay, sphereObject.center, sphereObject.radius);
-                if(intersection.hit && intersection.distance < currentHit.distance){
-                    currentHit = intersection;
-                    currentRotatedNormal = intersection.normal;
-                    currentColor = sphereObject.color;
-                }
+        // Spheres
+        for(unsigned s = 0; s < settings.sphereObjectCount; s++){
+            Metal_SphereRayTraceableObject sphereObject = sphereObjects[s];
+            Metal_Intersection intersection = intersectSphere(currentRay, sphereObject.center, sphereObject.radius);
+            if(intersection.hit && intersection.distance < currentHit.distance){
+                currentHit = intersection;
+                currentRotatedNormal = intersection.normal;
+                currentColor = sphereObject.color;
             }
+        }
 
-            // TODO lights
+        // TODO lights
 
-            if(currentHit.hit){
-                currentRay.colors[colorCount] = currentColor;
-                colorCount++;
-                //currentRay = reflectAt(currentRay, currentHit.hitPoint, currentRotatedNormal, 1.0f);
-                //currentRay.totalDistance += currentHit.distance;
-            }
+        if(currentHit.hit){
+            currentRay.colors[colorCount] = currentColor;
+            colorCount++;
+            Metal_Ray newRay = reflectAt(currentRay, currentHit.hitPoint, currentRotatedNormal, 0.9f);
+            currentRay.origin = newRay.origin;
+            currentRay.direction = newRay.direction;
+            //currentRay.totalDistance += currentHit.distance;
         }
     }
     float4 finalColor = float4(0.0);

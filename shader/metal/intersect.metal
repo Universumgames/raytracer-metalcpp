@@ -26,10 +26,13 @@ Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, flo
             };
         }
     }
-    return {.hit = false };
+    return {
+        .hit = false,
+        .distance = INFINITY
+    };
 }
 
-Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3]) {
+Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], float3 customNormal) {
     float3 edgeAB = triangle[1] - triangle[0];
     float3 edgeAC = triangle[2] - triangle[0];
     float3 normal = cross(edgeAB, edgeAC);
@@ -47,7 +50,7 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3]) {
     return {
         .hit = det > epsilon && dst >= 0 && u >= 0 && v >= 0 && w >= 0,
         .hitPoint = ray.origin + (ray.direction * dst),
-        .normal = normal,
+        .normal = customNormal,
         .distance = dst
     };
 }
@@ -82,37 +85,10 @@ bool intersectsBoundingBox(Metal_LocalRay ray, Metal_BoundingBox box) {
 
 Metal_LocalRay toLocalRay(Metal_Ray ray, simd::float4x4 inverseTransform, simd::float4x4 inverseRotate) {
     float4 origin4 = inverseTransform * float4(ray.origin, 1);
-    float4 direction4 = inverseRotate * float4(ray.direction, 0);
+    float4 direction4 = inverseRotate * float4(ray.direction, 1);
     return {
         .origin = float3(origin4.x, origin4.y, origin4.z),
         .direction = float3(direction4.x, direction4.y, direction4.z)
     };
 }
 
-float pseudoRandom01(float seed){
-    return fract(sin(seed) * 43758.5453123);
-}
-
-float3 randomHemisphereReflection(float3 normal){
-    float3 randVec = float3(pseudoRandom01(normal.x + normal.y), pseudoRandom01(normal.y + normal.z), pseudoRandom01(normal.z + normal.x));
-    float3 result = normalize(randVec + normal);
-    if(dot(result, normal) < 0){
-        result = -result;
-    }
-    return result;
-}
-
-Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, float totalReflection){
-    float dotProduct = dot(ray.direction, normal);
-    float3 totalReflectionVec = ray.direction -  (2.0f * dotProduct);
-    float3 rhf = randomHemisphereReflection(normal);
-    return {
-        .origin = point,
-        .direction = normalize(totalReflectionVec * totalReflection + rhf * (1 - totalReflection))
-    };
-}
-
-float3 rotateNormal(float4x4 inverseRotate, float3 normal){
-    simd::float4 normal4 = inverseRotate * float4(normal, 0);
-    return normalize(float3(normal4.x, normal4.y, normal4.z));
-}

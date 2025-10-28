@@ -44,20 +44,6 @@ namespace RayTracing {
 
         [[nodiscard]] Mat4x4 getInverseRotationMatrix() const;
 
-    private:
-        Mat4x4 calcTranslationMatrix(const Vec3 &translation);
-
-        Mat4x4 calcInverseTranslationMatrix();
-
-        Mat4x4 calcScaleMatrix(const Vec3 &scale);
-
-        Mat4x4 calcInverseScaleMatrix();
-
-        Mat4x4 calcRotationMatrix(const Vec3 &rotation);
-
-        Mat4x4 calcInverseRotationMatrix();
-
-    protected:
         [[nodiscard]] Mat4x4 getTransformationMatrix() const;
 
         [[nodiscard]] Vec3 getTransformedPosition(const Vec3 &pos) const;
@@ -74,6 +60,20 @@ namespace RayTracing {
 
         [[nodiscard]] Mat4x4 getScaleMatrix() const;
 
+    private:
+        Mat4x4 calcTranslationMatrix(const Vec3 &translation);
+
+        Mat4x4 calcInverseTranslationMatrix();
+
+        Mat4x4 calcScaleMatrix(const Vec3 &scale);
+
+        Mat4x4 calcInverseScaleMatrix();
+
+        Mat4x4 calcRotationMatrix(const Vec3 &rotation);
+
+        Mat4x4 calcInverseRotationMatrix();
+
+    protected:
         friend class SequentialRayTracer;
         friend struct Ray;
     };
