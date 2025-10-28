@@ -5,7 +5,7 @@ using namespace metal;
 
 #define epsilon 1.192093E-07
 
-Metal_Intersection intersectSphere(Metal_LocalRay ray, simd::float3 sphereCenter, float sphereRadius){
+Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, float sphereRadius){
     float3 offsetRayOrigin = ray.origin - sphereCenter;
 
     float a = dot(ray.direction, ray.direction);
@@ -29,7 +29,7 @@ Metal_Intersection intersectSphere(Metal_LocalRay ray, simd::float3 sphereCenter
     return {.hit = false };
 }
 
-Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], float3 customNormal) {
+Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3]) {
     float3 edgeAB = triangle[1] - triangle[0];
     float3 edgeAC = triangle[2] - triangle[0];
     float3 normal = cross(edgeAB, edgeAC);
@@ -47,7 +47,7 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], flo
     return {
         .hit = det > epsilon && dst >= 0 && u >= 0 && v >= 0 && w >= 0,
         .hitPoint = ray.origin + (ray.direction * dst),
-        .normal = customNormal, // triangle.normA * w + triangle.normB * u + triangle.normC * v
+        .normal = normal,
         .distance = dst
     };
 }
@@ -110,4 +110,9 @@ Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, floa
         .origin = point,
         .direction = normalize(totalReflectionVec * totalReflection + rhf * (1 - totalReflection))
     };
+}
+
+float3 rotateNormal(float4x4 inverseRotate, float3 normal){
+    simd::float4 normal4 = inverseRotate * float4(normal, 0);
+    return normalize(float3(normal4.x, normal4.y, normal4.z));
 }

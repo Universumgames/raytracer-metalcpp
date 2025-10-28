@@ -54,7 +54,7 @@ namespace RayTracing {
 
         void encodeRayTestData(MetalEncodingData, MTL::ComputeCommandEncoder *computeEncoder);
 
-        Image *outputBufferToImage();
+        Image *outputBufferToImage(unsigned samples);
 
         static std::vector<Metal_Ray> raysToMetal(const std::vector<Ray> &rays);
 

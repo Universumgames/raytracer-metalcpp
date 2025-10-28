@@ -121,7 +121,7 @@ namespace RayTracing {
         auto variables = loadFunction("uvTest");
         sendComputeCommand({variables, nullptr}, &MetalRaytracer::encodeUVTestData);
 
-        return outputBufferToImage();
+        return outputBufferToImage(1);
     }
 
     void MetalRaytracer::encodeRayTestData(MetalEncodingData data,
@@ -137,7 +137,7 @@ namespace RayTracing {
         computeEncoder->setBuffer(bufferForward, 0, 1);
         computeEncoder->setBuffer(bufferResult, 0, 2);
 
-        MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), 1);
+        MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), samplesPerPixel);
 
         NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
         MTL::Size threadgroupSize = MTL::Size::Make(threadGroupSize, 1, 1);
@@ -158,15 +158,20 @@ namespace RayTracing {
         sendComputeCommand(data, &MetalRaytracer::encodeRayTestData);
         delete scene;
 
-        return outputBufferToImage();
+        return outputBufferToImage(1);
     }
 
-    Image *MetalRaytracer::outputBufferToImage() {
+    Image *MetalRaytracer::outputBufferToImage(unsigned samples) {
         auto *image = new Image(windowSize.getX(), windowSize.getY());
         for (unsigned y = 0; y < windowSize.getY(); y++) {
             for (unsigned x = 0; x < windowSize.getX(); x++) {
-                simd::float4 color = ((simd::float4 *) bufferResult->contents())[y * windowSize.getX() + x];
-                image->setPixel(x, y, RGBf::fromFloat4(color).toRGBA8());
+                std::vector<RGBf> colors;
+                for (unsigned s = 0; s < samples; s++) {
+                    simd::float4 color = ((simd::float4 *) bufferResult->contents())[
+                        y * windowSize.getX() + x * samples + s];
+                    colors.push_back(RGBf::fromFloat4(color));
+                }
+                image->setPixel(x, y, RGBf::blend(colors));
             }
         }
         return image;
@@ -198,16 +203,14 @@ namespace RayTracing {
                 .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
                 .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
                 .color = object->color.toMetal(),
-                .vertIndicesOffset = (unsigned) indices.size(),
-                .vertIndicesCount = (unsigned) object->mesh->indices.size(),
-                .vertPositionsOffset = (unsigned) vertices.size(),
+                .indicesOffset = (unsigned) indices.size(),
+                .triangleCount = (unsigned) object->mesh->numTriangles,
+                .vertexOffset = (unsigned) vertices.size(),
             });
             for (auto &vertex: object->mesh->vertices) {
                 vertices.push_back(vertex.toMetal());
             }
-            for (auto &index: object->mesh->indices) {
-                indices.push_back(index);
-            }
+            indices.insert(indices.end(), object->mesh->indices.begin(), object->mesh->indices.end());
         }
         return {
             .meshObjects = meshObjects,
@@ -222,7 +225,7 @@ namespace RayTracing {
         for (auto &object: objects) {
             result.push_back(Metal_SphereRayTraceableObject{
                 .boundingBox = object->boundingBox.toMetal(),
-                .transform = object->transform.getTransformMatrix().toMetal(),
+                .center = object->transform.getTranslation().toMetal(),
                 .radius = object->radius,
                 .color = object->color.toMetal(),
             });
@@ -254,23 +257,23 @@ namespace RayTracing {
                                               MTL::ComputeCommandEncoder *computeEncoder) {
         auto variables = data.variables;
         auto scene = *(data.scene);
-        computeEncoder->setComputePipelineState(variables.functionPSO);
 
         // prep data for buffers
-        auto *settings = new Metal_RayTraceSettings{
-            .screenSize = {windowSize.getX(), windowSize.getY()},
-            .bounces = this->bounces,
-            .samplesPerPixel = this->samplesPerPixel,
-            .meshObjectCount = 0,
-            .sphereObjectCount = 0,
-            .lightsCount = 0,
-            .maxColorsPerRay = 6
-        };
         auto rays = calculateStartingRays(scene.camera);
         auto metalRays = raysToMetal(rays);
         auto meshObjects = meshObjectsToMetal(scene.objects);
         auto sphereObjects = sphereObjectsToMetal(scene.spheres);
         auto lights = lightsToMetal(scene.lights);
+        auto *settings = new Metal_RayTraceSettings{
+            .screenSize = {windowSize.getX(), windowSize.getY()},
+            .bounces = this->bounces,
+            .samplesPerPixel = this->samplesPerPixel,
+            .meshObjectCount = (unsigned) meshObjects.meshObjects.size(),
+            .sphereObjectCount = (unsigned) sphereObjects.size(),
+            .lightsCount = (unsigned) lights.size(),
+            .maxColorsPerRay = 6
+        };
+
 
         // prep buffers
         prepBuffer(&bufferMeshObjects, device, sizeof(Metal_MeshRayTraceableObject) * meshObjects.meshObjects.size());
@@ -293,6 +296,9 @@ namespace RayTracing {
                sphereObjects.size() * sizeof(Metal_SphereRayTraceableObject));
         memcpy(bufferLights->contents(), lights.data(), lights.size() * sizeof(Metal_Light));
 
+        // set function arguments
+        computeEncoder->setComputePipelineState(variables.functionPSO);
+
         computeEncoder->setBuffer(bufferRayTraceSettings, 0, 0);
         computeEncoder->setBuffer(bufferRays, 0, 1);
         computeEncoder->setBuffer(bufferMeshObjects, 0, 2);
@@ -311,12 +317,25 @@ namespace RayTracing {
     }
 
     Image *MetalRaytracer::raytrace(Scene scene) {
-        auto *image = new Image(windowSize.getX(), windowSize.getY());
+        float maxDepth = 0;
+        for (auto &object: scene.objects) {
+            object->updateBoundingBox();
+            object->transform.update();
+            object->updateNestedBoundingBox(300);
+            maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
+        }
+        std::cout << "[" << identifier() << "] Starting raytrace with "
+                << windowSize.getX() * windowSize.getY() * samplesPerPixel << " rays, "
+                << scene.objects.size() << " mesh objects, "
+                << scene.spheres.size() << " spheres and "
+                << scene.lights.size() << " light sources"
+                << std::endl;
+        std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
+
         auto variables = loadFunction("raytrace");
 
         sendComputeCommand({variables, &scene}, &MetalRaytracer::encodeRaytracingData);
-        outputBufferToImage();
-        return image;
+        return outputBufferToImage(samplesPerPixel);
     }
 }
 #endif

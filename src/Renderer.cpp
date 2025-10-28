@@ -8,7 +8,7 @@ ImageHandler::ImageHandler(const RayTracing::Vec2u &imageSize) {
     this->image = new sf::Image({imageSize.getX(), imageSize.getY()}, sf::Color::Black);
 }
 
-sf::Image* ImageHandler::getImage() {
+sf::Image *ImageHandler::getImage() {
     return image;
 }
 
@@ -19,7 +19,7 @@ ImageHandler::~ImageHandler() {
 bool ImageHandler::saveImage(const std::string &path, RayTracing::Image *imageSrc) {
     if (imageSrc != nullptr) updateImage(imageSrc);
     bool ret = image->saveToFile(path);
-    std::cout << "Saved an image to " << path << (ret ? "" : "failed") << std::endl;
+    std::cout << "[ImageHandler] Saved an image to " << path << (ret ? "" : "failed") << std::endl;
     return ret;
 }
 
@@ -93,6 +93,6 @@ void Renderer::draw(RayTracing::Image *imageSrc) {
     window->display();
 }
 
-bool Renderer::saveWindow(const std::string& path) {
+bool Renderer::saveWindow(const std::string &path) {
     return imageHandler->saveImage(path);
 }

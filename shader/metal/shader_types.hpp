@@ -42,14 +42,14 @@ struct Metal_MeshRayTraceableObject {
     simd::float4x4 inverseTransform;
     simd::float4x4 inverseRotate;
     simd::float4 color;
-    unsigned vertIndicesOffset;
-    unsigned vertIndicesCount;
-    unsigned vertPositionsOffset;
+    unsigned indicesOffset;
+    unsigned triangleCount;
+    unsigned vertexOffset;
 };
 
 struct Metal_SphereRayTraceableObject {
     Metal_BoundingBox boundingBox;
-    simd::float4x4 transform;
+    simd::float3 center;
     float radius;
     simd::float4 color;
 };
@@ -66,10 +66,14 @@ Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, floa
 
 Metal_LocalRay toLocalRay(Metal_Ray ray, simd::float4x4 inverseTransform, simd::float4x4 inverseRotate);
 
-Metal_Intersection intersectSphere(Metal_LocalRay ray, simd::float3 sphereCenter, float sphereRadius);
+Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, float sphereRadius);
 
-Metal_Intersection intersectTriangle(Metal_LocalRay ray, simd::float3 triangle[3], simd::float3 customNormal);
+Metal_Intersection intersectTriangle(Metal_LocalRay ray, simd::float3 triangle[3]);
+
+bool intersectsBoundingBox(Metal_LocalRay ray, Metal_BoundingBox box);
 
 simd::float3 randomHemisphereReflection(simd::float3 normal);
 
 float pseudoRandom01(float seed);
+
+simd::float3 rotateNormal(simd::float4x4 inverseRotate, simd::float3 normal);
