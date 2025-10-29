@@ -43,6 +43,7 @@ struct Metal_MeshRayTraceableObject {
     simd::float4x4 inverseTransform;
     simd::float4x4 rotation;
     simd::float4x4 inverseRotate;
+    simd::float4x4 inverseScale;
     simd::float4 color;
     unsigned indicesOffset;
     unsigned triangleCount;
@@ -67,7 +68,8 @@ struct Metal_Light {
 
 Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, float totalReflection);
 
-Metal_LocalRay toLocalRay(Metal_Ray ray, simd::float4x4 inverseTransform, simd::float4x4 inverseRotate);
+Metal_LocalRay toLocalRay(Metal_Ray ray, simd::float4x4 inverseTransform, simd::float4x4 inverseRotate,
+                          simd::float4x4 inverseScale);
 
 Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, float sphereRadius);
 

@@ -11,6 +11,7 @@
 #include <Metal/MTLBuffer.hpp>
 
 #include "../Renderer.h"
+#include "../timing.hpp"
 #include "../../shader/metal/shader_types.hpp"
 
 
@@ -99,9 +100,12 @@ namespace RayTracing {
 
         (this->*function)(data, computeEncoder);
 
+        TIMING_START(executeCompute)
         computeEncoder->endEncoding();
         commandBuffer->commit();
         commandBuffer->waitUntilCompleted();
+        TIMING_END(executeCompute)
+        TIMING_LOG(executeCompute, identifier(), "Compute command execution")
     }
 
     void MetalRaytracer::encodeUVTestData(MetalEncodingData data,
@@ -207,6 +211,7 @@ namespace RayTracing {
                 .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
                 .rotation = object->transform.getRotationMatrix().toMetal(),
                 .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
+                .inverseScale = object->transform.getInverseScaleMatrix().toMetal(),
                 .color = object->color.toMetal(),
                 .indicesOffset = (unsigned) indices.size(),
                 .triangleCount = (unsigned) object->mesh->numTriangles,
@@ -267,6 +272,8 @@ namespace RayTracing {
         auto [function, functionPSO] = data.variables;
         auto scene = *(data.scene);
 
+        TIMING_START(prepBuffers)
+
         // prep data for buffers
         auto rays = calculateStartingRays(scene.camera);
         auto metalRays = raysToMetal(rays);
@@ -321,6 +328,9 @@ namespace RayTracing {
         computeEncoder->setBuffer(bufferLights, 0, 7);
         computeEncoder->setBuffer(bufferResult, 0, 8);
 
+        TIMING_END(prepBuffers)
+        TIMING_LOG(prepBuffers, identifier(), "Preparing and encoding data into buffers for raytracing")
+
         MTL::Size gridSize = MTL::Size::Make(getWindowSize().getX(), getWindowSize().getY(), getSamplesPerPixel());
 
         NS::UInteger maxThreadGroupSize = functionPSO->maxTotalThreadsPerThreadgroup();
@@ -330,16 +340,21 @@ namespace RayTracing {
     }
 
     Image *MetalRaytracer::raytrace(Scene scene) {
+        TIMING_START(prepping)
         float maxDepth = 0;
-        for (const auto &object: scene.objects) {
+        unsigned long triangleCount = 0;
+        for (auto &object: scene.objects) {
             object->updateBoundingBox();
             object->transform.update();
             object->updateNestedBoundingBox(300);
             maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
+            triangleCount += object->mesh->numTriangles;
         }
+        TIMING_END(prepping)
+        TIMING_LOG(prepping, identifier(), "prepping scene for raytracing")
         std::cout << "[" << identifier() << "] Starting raytrace with "
                 << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
-                << scene.objects.size() << " mesh objects, "
+                << scene.objects.size() << " mesh objects (" << triangleCount << " triangles), "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"
                 << std::endl;

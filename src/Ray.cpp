@@ -23,7 +23,7 @@ namespace RayTracing {
         float w = 1 - u - v;
 
         return {
-            .hit = det > epsilon && dst >= 0 && u >= 0 && v >= 0 && w >= 0,
+            .hit = det > epsilon && dst >= epsilon && u >= 0 && v >= 0 && w >= 0,
             .hitPoint = origin + (direction * dst),
             .normal = customNormal, // triangle.normA * w + triangle.normB * u + triangle.normC * v
             .distance = dst
@@ -60,6 +60,8 @@ namespace RayTracing {
         float tmin = -INFINITY;
         float tmax = INFINITY;
 
+        if (box.contains(origin)) return true;
+
         for (auto axis: {Vec3::Direction::X_AXIS, Vec3::Direction::Y_AXIS, Vec3::Direction::Z_AXIS}) {
             if (direction[axis] != 0) {
                 float t1 = (box.minPos[axis] - origin[axis]) / direction[axis];
@@ -77,13 +79,8 @@ namespace RayTracing {
         return tmax >= tmin && tmin >= 0;
     }
 
-    float sign(float x) {
-        if (x > 0) return 1;
-        if (x < 0) return -1;
-        return 0;
-    }
-
-    Vec3 randomHemisphereReflection(const Vec3 &normal) {
+    // native cpp implementation
+    /*Vec3 randomHemisphereReflection(const Vec3 &normal) {
         static float sigma = 0.8f;
         static thread_local std::mt19937 gen(std::random_device{}());
         std::normal_distribution<float> dist(0.0f, sigma);
@@ -94,6 +91,26 @@ namespace RayTracing {
         if (result.dot(normal) < 0)
             result = result * -1.0f;
         return result;
+    }*/
+
+    /// get fractional part of number
+    float frac(float f) {
+        return f - (long) f;
+    }
+
+    /// pseudo random number generation
+    float pseudoRandom(float seed) {
+        return frac(sin(seed * 4123.2345) * 43758.5453123) * 345.75467 * 9435.834123546;
+    }
+
+    Vec3 randomHemisphereReflection(Vec3 normal) {
+        Vec3 randVec = Vec3(pseudoRandom(normal.x() * 598.1256 + normal.y() * 414.5788),
+                            pseudoRandom(normal.y() * 358.3404 + normal.z() * 692.6398),
+                            pseudoRandom(normal.z() * 928.3458 + normal.x() * 348.34575)).normalized();
+        if (Vec3::dot(randVec, normal) < 0) {
+            randVec = randVec * -1;
+        }
+        return randVec;
     }
 
     Vec3 Ray::reflectAt(const Vec3 &location, const Vec3 &normal, float totalReflection) {

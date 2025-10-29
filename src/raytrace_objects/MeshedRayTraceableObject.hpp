@@ -44,7 +44,7 @@ namespace RayTracing {
         }
 
         explicit MeshedRayTraceableObject(const SerializableMeshedRayTraceableObject &obj) : RayTraceableObject(
-                obj.color, obj.position, obj.scale, obj.rotation), fileName(obj.fileName) {
+                obj.color, obj.position, obj.scale, obj.rotation.asDegreeToRadian()), fileName(obj.fileName) {
         }
 
         /**

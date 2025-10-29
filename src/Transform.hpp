@@ -44,6 +44,8 @@ namespace RayTracing {
 
         [[nodiscard]] Mat4x4 getInverseRotationMatrix() const;
 
+        [[nodiscard]] Mat4x4 getInverseScaleMatrix() const;
+
         [[nodiscard]] Mat4x4 getTransformationMatrix() const;
 
         [[nodiscard]] Vec3 getTransformedPosition(const Vec3 &pos) const;

@@ -86,6 +86,10 @@ namespace RayTracing {
         return inverseRotationMatrix;
     }
 
+    Mat4x4 Transform::getInverseScaleMatrix() const {
+        return inverseScaleMatrix;
+    }
+
     void Transform::update() {
         scaleMatrix = calcScaleMatrix(scale);
         inverseScaleMatrix = calcInverseScaleMatrix();
@@ -106,7 +110,7 @@ namespace RayTracing {
     }
 
     Vec3 Transform::getTransformedRayDirection(const Vec3 &dir) const {
-        return (inverseRotationMatrix * Vec4(dir, 1)).cutoff();
+        return (inverseRotationMatrix * inverseScaleMatrix * Vec4(dir, 1)).cutoff();
     }
 
     Vec3 Transform::getInverseTransformedPosition(const Vec3 &pos) const {

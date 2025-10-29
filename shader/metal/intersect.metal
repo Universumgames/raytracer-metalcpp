@@ -50,7 +50,7 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], flo
     return {
         .hit = det > epsilon && dst >= 0 && u >= 0 && v >= 0 && w >= 0,
         .hitPoint = ray.origin + (ray.direction * dst),
-        .normal = customNormal,
+        .normal = normal,
         .distance = dst
     };
 }
@@ -83,9 +83,9 @@ bool intersectsBoundingBox(Metal_LocalRay ray, Metal_BoundingBox box) {
     return tmax >= tmin && tmin >= 0;
 }
 
-Metal_LocalRay toLocalRay(Metal_Ray ray, simd::float4x4 inverseTransform, simd::float4x4 inverseRotate) {
+Metal_LocalRay toLocalRay(Metal_Ray ray, float4x4 inverseTransform, float4x4 inverseRotate, float4x4 inverseScale) {
     float4 origin4 = inverseTransform * float4(ray.origin, 1);
-    float4 direction4 = inverseRotate * float4(ray.direction, 1);
+    float4 direction4 = inverseRotate * inverseScale * float4(ray.direction, 1);
     return {
         .origin = float3(origin4.x, origin4.y, origin4.z),
         .direction = float3(direction4.x, direction4.y, direction4.z)

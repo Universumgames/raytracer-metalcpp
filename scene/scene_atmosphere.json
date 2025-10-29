@@ -24,7 +24,7 @@
   },
   "objects": [
     {
-      "fileName": "cube.stl",
+      "fileName": "uv_sphere_atmosphere.stl",
       "position": {
         "values": [
           -2,
@@ -41,45 +41,15 @@
       },
       "color": {
         "r": 255,
-        "g": 255,
+        "g": 0,
         "b": 128,
         "a": 255
       },
       "scale": {
         "values": [
-          1,
-          1,
-          1
-        ]
-      }
-    },
-    {
-      "fileName": "cube.stl",
-      "position": {
-        "values": [
-          0,
-          50,
-          0
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
-      "color": {
-        "r": 255,
-        "g": 0,
-        "b": 128,
-        "a": 128
-      },
-      "scale": {
-        "values": [
-          50,
-          1,
-          50
+          0.08,
+          0.08,
+          0.08
         ]
       }
     }

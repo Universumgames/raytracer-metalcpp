@@ -1,14 +1,25 @@
 {
-  "camera":{
+  "camera": {
     "position": {
-      "values": [0,0,0]
+      "values": [
+        0,
+        0,
+        0
+      ]
     },
     "direction": {
-      "values": [0,0,0]
+      "values": [
+        0,
+        0,
+        0
+      ]
     },
     "fov": 90,
     "size": {
-      "values": [0,0]
+      "values": [
+        0,
+        0
+      ]
     }
   },
   "objects": [
@@ -39,66 +50,6 @@
           1,
           1,
           1
-        ]
-      }
-    },
-    {
-      "fileName": "cube.stl",
-      "position": {
-        "values": [
-          -2.5,
-          8,
-          -1
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
-      "color": {
-        "r": 255,
-        "g": 0,
-        "b": 128,
-        "a": 128
-      },
-      "scale": {
-        "values": [
-          1,
-          1,
-          1
-        ]
-      }
-    },
-    {
-      "fileName": "low_poly_dragon_origin_fixed.stl",
-      "position": {
-        "values": [
-          2,
-          7,
-          -2
-        ]
-      },
-      "rotation": {
-        "values": [
-          180,
-          90,
-          0
-        ]
-      },
-      "color": {
-        "r": 128,
-        "g": 255,
-        "b": 128,
-        "a": 255
-      },
-      "scale": {
-        "values": [
-          0.0625,
-          0.0625,
-          0.0625
         ]
       }
     },
@@ -156,11 +107,11 @@
       "position": {
         "values": [
           0,
-          -55,
+          -30,
           0
         ]
       },
-      "radius": 50,
+      "radius": 25,
       "emittingColor": {
         "r": 255,
         "g": 255,

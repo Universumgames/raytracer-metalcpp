@@ -5,6 +5,9 @@
 #include <simd/simd.h>
 #endif
 
+#define deg2rad(deg) (deg * (float)M_PI / 180.0f)
+#define rad2deg(rad) (rad * 180.0f / (float)M_PI)
+
 namespace RayTracing {
     /// Vector class
     template<unsigned int X,
@@ -251,6 +254,13 @@ namespace RayTracing {
             return *this;
         }
 
+        Vector &operator/=(T t) {
+            for (unsigned int i = 0; i < X; i++) {
+                values[i] /= t;
+            }
+            return *this;
+        }
+
         T operator[](unsigned i) const {
             return values[i];
         }
@@ -305,6 +315,14 @@ namespace RayTracing {
             return result;
         }
 
+        Vector<X, T> asDegreeToRadian() const requires (X == 3) {
+            return {
+                deg2rad(values[0]),
+                deg2rad(values[1]),
+                deg2rad(values[2])
+            };
+        }
+
 #ifdef USE_SHADER_METAL
         /// Convert to Metal simd type float3
         simd::float3 toMetal() requires (X == 3 && std::is_same<T, float>::value) {
@@ -323,9 +341,6 @@ namespace RayTracing {
     typedef Vector<4, float> Vec4;
     typedef Vector<2, unsigned> Vec2u;
 
-#define deg2rad(deg) (deg * (float)M_PI / 180.0f)
-#define rad2deg(rad) (rad * 180.0f / (float)M_PI)
-
     struct Quaternion : public Vector<4, float> {
         /**
          * Get quaternion from euler angles in radians
@@ -333,22 +348,29 @@ namespace RayTracing {
          * @return quaternion
          */
         static Quaternion fromEuler(const Vec3 &rad) {
-            double roll = rad.getY();
-            double pitch = rad.getX();
-            double yaw = rad.getZ();
-            double cr = cos(roll * 0.5);
-            double sr = sin(roll * 0.5);
-            double cp = cos(pitch * 0.5);
-            double sp = sin(pitch * 0.5);
-            double cy = cos(yaw * 0.5);
-            double sy = sin(yaw * 0.5);
+            auto xQ = Quaternion({
+                cos(rad.getX() * 0.5f),
+                sin(rad.getX() * 0.5f),
+                0,
+                0
+            });
 
-            Quaternion q;
-            q.x() = cr * cp * cy + sr * sp * sy;
-            q.y() = sr * cp * cy - cr * sp * sy;
-            q.z() = cr * sp * cy + sr * cp * sy;
-            q.w() = cr * cp * sy - sr * sp * cy;
-            return q;
+            auto yQ = Quaternion({
+                cos(rad.getY() * 0.5f),
+                0,
+                sin(rad.getY() * 0.5f),
+                0
+            });
+
+            auto zQ = Quaternion({
+                cos(rad.getZ() * 0.5f),
+                0,
+                0,
+                sin(rad.getZ() * 0.5f)
+            });
+
+            auto q = zQ * yQ * xQ;
+            return Quaternion(q);
         }
 
         /**

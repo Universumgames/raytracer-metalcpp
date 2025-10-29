@@ -2,6 +2,7 @@
 
 #include <iostream>
 
+#include "../timing.hpp"
 #include "SFML/System/Vector2.hpp"
 
 namespace RayTracing {
@@ -26,27 +27,33 @@ namespace RayTracing {
 
 
     Image *SequentialRayTracer::raytrace(Scene scene) {
+        TIMING_START(prepping)
         auto *image = new Image(getWindowSize());
         auto rays = calculateStartingRays(scene.camera);
 
         float maxDepth = 0;
+        unsigned long triangleCount = 0;
         for (auto &object: scene.objects) {
             object->updateBoundingBox();
             object->transform.update();
             object->updateNestedBoundingBox(300);
             maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
+            triangleCount += object->mesh->numTriangles;
         }
+        TIMING_END(prepping)
+        TIMING_LOG(prepping, identifier(), "prepping scene for raytracing")
         std::cout << "[" << identifier() << "] Starting raytrace with "
-                << rays.size() << " rays, "
-                << scene.objects.size() << " mesh objects, "
+                << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
+                << scene.objects.size() << " mesh objects (" << triangleCount << " triangles), "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"
                 << std::endl;
         std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
 
+        TIMING_START(tracing)
         for (auto &ray: rays) {
             for (unsigned b = 0; b < getBounces(); b++) {
-                HitInfo currentHit{.hit = false, .distance = MAXFLOAT};
+                HitInfo currentHit{.hit = false, .distance = INFINITY};
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
 
@@ -54,9 +61,9 @@ namespace RayTracing {
                 for (const auto object: scene.objects) {
                     auto localRay = ray.toLocalRay(object->transform);
 
-                    // if (!localRay.intersectsBoundingBox(object->boundingBox)) {
-                    //     continue;
-                    // }
+                    if (!localRay.intersectsBoundingBox(object->boundingBox)) {
+                        continue;
+                    }
 
                     // TODO check nested bounding boxes here
                     for (int i = 0; i < object->mesh->numTriangles; i++) {
@@ -106,11 +113,19 @@ namespace RayTracing {
                     }
                     ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal);
                     ray.totalDistance += currentHit.distance;
+                } else {
+                    b = getBounces(); // no hit, stop bouncing
                 }
             }
         }
+        TIMING_END(tracing)
 
+        TIMING_START(resolve)
         resolveRays(image, rays);
+        TIMING_END(resolve)
+
+        TIMING_LOG(tracing, identifier(), "tracing rays")
+        TIMING_LOG(resolve, identifier(), "resolving rays into image")
 
         return image;
     }
@@ -123,7 +138,7 @@ namespace RayTracing {
             auto dot = ray.direction.dot(Vec3::forward());
             dot = dot * dot * dot * dot;
             ray.colors.emplace_back(dot, dot, dot, 1);
-            ray.lightColor = RGBf(0, 0, 1, 1);
+            ray.lightColor = RGBf(1, 1, 1, 1);
         }
 
         resolveRays(image, rays);
@@ -134,25 +149,29 @@ namespace RayTracing {
     void SequentialRayTracer::resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode) const {
         for (unsigned x = 0; x < getWindowSize().getX(); x++) {
             for (unsigned y = 0; y < getWindowSize().getY(); y++) {
-                std::vector<Ray> pixelRays;
-                std::vector<RGBf> pixelColors;
-                std::vector<RGBf> lightColors;
+                std::vector<RGBf> sampleColors;
 
-                int startIndex = (y * getWindowSize().getX() + x) * getSamplesPerPixel();
+                unsigned startIndex = (y * getWindowSize().getX() + x) * getSamplesPerPixel();
                 for (int i = 0; i < getSamplesPerPixel(); i++) {
-                    auto ray = rays[startIndex + i];
-                    pixelRays.push_back(ray);
-                    pixelColors.insert(pixelColors.end(), ray.colors.begin(), ray.colors.end());
-                    lightColors.push_back(ray.lightColor);
+                    const auto &currentRay = rays[startIndex + i];
+
+                    RGBf finalColor = RGBf(0.0);
+                    if (!currentRay.colors.empty()) {
+                        for (const auto &color: currentRay.colors) {
+                            finalColor += color;
+                        }
+                        finalColor = finalColor / static_cast<float>(currentRay.colors.size());
+                        finalColor += currentRay.lightColor;
+                        finalColor /= 2.0f;
+                        finalColor.w() = 1.0f;
+                    } else {
+                        finalColor = RGBf(0.0, 0.0, 0.0, 1.0);
+                    }
+
+                    sampleColors.push_back(finalColor);
                 }
 
-                RGBf light = RGBf::blend(lightColors);
-                if (light == Vec4::zero() && !pixelColors.empty()) {
-                    light = {0.2, 0.2, 0.2, 1};
-                }
-                RGBf avg = RGBf::blend(pixelColors, mode); // * light;
-                //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
-                image->setPixel(x, y, avg.toRGBA8());
+                image->setPixel(x, y, RGBf::blend(sampleColors));
             }
         }
     }

@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "raytracers/RayTracerFactory.hpp"
 #include "argumentsResolver.hpp"
+#include "timing.hpp"
 
 using namespace RayTracing;
 
@@ -16,11 +17,10 @@ using namespace RayTracing;
  * @return the resulting image if deleteImg is false, nullptr otherwise
  */
 Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteImg = true, bool deleteTracer = true) {
-    auto start = std::chrono::high_resolution_clock::now();
+    TIMING_START(raytrace)
     Image *raytraced = raytracer->raytrace(scene);
-    auto end = std::chrono::high_resolution_clock::now();
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    std::cout << "[" << raytracer->identifier() << "] Laufzeit: " << duration.count() << " ms\n";
+    TIMING_END(raytrace)
+    TIMING_LOG(raytrace, "Benchmarking", raytracer->identifier() + " raytracing")
 
     bool exists = std::ifstream(benchmarkFile).good();
     std::ofstream timeLog;
@@ -31,7 +31,7 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     }
     timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
             raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << scene.totalTriangleCount() <<
-            "," << scene.totalSphericalCount() << "," << duration.count()
+            "," << scene.totalSphericalCount() << "," << TIMING_MILLIS(raytrace)
             << std::endl;
     timeLog.close();
 

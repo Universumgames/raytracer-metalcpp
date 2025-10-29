@@ -3,12 +3,14 @@
 
 using namespace metal;
 
-float pseudoRandom01(float seed){
+float pseudoRandom(float seed){
     return fract(sin(seed * 4123.2345) * 43758.5453123) * 345.75467 * 9435.834123546;
 }
 
 float3 randomHemisphereReflection(float3 normal){
-    float3 randVec = normalize(float3(pseudoRandom01(normal.x * 598.1256 + normal.y * 414.5788), pseudoRandom01(normal.y * 358.3404 + normal.z * 692.6398), pseudoRandom01(normal.z * 928.3458 + normal.x * 348.34575)));
+    float3 randVec = normalize(float3(pseudoRandom(normal.x * 598.1256 + normal.y * 414.5788),
+                                      pseudoRandom(normal.y * 358.3404 + normal.z * 692.6398),
+                                      pseudoRandom(normal.z * 928.3458 + normal.x * 348.34575)));
     if(dot(randVec, normal) < 0){
         randVec = -randVec;
     }

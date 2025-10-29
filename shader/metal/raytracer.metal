@@ -32,7 +32,7 @@ kernel void raytrace(
         // Meshes
         for(unsigned o = 0; o < settings.meshObjectCount; o++){
             Metal_MeshRayTraceableObject meshObject = meshObjects[o];
-            Metal_LocalRay localRay = toLocalRay(currentRay, meshObject.inverseTransform, meshObject.inverseRotate);
+            Metal_LocalRay localRay = toLocalRay(currentRay, meshObject.inverseTransform, meshObject.inverseRotate, meshObject.inverseScale);
             if(!intersectsBoundingBox(localRay, meshObject.boundingBox)){
                 continue;
             }
@@ -88,6 +88,8 @@ kernel void raytrace(
                 currentRay.direction = newRay.direction;
                 //currentRay.totalDistance += currentHit.distance;
             }
+        }else{
+            b = settings.bounces; // terminate
         }
     }
     float4 finalColor = float4(0.0);
