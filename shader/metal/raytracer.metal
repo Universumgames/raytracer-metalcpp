@@ -18,7 +18,7 @@ kernel void raytrace(
                      uint3 gid [[thread_position_in_grid]],
                      uint3 gridSize [[threads_per_grid]])
 {
-    uint idx = gid.y * gridSize.x + gid.x * gridSize.z + gid.z;
+    uint idx = (gid.y * gridSize.x + gid.x) * gridSize.z + gid.z;
     Metal_Ray currentRay = rays[idx];
     unsigned colorCount = 0;
     for(unsigned b = 0; b < settings.bounces; b++){
@@ -64,15 +64,30 @@ kernel void raytrace(
             }
         }
 
-        // TODO lights
+        // Lights
+        for(unsigned l = 0; l < settings.lightsCount; l++){
+            Metal_Light light = lights[l];
+            Metal_Intersection intersection = intersectSphere(currentRay, light.center, light.radius);
+            if(intersection.hit && intersection.distance < currentHit.distance){
+                currentHit = intersection;
+                currentHit.isLight = true;
+                currentRotatedNormal = intersection.normal;
+                currentColor = light.color;
+            }
+        }
 
         if(currentHit.hit){
-            currentRay.colors[colorCount] = currentColor;
-            colorCount++;
-            Metal_Ray newRay = reflectAt(currentRay, currentHit.hitPoint, currentRotatedNormal, 0.9f);
-            currentRay.origin = newRay.origin;
-            currentRay.direction = newRay.direction;
-            //currentRay.totalDistance += currentHit.distance;
+            if(currentHit.isLight){
+                currentRay.lightColor = currentColor;
+                b = settings.bounces; // terminate
+            }else{
+                currentRay.colors[colorCount] = currentColor * lightDissipationCoefficient(currentHit.distance);
+                colorCount++;
+                Metal_Ray newRay = reflectAt(currentRay, currentHit.hitPoint, currentRotatedNormal, 0.5f);
+                currentRay.origin = newRay.origin;
+                currentRay.direction = newRay.direction;
+                //currentRay.totalDistance += currentHit.distance;
+            }
         }
     }
     float4 finalColor = float4(0.0);
@@ -81,9 +96,15 @@ kernel void raytrace(
             finalColor += currentRay.colors[c];
         }
         finalColor = finalColor / float(colorCount);
+        finalColor += currentRay.lightColor;
+        finalColor /= 2.0f;
         finalColor.w = 1.0f;
     }else{
         finalColor = float4(0.0, 0.0, 0.0, 1.0);
     }
     result[idx] = finalColor;
+}
+
+float lightDissipationCoefficient(float distance){
+    return 1.0f / (sqrt(distance / 1000.0f) + 1.0f);
 }

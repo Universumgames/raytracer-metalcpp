@@ -4,16 +4,15 @@
 using namespace metal;
 
 float pseudoRandom01(float seed){
-    return fract(sin(seed) * 43758.5453123);
+    return fract(sin(seed * 4123.2345) * 43758.5453123) * 345.75467 * 9435.834123546;
 }
 
 float3 randomHemisphereReflection(float3 normal){
-    float3 randVec = float3(pseudoRandom01(normal.x + normal.y), pseudoRandom01(normal.y + normal.z), pseudoRandom01(normal.z + normal.x));
-    float3 result = normalize(randVec + normal);
-    if(dot(result, normal) < 0){
-        result = -result;
+    float3 randVec = normalize(float3(pseudoRandom01(normal.x * 598.1256 + normal.y * 414.5788), pseudoRandom01(normal.y * 358.3404 + normal.z * 692.6398), pseudoRandom01(normal.z * 928.3458 + normal.x * 348.34575)));
+    if(dot(randVec, normal) < 0){
+        randVec = -randVec;
     }
-    return result;
+    return randVec;
 }
 
 Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, float totalReflection){

@@ -6,10 +6,10 @@ using namespace metal;
 kernel void rayTest(const device Metal_Ray* rays [[ buffer(0) ]],
                    constant float3& forward [[ buffer(1) ]],
                    device float4* result,
-                   uint2 gid [[thread_position_in_grid]],
-                   uint2 gridSize [[threads_per_grid]])
+                   uint3 gid [[thread_position_in_grid]],
+                   uint3 gridSize [[threads_per_grid]])
 {
-    uint idx = gid.y * gridSize.x + gid.x;
+    uint idx = (gid.y * gridSize.x + gid.x) * gridSize.z + gid.z;
     // the for-loop is replaced with a collection of threads, each of which calls this function
     float dotValue = dot(rays[idx].direction, forward);
     dotValue = dotValue * dotValue * dotValue * dotValue;

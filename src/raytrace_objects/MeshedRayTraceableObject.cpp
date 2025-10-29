@@ -43,8 +43,8 @@ namespace RayTracing {
                 }
                 const float *n = stl_mesh.tri_normal(itri);
                 mesh->normals.emplace_back(n[0], n[1], n[2]);
-                mesh->numTriangles++;
             }
+            mesh->numTriangles = stl_mesh.num_tris();
             this->boundingBox = {minLoc, maxLoc};
         } catch (std::exception &e) {
             std::cerr << e.what() << std::endl;

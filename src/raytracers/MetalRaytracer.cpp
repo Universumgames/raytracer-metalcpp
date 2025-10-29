@@ -26,6 +26,7 @@ namespace RayTracing {
     }
 
     void MetalRaytracer::initialize() {
+        auto windowSize = getWindowSize();
         device = MTL::CreateSystemDefaultDevice();
 
         defaultLibrary = device->newDefaultLibrary();
@@ -59,10 +60,11 @@ namespace RayTracing {
         auto *forward = new simd::float3{Vec3::forward().getX(), Vec3::forward().getY(), Vec3::forward().getZ()};
         memcpy(bufferForward->contents(), forward, sizeof(simd::float3));
 
-        bufferResult = device->newBuffer(sizeof(simd::float4) * windowSize.getX() * windowSize.getY(),
-                                         MTL::ResourceStorageModeShared);
+        bufferResult = device->newBuffer(
+            sizeof(simd::float4) * windowSize.getX() * windowSize.getY() * getSamplesPerPixel(),
+            MTL::ResourceStorageModeShared);
 
-        bufferRays = device->newBuffer(sizeof(Metal_Ray) * windowSize.getX() * windowSize.getY() * samplesPerPixel,
+        bufferRays = device->newBuffer(sizeof(Metal_Ray) * windowSize.getX() * windowSize.getY() * getSamplesPerPixel(),
                                        MTL::ResourceStorageModeShared);
 
         // data to be filled on encode
@@ -104,17 +106,17 @@ namespace RayTracing {
 
     void MetalRaytracer::encodeUVTestData(MetalEncodingData data,
                                           MTL::ComputeCommandEncoder *computeEncoder) {
-        auto variables = data.variables;
-        computeEncoder->setComputePipelineState(variables.functionPSO);
+        auto [function, functionPSO] = data.variables;
+        computeEncoder->setComputePipelineState(functionPSO);
         computeEncoder->setBuffer(bufferResult, 0, 0);
         computeEncoder->setBuffer(bufferScreenSize, 0, 1);
 
-        MTL::Size gridSize = MTL::Size(windowSize.getX(), windowSize.getY(), 1);
+        MTL::Size gridSize = MTL::Size(getWindowSize().getX(), getWindowSize().getY(), 1);
 
-        NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
-        MTL::Size threadgroupSize(threadGroupSize, 1, 1);
+        NS::UInteger maxThreadGroupSize = functionPSO->maxTotalThreadsPerThreadgroup();
+        MTL::Size tGroupSize = MTL::Size::Make(maxThreadGroupSize, 1, 1);
 
-        computeEncoder->dispatchThreads(gridSize, threadgroupSize);
+        computeEncoder->dispatchThreads(gridSize, tGroupSize);
     }
 
     Image *MetalRaytracer::uvTest() {
@@ -126,49 +128,50 @@ namespace RayTracing {
 
     void MetalRaytracer::encodeRayTestData(MetalEncodingData data,
                                            MTL::ComputeCommandEncoder *computeEncoder) {
-        auto variables = data.variables;
-        auto rays = calculateStartingRays(data.scene->camera);
-        auto metalRays = raysToMetal(rays);
-        auto rayArray = metalRays.data();
-        memcpy(bufferRays->contents(), rayArray, windowSize.getX() * windowSize.getY() * sizeof(Metal_Ray));
+        auto [function, functionPSO] = data.variables;
+        const auto rays = calculateStartingRays(data.scene->camera);
+        const auto metalRays = raysToMetal(rays);
+        const auto rayArray = metalRays.data();
+        memcpy(bufferRays->contents(), rayArray, metalRays.size() * sizeof(Metal_Ray));
 
-        computeEncoder->setComputePipelineState(variables.functionPSO);
+        computeEncoder->setComputePipelineState(functionPSO);
         computeEncoder->setBuffer(bufferRays, 0, 0);
         computeEncoder->setBuffer(bufferForward, 0, 1);
         computeEncoder->setBuffer(bufferResult, 0, 2);
 
-        MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), samplesPerPixel);
+        MTL::Size gridSize = MTL::Size::Make(getWindowSize().getX(), getWindowSize().getY(), getSamplesPerPixel());
 
-        NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
-        MTL::Size threadgroupSize = MTL::Size::Make(threadGroupSize, 1, 1);
+        NS::UInteger maxThreadGroupSize = functionPSO->maxTotalThreadsPerThreadgroup();
+        MTL::Size tGroupSize = MTL::Size::Make(maxThreadGroupSize, 1, 1);
 
-        computeEncoder->dispatchThreads(gridSize, threadgroupSize);
+        computeEncoder->dispatchThreads(gridSize, tGroupSize);
     }
 
     Image *MetalRaytracer::rayTest(Camera *camera) {
-        auto variables = loadFunction("rayTest");
+        const auto variables = loadFunction("rayTest");
         assert(variables.functionPSO != nullptr);
 
-        auto scene = new Scene{camera};
+        const auto scene = new Scene{camera};
 
-        auto data = MetalEncodingData{
+        const auto data = MetalEncodingData{
             .variables = variables,
             .scene = scene
         };
         sendComputeCommand(data, &MetalRaytracer::encodeRayTestData);
         delete scene;
 
-        return outputBufferToImage(1);
+        return outputBufferToImage(getSamplesPerPixel());
     }
 
     Image *MetalRaytracer::outputBufferToImage(unsigned samples) {
+        auto windowSize = getWindowSize();
         auto *image = new Image(windowSize.getX(), windowSize.getY());
         for (unsigned y = 0; y < windowSize.getY(); y++) {
             for (unsigned x = 0; x < windowSize.getX(); x++) {
                 std::vector<RGBf> colors;
+                int startIndex = (y * getWindowSize().getX() + x) * samples;
                 for (unsigned s = 0; s < samples; s++) {
-                    simd::float4 color = ((simd::float4 *) bufferResult->contents())[
-                        y * windowSize.getX() + x * samples + s];
+                    simd::float4 color = ((simd::float4 *) bufferResult->contents())[startIndex + s];
                     colors.push_back(RGBf::fromFloat4(color));
                 }
                 image->setPixel(x, y, RGBf::blend(colors));
@@ -261,7 +264,7 @@ namespace RayTracing {
 
     void MetalRaytracer::encodeRaytracingData(MetalEncodingData data,
                                               MTL::ComputeCommandEncoder *computeEncoder) {
-        auto variables = data.variables;
+        auto [function, functionPSO] = data.variables;
         auto scene = *(data.scene);
 
         // prep data for buffers
@@ -271,9 +274,9 @@ namespace RayTracing {
         auto sphereObjects = sphereObjectsToMetal(scene.spheres);
         auto lights = lightsToMetal(scene.lights);
         auto *settings = new Metal_RayTraceSettings{
-            .screenSize = {windowSize.getX(), windowSize.getY()},
-            .bounces = this->bounces,
-            .samplesPerPixel = this->samplesPerPixel,
+            .screenSize = {getWindowSize().getX(), getWindowSize().getY()},
+            .bounces = getBounces(),
+            .samplesPerPixel = getSamplesPerPixel(),
             .meshObjectCount = (unsigned) meshObjects.meshObjects.size(),
             .sphereObjectCount = (unsigned) sphereObjects.size(),
             .lightsCount = (unsigned) lights.size(),
@@ -306,7 +309,7 @@ namespace RayTracing {
         memcpy(bufferLights->contents(), lights.data(), lights.size() * sizeof(Metal_Light));
 
         // set function arguments
-        computeEncoder->setComputePipelineState(variables.functionPSO);
+        computeEncoder->setComputePipelineState(functionPSO);
 
         computeEncoder->setBuffer(bufferRayTraceSettings, 0, 0);
         computeEncoder->setBuffer(bufferRays, 0, 1);
@@ -318,34 +321,34 @@ namespace RayTracing {
         computeEncoder->setBuffer(bufferLights, 0, 7);
         computeEncoder->setBuffer(bufferResult, 0, 8);
 
-        MTL::Size gridSize = MTL::Size::Make(windowSize.getX(), windowSize.getY(), samplesPerPixel);
+        MTL::Size gridSize = MTL::Size::Make(getWindowSize().getX(), getWindowSize().getY(), getSamplesPerPixel());
 
-        NS::UInteger threadGroupSize = variables.functionPSO->maxTotalThreadsPerThreadgroup();
-        MTL::Size threadgroupSize = MTL::Size::Make(threadGroupSize, 1, 1);
+        NS::UInteger maxThreadGroupSize = functionPSO->maxTotalThreadsPerThreadgroup();
+        MTL::Size tGroupSize = MTL::Size::Make(maxThreadGroupSize, 1, 1);
 
-        computeEncoder->dispatchThreads(gridSize, threadgroupSize);
+        computeEncoder->dispatchThreads(gridSize, tGroupSize);
     }
 
     Image *MetalRaytracer::raytrace(Scene scene) {
         float maxDepth = 0;
-        for (auto &object: scene.objects) {
+        for (const auto &object: scene.objects) {
             object->updateBoundingBox();
             object->transform.update();
             object->updateNestedBoundingBox(300);
             maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
         }
         std::cout << "[" << identifier() << "] Starting raytrace with "
-                << windowSize.getX() * windowSize.getY() * samplesPerPixel << " rays, "
+                << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
                 << scene.objects.size() << " mesh objects, "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"
                 << std::endl;
         std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
 
-        auto variables = loadFunction("raytrace");
+        const auto variables = loadFunction("raytrace");
 
         sendComputeCommand({variables, &scene}, &MetalRaytracer::encodeRaytracingData);
-        return outputBufferToImage(samplesPerPixel);
+        return outputBufferToImage(getSamplesPerPixel());
     }
 }
 #endif

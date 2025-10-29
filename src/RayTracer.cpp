@@ -5,6 +5,11 @@ namespace RayTracing {
         this->windowSize = windowSize;
         this->bounces = bounces;
         this->samplesPerPixel = samplesPerPixel;
+
+        assert(samplesPerPixel > 0);
+        assert(bounces > 0);
+        assert(windowSize.getX() > 0);
+        assert(windowSize.getY() > 0);
     }
 
     RayTracer::~RayTracer() {
@@ -19,9 +24,9 @@ namespace RayTracing {
     }
 
     Vec2 RayTracer::getViewBoxScaling() {
-        Vec2 windowSize = {(float) this->windowSize.getX(), (float) this->windowSize.getY()};
+        Vec2 windowSizeF = {(float) this->windowSize.getX(), (float) this->windowSize.getY()};
         Vec2 desiredSize = {1, 1};
-        return desiredSize / windowSize;
+        return desiredSize / windowSizeF;
     }
 
     std::vector<Ray> RayTracer::calculateStartingRays(Camera *camera) {
@@ -73,48 +78,13 @@ namespace RayTracing {
         return rays;
     }
 
-    void RayTracer::resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode) const {
-        for (unsigned x = 0; x < windowSize.getX(); x++) {
-            for (unsigned y = 0; y < windowSize.getY(); y++) {
-                std::vector<Ray> pixelRays;
-                std::vector<RGBf> pixelColors;
-                std::vector<RGBf> lightColors;
 
-                int startIndex = (y * windowSize.getX() + x) * samplesPerPixel;
-                for (int i = 0; i < samplesPerPixel; i++) {
-                    auto ray = rays[startIndex + i];
-                    pixelRays.push_back(ray);
-                    pixelColors.insert(pixelColors.end(), ray.colors.begin(), ray.colors.end());
-                    lightColors.push_back(ray.lightColor);
-                }
-
-                /*// find all rays assigned to specified pixel, when we are assuming that the order changed
-                auto it = rays.begin();
-                while ((it = std::find_if(it, rays.end(), [x, y](const Ray &ray) {
-                    return ray.idX == x && ray.idY == y;
-                })) != rays.end()) {
-                    pixelRays.push_back(*it);
-                    std::vector<Color> colors = (*it).colors;
-                    pixelColors.insert(pixelColors.end(), colors.begin(), colors.end());
-                    ++it;
-                }*/
-
-                RGBf light = RGBf::blend(lightColors);
-                if (light == Vec4::zero() && !pixelColors.empty()) {
-                    light = {0.2, 0.2, 0.2, 1};
-                }
-                RGBf avg = RGBf::blend(pixelColors, mode); // * light;
-                //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
-                image->setPixel(x, y, avg.toRGBA8());
-            }
-        }
-    }
 
     std::vector<Vec2> RayTracer::getSamplingOffsets() {
         std::vector<Vec2> offsets;
 
-        int rows = std::floor(std::sqrt(samplesPerPixel));
-        int cols = std::ceil((float) samplesPerPixel / (float) rows);
+        const int rows = std::floor(std::sqrt(samplesPerPixel));
+        const int cols = std::ceil((float) samplesPerPixel / (float) rows);
 
         float dx = 1.0f / (cols + 1);
         float dy = 1.0f / (rows + 1);

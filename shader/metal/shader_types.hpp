@@ -5,6 +5,7 @@ struct Metal_Ray {
     simd::float3 origin;
     simd::float3 direction;
     simd::float4 colors[6];
+    simd::float4 lightColor;
     unsigned numColors;
 };
 
@@ -79,3 +80,5 @@ simd::float3 randomHemisphereReflection(simd::float3 normal);
 float pseudoRandom01(float seed);
 
 simd::float3 rotateNormal(simd::float4x4 rotation, simd::float3 normal);
+
+float lightDissipationCoefficient(float distance);

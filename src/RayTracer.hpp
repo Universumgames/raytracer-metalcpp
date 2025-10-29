@@ -7,10 +7,6 @@
 namespace RayTracing {
     class RayTracer {
     protected:
-        Vec2u windowSize;
-        unsigned bounces;
-        unsigned samplesPerPixel;
-
         /**
          * get the view box scaling to convert from screen space to world space
          * ratio of the view boc to the screen space
@@ -24,9 +20,10 @@ namespace RayTracing {
          */
         std::vector<Ray> calculateStartingRays(Camera *camera);
 
-        void resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode = AVERAGE) const;
-
     private:
+        Vec2u windowSize;
+        unsigned bounces;
+        unsigned samplesPerPixel;
         /**
          * For multiple rays per pixel calculate coordinate offsets for samples
          * @return geometrical centered point cloud of length samplesPerPixel
@@ -64,7 +61,7 @@ namespace RayTracing {
         virtual Image *rayTest(Camera *camera) = 0;
 
         /// Get the window size
-        Vec2u getWindowSize() { return windowSize; }
+        Vec2u getWindowSize() const { return windowSize; }
 
         /// Get the number of samples per pixel
         unsigned getSamplesPerPixel() const;

@@ -3,6 +3,9 @@
 
 namespace RayTracing {
     class SequentialRayTracer : public RayTracer {
+    private:
+        void resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode = AVERAGE) const;
+
     public:
         SequentialRayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 

@@ -11,6 +11,7 @@ namespace RayTracing {
     }
 
     Image *SequentialRayTracer::uvTest() {
+        auto windowSize = getWindowSize();
         auto *image = new Image(windowSize);
 
         for (unsigned y = 0; y < windowSize.getY(); y++) {
@@ -25,7 +26,7 @@ namespace RayTracing {
 
 
     Image *SequentialRayTracer::raytrace(Scene scene) {
-        auto *image = new Image(windowSize);
+        auto *image = new Image(getWindowSize());
         auto rays = calculateStartingRays(scene.camera);
 
         float maxDepth = 0;
@@ -44,7 +45,7 @@ namespace RayTracing {
         std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
 
         for (auto &ray: rays) {
-            for (unsigned b = 0; b < bounces; b++) {
+            for (unsigned b = 0; b < getBounces(); b++) {
                 HitInfo currentHit{.hit = false, .distance = MAXFLOAT};
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
@@ -99,7 +100,7 @@ namespace RayTracing {
                     // hacky way to get some shading without light sources
                     if (currentHit.isLight) {
                         ray.lightColor = currentColor;
-                        b = bounces; // after ray intersects with light source, stop bouncing
+                        b = getBounces(); // after ray intersects with light source, stop bouncing
                     } else {
                         ray.colors.emplace_back(currentColor);
                     }
@@ -115,7 +116,7 @@ namespace RayTracing {
     }
 
     Image *SequentialRayTracer::rayTest(Camera *camera) {
-        auto *image = new Image(windowSize);
+        auto *image = new Image(getWindowSize());
         auto rays = calculateStartingRays(camera);
 
         for (auto &ray: rays) {
@@ -128,5 +129,31 @@ namespace RayTracing {
         resolveRays(image, rays);
 
         return image;
+    }
+
+    void SequentialRayTracer::resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode) const {
+        for (unsigned x = 0; x < getWindowSize().getX(); x++) {
+            for (unsigned y = 0; y < getWindowSize().getY(); y++) {
+                std::vector<Ray> pixelRays;
+                std::vector<RGBf> pixelColors;
+                std::vector<RGBf> lightColors;
+
+                int startIndex = (y * getWindowSize().getX() + x) * getSamplesPerPixel();
+                for (int i = 0; i < getSamplesPerPixel(); i++) {
+                    auto ray = rays[startIndex + i];
+                    pixelRays.push_back(ray);
+                    pixelColors.insert(pixelColors.end(), ray.colors.begin(), ray.colors.end());
+                    lightColors.push_back(ray.lightColor);
+                }
+
+                RGBf light = RGBf::blend(lightColors);
+                if (light == Vec4::zero() && !pixelColors.empty()) {
+                    light = {0.2, 0.2, 0.2, 1};
+                }
+                RGBf avg = RGBf::blend(pixelColors, mode); // * light;
+                //Color bounceColor = Color(255 / pixelColors.size(), 255 / pixelColors.size(), 0, 255);
+                image->setPixel(x, y, avg.toRGBA8());
+            }
+        }
     }
 }
