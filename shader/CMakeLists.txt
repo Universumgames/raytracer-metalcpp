@@ -7,4 +7,6 @@ endif ()
 
 if(USE_SHADER_CUDA)
     add_subdirectory(cuda)
+    add_dependencies(${PROJECT_NAME} COPIED_CUDA)
+    source_group("CudaSources" ".*/\.cuda")
 endif ()

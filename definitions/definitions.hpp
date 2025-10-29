@@ -12,3 +12,7 @@
     do { \
         throw std::runtime_error(std::string("TODO at ") + __FILE__ + ":" + std::to_string(__LINE__) + " - " + msg); \
     } while (0)
+
+
+#define _USE_MATH_DEFINES
+#include <cmath>
