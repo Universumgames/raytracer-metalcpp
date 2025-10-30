@@ -27,8 +27,9 @@ namespace RayTracing {
                                                             samplesPerPixel);
 #ifdef USE_SHADER_METAL
         this->shaderRayTracer = new MetalRaytracer(windowSize, bounces, samplesPerPixel);
-#elifdef USE_SHADER_CUDA
-        this->sequentialRayTracer = new CudaRayTracer(windowSize, bounces, samplesPerPixel);
+#endif
+#ifdef USE_SHADER_CUDA
+        this->shaderRayTracer = new CudaRayTracer(windowSize, bounces, samplesPerPixel);
 #endif
     }
 }

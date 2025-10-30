@@ -26,6 +26,7 @@ if(USE_SHADER_CUDA)
             CUDA_SEPARABLE_COMPILATION ON)
 
     target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:--extended-lambda>)
+    target_compile_options(${PROJECT_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CUDA>:-g -G>)
 
     target_compile_features(${PROJECT_NAME} PRIVATE cxx_std_17 cuda_std_17)
 

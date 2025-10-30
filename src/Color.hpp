@@ -9,6 +9,10 @@
 #ifdef USE_SHADER_METAL
 #include <simd/vector_types.h>
 #endif
+#ifdef USE_SHADER_CUDA
+#include <cuda.hpp>
+#include <vector_types.h>
+#endif
 
 namespace RayTracing {
     /// 8-bit per channel RGBA color
@@ -63,6 +67,13 @@ namespace RayTracing {
         /// Converts from simd::float4 to RGBA8
         static RGBA8 fromFloat4(simd::float4 f) {
             return {f[0] * 255, f[1] * 255, f[2] * 255, f[3] * 255};
+        }
+#endif
+
+#ifdef USE_SHADER_CUDA
+        static RGBA8 fromFloat4(float4 f) {
+            auto* fP = (float*) &f;
+            return {fP[0] * 255, fP[1] * 255, fP[2] * 255, fP[3] * 255};
         }
 #endif
     };
@@ -126,6 +137,13 @@ namespace RayTracing {
         /// Converts from simd::float4 to RGBf
         static RGBf fromFloat4(simd::float4 f) {
             return {f[0], f[1], f[2], f[3]};
+        }
+#endif
+
+#ifdef USE_SHADER_CUDA
+        static RGBf fromFloat4(float4 f) {
+            auto* fP = (float*) &f;
+            return {fP[0], fP[1], fP[2], fP[3]};
         }
 #endif
     };

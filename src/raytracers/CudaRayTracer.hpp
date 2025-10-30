@@ -1,10 +1,21 @@
 #pragma once
 #ifdef USE_SHADER_CUDA
 #include "../RayTracer.hpp"
+#include "shader_types.cuh"
 
 namespace RayTracing {
-    class CudaRayTracer : public RayTracer {
+    class CudaRayTracer final : public RayTracer {
     private:
+
+        struct Cuda_Ray {
+
+        };
+
+        Image *outputBufferToImage(unsigned samples);
+
+        cudaDeviceProp deviceProp = {};
+
+        RGBf* bufferResult;
 
     public:
         CudaRayTracer(const Vec2u& screenSize, unsigned bounces, unsigned samplesPerPixel);

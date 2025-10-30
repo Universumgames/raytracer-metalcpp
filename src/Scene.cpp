@@ -4,7 +4,7 @@
 
 namespace RayTracing {
     Scene Scene::loadFromFile(const std::string &path) {
-        std::cout << "Loading scene from " << path << std::endl;
+        std::cout << "[Scene] Loading scene from " << path << std::endl;
         std::ifstream file(path);
         if (!file.is_open()) {
             throw std::runtime_error("Could not open file " + std::filesystem::current_path().string() + '/' + path);

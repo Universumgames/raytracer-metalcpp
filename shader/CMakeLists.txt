@@ -7,7 +7,7 @@ endif ()
 
 if(USE_SHADER_CUDA)
     add_subdirectory(cuda)
-    include_directories(cuda)
+    target_include_directories(${PROJECT_NAME} PUBLIC cuda)
 
     set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
     target_link_libraries(${PROJECT_NAME} PRIVATE CUDA_SHADERS)
