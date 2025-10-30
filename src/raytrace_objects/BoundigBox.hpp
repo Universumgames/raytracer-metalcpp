@@ -63,13 +63,24 @@ namespace RayTracing {
 
     /// Nested bounding box for spatial partitioning
     struct NestedBoundingBox : public BoundingBox {
+        /// containing the triangle indices list for this bounding box
         std::vector<int> indices;
+        /// child left bounding box
         NestedBoundingBox *left;
+        /// child right bounding box
         NestedBoundingBox *right;
+        /// value at which the box is split
         float splitValue;
+        /// axis along which the box is split
         Vec3::Direction splitAxis;
 
-        NestedBoundingBox() {
+        /// Default constructor for easier initialization
+        NestedBoundingBox() : BoundingBox(), left(nullptr), right(nullptr), splitValue(0), splitAxis(Vec3::X_AXIS) {
+        }
+
+        ~NestedBoundingBox() {
+            delete left;
+            delete right;
         }
 
         /**
@@ -103,6 +114,19 @@ namespace RayTracing {
             unsigned leftDepth = left != nullptr ? left->depth() : 0;
             unsigned rightDepth = right != nullptr ? right->depth() : 0;
             return 1 + std::max(leftDepth, rightDepth);
+        }
+
+        std::vector<int> getAllIndices() const {
+            std::vector<int> allIndices = indices;
+            if (left != nullptr) {
+                auto leftIndices = left->getAllIndices();
+                allIndices.insert(allIndices.end(), leftIndices.begin(), leftIndices.end());
+            }
+            if (right != nullptr) {
+                auto rightIndices = right->getAllIndices();
+                allIndices.insert(allIndices.end(), rightIndices.begin(), rightIndices.end());
+            }
+            return allIndices;
         }
     };
 }

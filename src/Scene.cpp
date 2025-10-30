@@ -31,4 +31,23 @@ namespace RayTracing {
         }
         return scene;
     }
+
+    void Scene::prepareRender() {
+        if (prepared) return;
+        for (auto &object: objects) {
+            object->updateBoundingBox();
+            object->transform.update();
+            unsigned maxTriangleCount = object->mesh->numTriangles;
+            if (object->mesh->numTriangles > 200) {
+                maxTriangleCount /= 2;
+            }
+            if (object->mesh->numTriangles > 2000) {
+                maxTriangleCount /= 2;
+            }
+            object->updateNestedBoundingBox(maxTriangleCount + 1);
+            nestingDepth = std::max(nestingDepth, (int) object->nestedBoundingBox->depth());
+            triangleCount += object->mesh->numTriangles;
+        }
+        prepared = true;
+    }
 }

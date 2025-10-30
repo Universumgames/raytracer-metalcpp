@@ -207,6 +207,14 @@ MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,8,10,381472,2,9773
 MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,10,20,381472,2,12524
 MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,10,20,381472,2,18445
 MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,10,20,381472,2,57360
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,27012
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,25451
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,237641
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,26195
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,713102
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,19119
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,25787
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,30601
 CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,376
 CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,231
 CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,227
@@ -229,3 +237,8 @@ CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,0
 CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,0
 CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,0
 CudaRayTracer,Windows,AMD64,scene/scene_simple_atmosphere.json,1,3,972,2,0
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,1,972,2,14656
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,1,972,2,14569
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,1,972,2,15234
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,1,972,2,14584
+SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,1,972,2,60669

@@ -64,17 +64,18 @@ namespace RayTracing {
     }
 
     void MeshedRayTraceableObject::updateNestedBoundingBox(unsigned maxTrianglesPerBox) {
-        this->nestedBoundingBox = updateNestedBoundingBoxRecursive(mesh->indices, maxTrianglesPerBox);
+        this->nestedBoundingBox = updateNestedBoundingBoxRecursive(mesh->indices, maxTrianglesPerBox,
+                                                                   mesh->numTriangles);
     }
 
-    NestedBoundingBox MeshedRayTraceableObject::updateNestedBoundingBoxRecursive(
-        const std::vector<int> &indices, unsigned maxTrianglesPerBox) {
-        if (indices.size() < maxTrianglesPerBox) {
-            return NestedBoundingBox{
-                calculateBoundingBoxForIndices(indices), indices, nullptr, nullptr, 0, Vec3::X_AXIS
+    NestedBoundingBox *MeshedRayTraceableObject::updateNestedBoundingBoxRecursive(
+        const std::vector<int> &indices, unsigned maxTrianglesPerBox, unsigned triangleCount) {
+        BoundingBox innerBoundingBox = calculateBoundingBoxForIndices(indices);
+        if (indices.size() / 3 <= maxTrianglesPerBox) {
+            return new NestedBoundingBox{
+                innerBoundingBox, indices, nullptr, nullptr, 0, Vec3::X_AXIS
             };
         }
-        BoundingBox innerBoundingBox = calculateBoundingBoxForIndices(indices);
         // get longest axis to split along
         Vec3::Direction splitAxis = Vec3::X_AXIS;
         float length = 0;
@@ -86,23 +87,46 @@ namespace RayTracing {
             }
         }
 
-        // split indices along axis center
+        // split triangles along axis center
         std::vector<int> indicesLeft = {};
         std::vector<int> indicesRight = {};
         float splitValue = innerBoundingBox.minPos.getValue(splitAxis) + (length / 2.0f);
-        for (auto index: indices) {
-            float axisValue = mesh->vertices[index].getValue(splitAxis);
-            if (axisValue < splitValue) {
-                indicesLeft.push_back(index);
-            } else {
-                indicesRight.push_back(index);
+        for (unsigned triangle = 0; triangle < triangleCount; triangle++) {
+            bool left = false;
+            bool right = false;
+            unsigned triangleStartIndex = triangle * 3;
+            for (int i = 0; i < 3; i++) {
+                float axisValue = mesh->vertices[indices[triangleStartIndex + i]].getValue(splitAxis);
+                if (axisValue <= splitValue) {
+                    left = true;
+                } else {
+                    right = true;
+                }
+            }
+            if (left) {
+                indicesLeft.push_back(indices[triangleStartIndex + 0]);
+                indicesLeft.push_back(indices[triangleStartIndex + 1]);
+                indicesLeft.push_back(indices[triangleStartIndex + 2]);
+            }
+            if (right) {
+                indicesRight.push_back(indices[triangleStartIndex + 0]);
+                indicesRight.push_back(indices[triangleStartIndex + 1]);
+                indicesRight.push_back(indices[triangleStartIndex + 2]);
             }
         }
 
-        return {
-            calculateBoundingBoxForIndices(indices), indices,
-            new NestedBoundingBox(updateNestedBoundingBoxRecursive(indicesLeft, maxTrianglesPerBox)),
-            new NestedBoundingBox(updateNestedBoundingBoxRecursive(indicesRight, maxTrianglesPerBox)),
+        /// Check if split was possible and prevent (call)stack overflow
+        if (indicesLeft.size() == indices.size() || indicesRight.size() == indices.size()) {
+            // unable to split further
+            return new NestedBoundingBox{
+                innerBoundingBox, indices, nullptr, nullptr, 0, Vec3::X_AXIS
+            };
+        }
+
+        return new NestedBoundingBox{
+            innerBoundingBox, {},
+            updateNestedBoundingBoxRecursive(indicesLeft, maxTrianglesPerBox, indicesLeft.size() / 3),
+            updateNestedBoundingBoxRecursive(indicesRight, maxTrianglesPerBox, indicesRight.size() / 3),
             splitValue, splitAxis
         };
     }
@@ -114,8 +138,8 @@ namespace RayTracing {
             Vec3 v = mesh->vertices[index];
             minLoc = Vec3(std::min(minLoc.getX(), v.getX()), std::min(minLoc.getY(), v.getY()),
                           std::min(minLoc.getZ(), v.getZ()));
-            maxLoc = Vec3(std::max(maxLoc.getX(), v.getX()), std::min(minLoc.getY(), v.getY()),
-                          std::max(minLoc.getZ(), v.getZ()));
+            maxLoc = Vec3(std::max(maxLoc.getX(), v.getX()), std::max(maxLoc.getY(), v.getY()),
+                          std::max(maxLoc.getZ(), v.getZ()));
         }
         return {minLoc, maxLoc};
     }

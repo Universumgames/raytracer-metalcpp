@@ -75,6 +75,8 @@ int main(int argc, char *argv[]) {
         delete rayTest;
     }
 
+    scene.prepareRender();
+
     Image *raytraced = benchmarkRaytracer(raytracer, scene, false, false);
 
     imageHandler->saveImage(outputFile, raytraced);

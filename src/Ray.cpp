@@ -57,7 +57,7 @@ namespace RayTracing {
         };
     }
 
-    bool LocalRay::intersectsBoundingBox(const BoundingBox &box) {
+    bool LocalRay::intersectsBoundingBox(const BoundingBox &box) const {
         float tmin = -INFINITY;
         float tmax = INFINITY;
 

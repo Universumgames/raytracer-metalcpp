@@ -66,6 +66,6 @@ namespace RayTracing {
          * @param box the bounding box to check against
          * @return true if the ray intersects the bounding box, false otherwise
          */
-        [[nodiscard]] bool intersectsBoundingBox(const BoundingBox &box);
+        [[nodiscard]] bool intersectsBoundingBox(const BoundingBox &box) const;
     };
 }

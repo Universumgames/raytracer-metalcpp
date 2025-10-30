@@ -341,24 +341,17 @@ namespace RayTracing {
 
     Image *MetalRaytracer::raytrace(Scene scene) {
         TIMING_START(prepping)
-        float maxDepth = 0;
-        unsigned long triangleCount = 0;
-        for (auto &object: scene.objects) {
-            object->updateBoundingBox();
-            object->transform.update();
-            object->updateNestedBoundingBox(300);
-            maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
-            triangleCount += object->mesh->numTriangles;
-        }
+        scene.prepareRender();
         TIMING_END(prepping)
         TIMING_LOG(prepping, identifier(), "prepping scene for raytracing")
         std::cout << "[" << identifier() << "] Starting raytrace with "
                 << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
-                << scene.objects.size() << " mesh objects (" << triangleCount << " triangles), "
+                << scene.objects.size() << " mesh objects (" << scene.getTriangleCount() << " triangles), "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"
                 << std::endl;
-        std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
+        std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << scene.getNestingDepth() <<
+                std::endl;
 
         const auto variables = loadFunction("raytrace");
 

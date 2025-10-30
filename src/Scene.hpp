@@ -21,6 +21,11 @@ namespace RayTracing {
     };
 
     struct Scene {
+    private:
+        int nestingDepth = -1;
+        long triangleCount = -1;
+        bool prepared = false;
+
     public:
         Camera *camera = nullptr;
         std::vector<MeshedRayTraceableObject *> objects;
@@ -63,6 +68,28 @@ namespace RayTracing {
          */
         [[nodiscard]] unsigned totalSphericalCount() const {
             return spheres.size() + lights.size();
+        }
+
+        /**
+         * Prepare scene for rendering
+         * e.g. update bounding boxes
+         */
+        void prepareRender();
+
+        /**
+         * Get the maximum nesting depth of bounding boxes in the scene
+         * @return -1 if not prepared, else the nesting depth
+         */
+        [[nodiscard]] int getNestingDepth() const {
+            return nestingDepth;
+        }
+
+        /**
+         * Get the total triangle count in the scene
+         * @return -1 if not prepared, else the triangle count
+         */
+        [[nodiscard]] long getTriangleCount() const {
+            return triangleCount;
         }
     };
 }

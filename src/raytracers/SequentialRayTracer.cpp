@@ -1,7 +1,9 @@
 #include "SequentialRayTracer.hpp"
 
+#include <future>
 #include <iostream>
 
+#include "../Renderer.h"
 #include "../timing.hpp"
 #include "SFML/System/Vector2.hpp"
 
@@ -31,24 +33,17 @@ namespace RayTracing {
         auto *image = new Image(getWindowSize());
         auto rays = calculateStartingRays(scene.camera);
 
-        float maxDepth = 0;
-        unsigned long triangleCount = 0;
-        for (auto &object: scene.objects) {
-            object->updateBoundingBox();
-            object->transform.update();
-            object->updateNestedBoundingBox(300);
-            maxDepth = std::max(maxDepth, (float) object->nestedBoundingBox.depth());
-            triangleCount += object->mesh->numTriangles;
-        }
+        scene.prepareRender();
         TIMING_END(prepping)
         TIMING_LOG(prepping, identifier(), "prepping scene for raytracing")
         std::cout << "[" << identifier() << "] Starting raytrace with "
                 << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
-                << scene.objects.size() << " mesh objects (" << triangleCount << " triangles), "
+                << scene.objects.size() << " mesh objects (" << scene.getTriangleCount() << " triangles), "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"
                 << std::endl;
-        std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << maxDepth << std::endl;
+        std::cout << "[" << identifier() << "]" << " Maximum nested bounding box depth: " << scene.getNestingDepth() <<
+                std::endl;
 
         TIMING_START(tracing)
         for (auto &ray: rays) {
@@ -65,9 +60,28 @@ namespace RayTracing {
                         continue;
                     }
 
-                    // TODO check nested bounding boxes here
-                    for (int i = 0; i < object->mesh->numTriangles; i++) {
-                        int *startIndex = &object->mesh->indices[i * 3];
+                    std::vector<int> indices;
+                    std::vector<NestedBoundingBox *> boxesToCheck;
+                    boxesToCheck.push_back(object->nestedBoundingBox);
+                    while (!boxesToCheck.empty()) {
+                        auto nestedBox = boxesToCheck.back();
+                        boxesToCheck.pop_back();
+                        if (!nestedBox->indices.empty()) {
+                            indices.insert(indices.end(), nestedBox->indices.begin(), nestedBox->indices.end());
+                            continue;
+                        }
+                        if (nestedBox->left != nullptr && localRay.intersectsBoundingBox(*nestedBox->left)) {
+                            boxesToCheck.push_back(nestedBox->left);
+                        }
+                        if (nestedBox->right != nullptr && localRay.intersectsBoundingBox(*nestedBox->right)) {
+                            boxesToCheck.push_back(nestedBox->right);
+                        }
+                    }
+
+                    if (indices.empty()) continue;
+
+                    for (int i = 0; i < indices.size() / 3; i++) {
+                        int *startIndex = &indices[i * 3];
                         Vec3 triangle[3] = {
                             object->mesh->vertices[startIndex[0]],
                             object->mesh->vertices[startIndex[1]],

@@ -78,22 +78,20 @@ namespace RayTracing {
         return rays;
     }
 
-
-
     std::vector<Vec2> RayTracer::getSamplingOffsets() {
         std::vector<Vec2> offsets;
 
-        const int rows = std::floor(std::sqrt(samplesPerPixel));
-        const int cols = std::ceil((float) samplesPerPixel / (float) rows);
+        const float rows = std::floor(std::sqrt(samplesPerPixel));
+        const float cols = std::ceil((float) samplesPerPixel / (float) rows);
 
         float dx = 1.0f / (cols + 1);
         float dy = 1.0f / (rows + 1);
 
-        for (int r = 0; r < rows; ++r) {
-            for (int c = 0; c < cols; ++c) {
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
                 if (offsets.size() >= samplesPerPixel) break;
-                float x = (c + 1) * dx;
-                float y = (r + 1) * dy;
+                float x = (c + 1.0f) * dx;
+                float y = (r + 1.0f) * dy;
                 offsets.emplace_back(x, y);
             }
         }

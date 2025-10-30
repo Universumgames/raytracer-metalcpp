@@ -20,6 +20,8 @@ namespace RayTracing {
          */
         std::vector<Ray> calculateStartingRays(Camera *camera);
 
+        Scene scene;
+
     private:
         Vec2u windowSize;
         unsigned bounces;

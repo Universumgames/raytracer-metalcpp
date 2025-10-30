@@ -32,7 +32,7 @@ namespace RayTracing {
         std::string fileName;
         Mesh *mesh = nullptr;
 
-        NestedBoundingBox nestedBoundingBox;
+        NestedBoundingBox *nestedBoundingBox = nullptr;
 
         MeshedRayTraceableObject() : RayTraceableObject({}, {}, Vec3(1), {}) {
         };
@@ -66,8 +66,9 @@ namespace RayTracing {
 
     private:
         /// Recursively update the nested bounding box
-        NestedBoundingBox updateNestedBoundingBoxRecursive(const std::vector<int> &indices,
-                                                           unsigned maxTrianglesPerBox);
+        NestedBoundingBox *updateNestedBoundingBoxRecursive(const std::vector<int> &indices,
+                                                            unsigned maxTrianglesPerBox,
+                                                            unsigned triangleCount);
 
         /// Calculate the bounding box for given indices
         [[nodiscard]] BoundingBox calculateBoundingBoxForIndices(const std::vector<int> &indices) const;
