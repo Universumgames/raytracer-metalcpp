@@ -48,9 +48,9 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], flo
     float w = 1 - u - v;
     
     return {
-        .hit = det > epsilon && dst >= 0 && u >= 0 && v >= 0 && w >= 0,
+        .hit = det > epsilon && dst >= epsilon && u >= 0 && v >= 0 && w >= 0,
         .hitPoint = ray.origin + (ray.direction * dst),
-        .normal = normal,
+        .normal = customNormal,
         .distance = dst
     };
 }
@@ -58,6 +58,12 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], flo
 bool intersectsBoundingBox(Metal_LocalRay ray, Metal_BoundingBox box) {
     float tmin = -INFINITY;
     float tmax = INFINITY;
+
+    if(ray.origin.x >= box.min.x && ray.origin.x <= box.max.x &&
+       ray.origin.y >= box.min.y && ray.origin.y <= box.max.y &&
+       ray.origin.z >= box.min.z && ray.origin.z <= box.max.z) {
+        return true;
+    }
 
     for (int i = 0; i < 3; i++) {
         if (abs(ray.direction[i]) < epsilon) {

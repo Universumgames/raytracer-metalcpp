@@ -89,7 +89,7 @@ kernel void raytrace(
                 //currentRay.totalDistance += currentHit.distance;
             }
         }else{
-            b = settings.bounces; // terminate
+            b = settings.bounces; // no hit, stop bouncing
         }
     }
     float4 finalColor = float4(0.0);

@@ -52,7 +52,8 @@ namespace RayTracing {
             }
         }
         return {
-            .hit = false
+            .hit = false,
+            .distance = INFINITY
         };
     }
 

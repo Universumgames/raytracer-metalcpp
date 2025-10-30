@@ -295,13 +295,13 @@ namespace RayTracing {
         T &w() requires (X >= 4) { return values[W_AXIS]; }
 
         /// x component getter
-        T getX() const requires (X >= 1) { return values[X_AXIS]; }
+        [[nodiscard]] T getX() const requires (X >= 1) { return values[X_AXIS]; }
         /// y component getter
-        T getY() const requires (X >= 2) { return values[Y_AXIS]; }
+        [[nodiscard]] T getY() const requires (X >= 2) { return values[Y_AXIS]; }
         /// z component getter
-        T getZ() const requires (X >= 3) { return values[Z_AXIS]; }
+        [[nodiscard]] T getZ() const requires (X >= 3) { return values[Z_AXIS]; }
         /// w component getter
-        T getW() const requires (X >= 4) { return values[W_AXIS]; }
+        [[nodiscard]] T getW() const requires (X >= 4) { return values[W_AXIS]; }
 
         /**
          * Cut off the last dimension, returning a vector with one less dimension
