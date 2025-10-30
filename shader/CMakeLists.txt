@@ -7,6 +7,9 @@ endif ()
 
 if(USE_SHADER_CUDA)
     add_subdirectory(cuda)
-    add_dependencies(${PROJECT_NAME} COPIED_CUDA)
+    include_directories(cuda)
+
+    set_target_properties(${PROJECT_NAME} PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
+    target_link_libraries(${PROJECT_NAME} PRIVATE CUDA_SHADERS)
     source_group("CudaSources" ".*/\.cuda")
 endif ()

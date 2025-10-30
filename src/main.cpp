@@ -56,6 +56,10 @@ int main(int argc, char *argv[]) {
     auto *raytracer = sequential
                           ? raytracerFactory->getSequentialImplementation()
                           : raytracerFactory->getShaderImplementation();
+    if (raytracer == nullptr) {
+        std::cerr << "No implementation found for desired raytracer, using sequential implementation" << std::endl;
+        raytracer = raytracerFactory->getSequentialImplementation();
+    }
     std::cout << "Using raytracer implementation: " << raytracer->identifier() << std::endl;
 
     Scene scene = Scene::loadFromFile(sceneFile);

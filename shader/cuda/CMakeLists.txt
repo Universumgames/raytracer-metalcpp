@@ -1,8 +1,1 @@
-
-file(GLOB SHADER_SRC *.cu)
-
-add_custom_target(
-        COPIED_CUDA
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        ${SHADER_SRC} ${CMAKE_CURRENT_BINARY_DIR}
-)
+file(GLOB SHADER_SRC *.cu)file(GLOB SHADER_HEADERS *.cuh)add_library(CUDA_SHADERS STATIC ${SHADER_SRC} ${SHADER_HEADERS})set_target_properties(CUDA_SHADERS PROPERTIES CUDA_SEPARABLE_COMPILATION ON)

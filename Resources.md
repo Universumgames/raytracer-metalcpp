@@ -17,7 +17,7 @@
 - Metal Shading Language Specification https://developer.apple.com/metal/Metal-Shading-Language-Specification.pdf
 
 ## CUDA
--
+- Samples Repository https://github.com/NVIDIA/cuda-samples
 
 ## Libraries
 - JSON library https://github.com/nlohmann/json

@@ -1,15 +1,13 @@
 #pragma once
 #ifdef USE_SHADER_CUDA
-#include "../RayTracing.hpp"
+#include "../RayTracer.hpp"
 
 namespace RayTracing {
     class CudaRayTracer : public RayTracer {
     private:
 
     public:
-        CudaRayTracer(unsigned width, unsigned height, unsigned bounces, unsigned samplesPerPixel)
-            : RayTracer(width, height, bounces, samplesPerPixel) {
-        }
+        CudaRayTracer(const Vec2u& screenSize, unsigned bounces, unsigned samplesPerPixel);
 
         ~CudaRayTracer() override = default;
 

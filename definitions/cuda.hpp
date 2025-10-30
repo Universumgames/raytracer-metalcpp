@@ -1,4 +1,6 @@
 #pragma once
 #include "./definitions.hpp"
 
-#define USER_SHADER_CUDA
+#define USE_SHADER_CUDA
+
+#define CUDA_SHADER_SRC_DIR "shader/cuda"
