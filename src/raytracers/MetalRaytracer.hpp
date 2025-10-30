@@ -9,7 +9,7 @@
 
 namespace RayTracing {
     /// Ray tracer implementation using Apple's Metal API
-    class MetalRaytracer : public RayTracer {
+    class MetalRaytracer final : public RayTracer {
     private:
         NS::AutoreleasePool *pAutoreleasePool = nullptr;
         MTL::Device *device = nullptr;

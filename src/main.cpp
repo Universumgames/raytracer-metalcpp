@@ -66,10 +66,13 @@ int main(int argc, char *argv[]) {
 
     if (renderTests) {
         Image *uvTest = raytracer->uvTest();
-        Image *rayTest = raytracer->rayTest(scene.camera);
-
         imageHandler->saveImage("uvTest.jpg", uvTest);
+
+        Image *rayTest = raytracer->rayTest(scene.camera);
         imageHandler->saveImage("rayTest.jpg", rayTest);
+
+        delete uvTest;
+        delete rayTest;
     }
 
     Image *raytraced = benchmarkRaytracer(raytracer, scene, false, false);

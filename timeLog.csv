@@ -202,3 +202,8 @@ MetalRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,270
 MetalRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,275
 SequentialRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,114262
 MetalRayTracer,Darwin,arm64,scene/scene_simple_atmosphere.json,1,3,972,2,368
+MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,1,3,381472,2,3237
+MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,8,10,381472,2,9773
+MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,10,20,381472,2,12524
+MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,10,20,381472,2,18445
+MetalRayTracer,Darwin,arm64,scene/scene_simple_dragon.json,10,20,381472,2,57360
