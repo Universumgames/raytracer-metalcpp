@@ -55,7 +55,7 @@ namespace RayTracing {
         }
 
 #ifdef USE_SHADER_METAL
-        Metal_BoundingBox toMetal() {
+        Metal_NestedBoundingBox toMetalBasic() {
             return {minPos.toMetal(), maxPos.toMetal()};
         }
 #endif
@@ -65,6 +65,8 @@ namespace RayTracing {
     struct NestedBoundingBox : public BoundingBox {
         /// containing the triangle indices list for this bounding box
         std::vector<int> indices;
+        /// containing the triangle normals list for this bounding box
+        std::vector<Vec3> normals;
         /// child left bounding box
         NestedBoundingBox *left;
         /// child right bounding box
@@ -92,11 +94,12 @@ namespace RayTracing {
          * @param split_value value at which the box is split
          * @param split_axis axis along which the box is split
          */
-        NestedBoundingBox(const BoundingBox &box, const std::vector<int> &indices,
+        NestedBoundingBox(const BoundingBox &box, const std::vector<int> &indices, const std::vector<Vec3> &normals,
                           NestedBoundingBox *left, NestedBoundingBox *right, float split_value,
                           Vec3::Direction split_axis)
             : BoundingBox(box.minPos, box.maxPos),
               indices(indices),
+              normals(normals),
               left(left),
               right(right),
               splitValue(split_value),
@@ -127,6 +130,22 @@ namespace RayTracing {
                 allIndices.insert(allIndices.end(), rightIndices.begin(), rightIndices.end());
             }
             return allIndices;
+        }
+
+        [[nodiscard]] unsigned totalNodeCount() const {
+            unsigned count = 1; // counting this box
+            if (left != nullptr) {
+                count += left->totalNodeCount();
+            }
+            if (right != nullptr) {
+                count += right->totalNodeCount();
+            }
+            return count;
+        }
+
+        bool operator==(const NestedBoundingBox &lhs) const {
+            return minPos == lhs.minPos && maxPos == lhs.maxPos && indices == lhs.indices && splitValue == lhs.
+                   splitValue && splitAxis == lhs.splitAxis;
         }
     };
 }

@@ -25,6 +25,7 @@ namespace RayTracing {
         MTL::Buffer *bufferMeshVertices = nullptr;
         MTL::Buffer *bufferNormals = nullptr;
         MTL::Buffer *bufferMeshIndices = nullptr;
+        MTL::Buffer *bufferBoundingBoxes = nullptr;
         MTL::Buffer *bufferSphereObjects = nullptr;
         MTL::Buffer *bufferLights = nullptr;
 
@@ -64,6 +65,7 @@ namespace RayTracing {
             std::vector<simd::float3> vertices;
             std::vector<int> indices;
             std::vector<simd::float3> normals;
+            std::vector<Metal_NestedBoundingBox> boundingBoxes;
         };
 
         static Metal_MeshTransformationReturn

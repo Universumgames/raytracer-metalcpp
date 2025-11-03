@@ -173,9 +173,10 @@ namespace RayTracing {
         for (unsigned y = 0; y < windowSize.getY(); y++) {
             for (unsigned x = 0; x < windowSize.getX(); x++) {
                 std::vector<RGBf> colors;
-                int startIndex = (y * getWindowSize().getX() + x) * samples;
+                unsigned startIndex = (y * getWindowSize().getX() + x) * samples;
                 for (unsigned s = 0; s < samples; s++) {
-                    simd::float4 color = ((simd::float4 *) bufferResult->contents())[startIndex + s];
+                    unsigned rayIndex = startIndex + s;
+                    simd::float4 color = ((simd::float4 *) bufferResult->contents())[rayIndex];
                     colors.push_back(RGBf::fromFloat4(color));
                 }
                 image->setPixel(x, y, RGBf::blend(colors));
@@ -187,12 +188,10 @@ namespace RayTracing {
     std::vector<Metal_Ray> MetalRaytracer::raysToMetal(const std::vector<Ray> &rays) {
         std::vector<Metal_Ray> result;
         for (auto &ray: rays) {
-            result.push_back(Metal_Ray(
-                simd::float3{ray.origin.getX(), ray.origin.getY(), ray.origin.getZ()},
-                simd::float3{ray.direction.getX(), ray.direction.getY(), ray.direction.getZ()},
-                {},
-                0
-            ));
+            result.push_back(Metal_Ray{
+                .origin = ray.origin.toMetal(),
+                .direction = ray.direction.toMetal()
+            });
         }
         return result;
     }
@@ -203,33 +202,83 @@ namespace RayTracing {
         std::vector<simd::float3> vertices;
         std::vector<int> indices;
         std::vector<simd::float3> normals;
+        std::vector<Metal_NestedBoundingBox> nestedBoundingBoxes;
 
         for (auto &object: objects) {
-            meshObjects.push_back(Metal_MeshRayTraceableObject{
-                .boundingBox = object->boundingBox.toMetal(),
-                .transform = object->transform.getTransformMatrix().toMetal(),
-                .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
-                .rotation = object->transform.getRotationMatrix().toMetal(),
-                .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
-                .inverseScale = object->transform.getInverseScaleMatrix().toMetal(),
-                .color = object->color.toMetal(),
-                .indicesOffset = (unsigned) indices.size(),
-                .triangleCount = (unsigned) object->mesh->numTriangles,
-                .vertexOffset = (unsigned) vertices.size(),
-                .normalsOffset = (unsigned) normals.size(),
-            });
+            auto metalObject =
+                    Metal_MeshRayTraceableObject{
+                        .boundingBox = object->boundingBox.toMetalBasic(),
+                        .transform = object->transform.getTransformMatrix().toMetal(),
+                        .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
+                        .rotation = object->transform.getRotationMatrix().toMetal(),
+                        .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
+                        .inverseScale = object->transform.getInverseScaleMatrix().toMetal(),
+                        .color = object->color.toMetal(),
+                        .indicesOffset = (unsigned) indices.size(),
+                        .triangleCount = object->mesh->numTriangles,
+                        .vertexOffset = (unsigned) vertices.size(),
+                        .normalsOffset = (unsigned) normals.size(),
+                    };
             for (auto &vertex: object->mesh->vertices) {
                 vertices.push_back(vertex.toMetal());
             }
-            for (auto &normal: object->mesh->normals) {
-                normals.push_back(normal.toMetal());
+
+            // copy bounding box indices
+            NestedBoundingBox rootBoundingBox = *(object->nestedBoundingBox);
+            std::vector toTraverse = {object->nestedBoundingBox};
+            unsigned long newTriangleCount = 0;
+            while (!toTraverse.empty()) {
+                auto current = toTraverse.back();
+                toTraverse.pop_back();
+
+                auto currentMetal = current->toMetalBasic();
+                newTriangleCount += current->indices.size() / 3;
+
+                unsigned childCount = 0;
+
+                if (current->left != nullptr) {
+                    toTraverse.push_back(current->left);
+                    currentMetal.childLeftIndex = (unsigned) nestedBoundingBoxes.size() + 1;
+                    childCount = current->left->totalNodeCount();
+                } else {
+                    currentMetal.childLeftIndex = -1;
+                }
+                if (current->right != nullptr) {
+                    toTraverse.push_back(current->right);
+                    currentMetal.childRightIndex = (unsigned) nestedBoundingBoxes.size() + childCount + 1;
+                } else {
+                    currentMetal.childRightIndex = -1;
+                }
+
+                if (!current->indices.empty()) {
+                    currentMetal.indicesOffset = (unsigned) indices.size();
+                    currentMetal.normalsOffset = (unsigned) normals.size();
+                    currentMetal.triangleCount = object->mesh->numTriangles;
+                    indices.insert(indices.end(), current->indices.begin(), current->indices.end());
+                    for (auto &normal: current->normals) {
+                        normals.push_back(normal.toMetal());
+                    }
+                } else {
+                    currentMetal.indicesOffset = -1;
+                    currentMetal.normalsOffset = -1;
+                    currentMetal.triangleCount = 0;
+                }
+                if (*current == rootBoundingBox) {
+                    metalObject.boundingBox = currentMetal;
+                }
+                nestedBoundingBoxes.push_back(currentMetal);
             }
-            indices.insert(indices.end(), object->mesh->indices.begin(), object->mesh->indices.end());
+
+            // for legacy single hitbox rendering
+            metalObject.triangleCount = newTriangleCount;
+            meshObjects.push_back(metalObject);
         }
         return {
             .meshObjects = meshObjects,
             .vertices = vertices,
             .indices = indices,
+            .normals = normals,
+            .boundingBoxes = nestedBoundingBoxes,
         };
     }
 
@@ -238,7 +287,7 @@ namespace RayTracing {
         std::vector<Metal_SphereRayTraceableObject> result;
         for (auto &object: objects) {
             result.push_back(Metal_SphereRayTraceableObject{
-                .boundingBox = object->boundingBox.toMetal(),
+                .boundingBox = object->boundingBox.toMetalBasic(),
                 .center = object->transform.getTranslation().toMetal(),
                 .radius = object->radius,
                 .color = object->color.toMetal(),
@@ -251,7 +300,7 @@ namespace RayTracing {
         std::vector<Metal_Light> result;
         for (auto &light: lights) {
             result.push_back(Metal_Light{
-                .boundingBox = light->boundingBox.toMetal(),
+                .boundingBox = light->boundingBox.toMetalBasic(),
                 .center = light->transform.getTranslation().toMetal(),
                 .intensity = 1,
                 .color = light->emittingColor.toMetal(),
@@ -281,7 +330,7 @@ namespace RayTracing {
         auto sphereObjects = sphereObjectsToMetal(scene.spheres);
         auto lights = lightsToMetal(scene.lights);
         auto *settings = new Metal_RayTraceSettings{
-            .screenSize = {getWindowSize().getX(), getWindowSize().getY()},
+            .screenSize = getWindowSize().toMetal(),
             .bounces = getBounces(),
             .samplesPerPixel = getSamplesPerPixel(),
             .meshObjectCount = (unsigned) meshObjects.meshObjects.size(),
@@ -296,6 +345,7 @@ namespace RayTracing {
         prepBuffer(&bufferMeshVertices, device, sizeof(simd::float3) * meshObjects.vertices.size());
         prepBuffer(&bufferMeshIndices, device, sizeof(int) * meshObjects.indices.size());
         prepBuffer(&bufferNormals, device, sizeof(simd::float3) * meshObjects.normals.size());
+        prepBuffer(&bufferBoundingBoxes, device, sizeof(Metal_NestedBoundingBox) * meshObjects.boundingBoxes.size());
         prepBuffer(&bufferSphereObjects, device, sizeof(Metal_SphereRayTraceableObject) * sphereObjects.size());
         prepBuffer(&bufferLights, device, sizeof(Metal_Light) * lights.size());
 
@@ -311,6 +361,8 @@ namespace RayTracing {
                meshObjects.indices.size() * sizeof(int));
         memcpy(bufferNormals->contents(), meshObjects.normals.data(),
                meshObjects.normals.size() * sizeof(simd::float3));
+        memcpy(bufferBoundingBoxes->contents(), meshObjects.boundingBoxes.data(),
+               meshObjects.boundingBoxes.size() * sizeof(Metal_NestedBoundingBox));
         memcpy(bufferSphereObjects->contents(), sphereObjects.data(),
                sphereObjects.size() * sizeof(Metal_SphereRayTraceableObject));
         memcpy(bufferLights->contents(), lights.data(), lights.size() * sizeof(Metal_Light));
@@ -324,9 +376,10 @@ namespace RayTracing {
         computeEncoder->setBuffer(bufferMeshVertices, 0, 3);
         computeEncoder->setBuffer(bufferMeshIndices, 0, 4);
         computeEncoder->setBuffer(bufferNormals, 0, 5);
-        computeEncoder->setBuffer(bufferSphereObjects, 0, 6);
-        computeEncoder->setBuffer(bufferLights, 0, 7);
-        computeEncoder->setBuffer(bufferResult, 0, 8);
+        computeEncoder->setBuffer(bufferBoundingBoxes, 0, 6);
+        computeEncoder->setBuffer(bufferSphereObjects, 0, 7);
+        computeEncoder->setBuffer(bufferLights, 0, 8);
+        computeEncoder->setBuffer(bufferResult, 0, 9);
 
         TIMING_END(prepBuffers)
         TIMING_LOG(prepBuffers, identifier(), "Preparing and encoding data into buffers for raytracing")

@@ -1,15 +1,19 @@
 #pragma once
+#include <iostream>
+#include <string>
+
+#include "math/vectors.hpp"
 
 
 inline bool openWindow = true;
 inline bool renderTests = true;
 inline bool helped = false;
 inline bool sequential = false;
-inline std::string outputFile = "raytraced.jpg";
-inline std::string sceneFile = "scene/scene_simple_atmosphere.json";
+inline std::string outputFile = "./raytraced.jpg";
+inline std::string sceneFile = "scene/scene_simple.json";
 inline std::string benchmarkFile = "../timeLog.csv";
 inline unsigned bounces = 3;
-inline unsigned samples = 1;
+inline unsigned samples = 4;
 inline auto windowSize = RayTracing::Vec2u(800, 600);
 
 /**

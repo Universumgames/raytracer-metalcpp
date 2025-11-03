@@ -1,5 +1,5 @@
 #include <metal_stdlib>
-#include "shader_types.hpp"
+#include "shader_methods.hpp"
 
 using namespace metal;
 
@@ -55,7 +55,48 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], flo
     };
 }
 
-bool intersectsBoundingBox(Metal_LocalRay ray, Metal_BoundingBox box) {
+Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, Metal_MeshRayTraceableObject meshObject, Metal_NestedBoundingBox boundingBox, device int* meshIndices, device float3* meshVertices, device float3* meshNormals, device Metal_NestedBoundingBox* boundingBoxes){
+    if(!intersectsBoundingBox(ray, boundingBox))
+        return {
+            .hit = false,
+            .distance = INFINITY
+        };
+    
+    /// if bounding box is not a leaf node, check children
+    if(boundingBox.indicesOffset == -1){
+        Metal_Intersection left = {.hit = false, .distance = INFINITY};
+        Metal_Intersection right = {.hit = false, .distance = INFINITY};
+        if(boundingBox.childLeftIndex != -1 )
+            /// recursive call required because no dynamic memory for a variable array can be allocated
+            left = intersectTrianglesInBox(ray, meshObject, boundingBoxes[boundingBox.childLeftIndex], meshIndices, meshNormals, meshVertices, boundingBoxes);
+        if(boundingBox.childRightIndex != -1)
+            right = intersectTrianglesInBox(ray, meshObject, boundingBoxes[boundingBox.childRightIndex], meshIndices, meshNormals, meshVertices, boundingBoxes);
+        if(left.distance < right.distance)
+            return left;
+        else
+            return right;
+    }
+    
+    /// bounding box is leaf node, check all triangles
+    Metal_Intersection nearestIntersection = { .hit = false, .distance = INFINITY };
+    int vertexOffset = meshObject.vertexOffset;
+    for(unsigned i = 0; i < boundingBox.triangleCount; i++){
+        int startIndicesIndex = boundingBox.indicesOffset + (i * 3);
+        float3 triangle[3] = {
+            meshVertices[vertexOffset + meshIndices[startIndicesIndex + 0]],
+            meshVertices[vertexOffset + meshIndices[startIndicesIndex + 1]],
+            meshVertices[vertexOffset + meshIndices[startIndicesIndex + 2]],
+        };
+        Metal_Intersection cur = intersectTriangle(ray, triangle, meshNormals[boundingBox.normalsOffset + i]);
+        if(cur.hit && cur.distance < nearestIntersection.distance){
+            nearestIntersection = cur;
+        }
+    }
+    
+    return nearestIntersection;
+}
+
+bool intersectsBoundingBox(Metal_LocalRay ray, Metal_NestedBoundingBox box) {
     float tmin = -INFINITY;
     float tmax = INFINITY;
 

@@ -1,5 +1,5 @@
 #include <metal_stdlib>
-#include "shader_types.hpp"
+#include "shader_methods.hpp"
 
 using namespace metal;
 

@@ -1,19 +1,19 @@
 #pragma once
 #include <simd/simd.h>
 
+/// Metal struct definition of a ray
 struct Metal_Ray {
     simd::float3 origin;
     simd::float3 direction;
-    simd::float4 colors[6];
-    simd::float4 lightColor;
-    unsigned numColors;
 };
 
+/// Metal struct definition of a ray in local space
 struct Metal_LocalRay {
     simd::float3 origin;
     simd::float3 direction;
 };
 
+/// intersection information
 struct Metal_Intersection {
     simd::float3 hitPoint;
     bool hit;
@@ -22,9 +22,20 @@ struct Metal_Intersection {
     bool isLight;
 };
 
-struct Metal_BoundingBox {
+/// metal struct definition of a nested bounding box
+struct Metal_NestedBoundingBox {
     simd::float3 min;
     simd::float3 max;
+    /// offset of indices in buffer, -1 if no indices are part of this bounidng box
+    int indicesOffset;
+    /// offset of normals in buffer, -1 if no normals are part of this bounding box
+    int normalsOffset;
+    /// number of triangles in this bounding box
+    unsigned triangleCount;
+    /// index of left child box in bounding box buffer, -1 if no child element exists
+    int childLeftIndex;
+    /// index of right child box in bounding box buffer, -1 if no child element exists
+    int childRightIndex;
 };
 
 struct Metal_RayTraceSettings {
@@ -38,7 +49,7 @@ struct Metal_RayTraceSettings {
 };
 
 struct Metal_MeshRayTraceableObject {
-    Metal_BoundingBox boundingBox;
+    Metal_NestedBoundingBox boundingBox;
     simd::float4x4 transform;
     simd::float4x4 inverseTransform;
     simd::float4x4 rotation;
@@ -52,35 +63,18 @@ struct Metal_MeshRayTraceableObject {
 };
 
 struct Metal_SphereRayTraceableObject {
-    Metal_BoundingBox boundingBox;
+    Metal_NestedBoundingBox boundingBox;
     simd::float3 center;
     float radius;
     simd::float4 color;
 };
 
 struct Metal_Light {
-    Metal_BoundingBox boundingBox;
+    Metal_NestedBoundingBox boundingBox;
     simd::float3 center;
     float intensity;
     simd::float4 color;
     float radius;
 };
 
-Metal_Ray reflectAt(Metal_Ray ray, simd::float3 point, simd::float3 normal, float totalReflection);
-
-Metal_LocalRay toLocalRay(Metal_Ray ray, simd::float4x4 inverseTransform, simd::float4x4 inverseRotate,
-                          simd::float4x4 inverseScale);
-
-Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, float sphereRadius);
-
-Metal_Intersection intersectTriangle(Metal_LocalRay ray, simd::float3 triangle[3], simd::float3 customNormal);
-
-bool intersectsBoundingBox(Metal_LocalRay ray, Metal_BoundingBox box);
-
-simd::float3 randomHemisphereReflection(simd::float3 normal);
-
-float pseudoRandom01(float seed);
-
-simd::float3 rotateNormal(simd::float4x4 rotation, simd::float3 normal);
-
-float lightDissipationCoefficient(float distance);
+#define METAL_COLOR_COUNT_MAX ((unsigned)6)

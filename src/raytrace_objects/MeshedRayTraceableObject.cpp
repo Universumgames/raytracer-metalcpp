@@ -64,16 +64,19 @@ namespace RayTracing {
     }
 
     void MeshedRayTraceableObject::updateNestedBoundingBox(unsigned maxTrianglesPerBox) {
-        this->nestedBoundingBox = updateNestedBoundingBoxRecursive(mesh->indices, maxTrianglesPerBox,
+        this->nestedBoundingBox = updateNestedBoundingBoxRecursive(mesh->indices,
+                                                                   mesh->normals,
+                                                                   maxTrianglesPerBox,
                                                                    mesh->numTriangles);
     }
 
     NestedBoundingBox *MeshedRayTraceableObject::updateNestedBoundingBoxRecursive(
-        const std::vector<int> &indices, unsigned maxTrianglesPerBox, unsigned triangleCount) {
+        const std::vector<int> &indices, const std::vector<Vec3> &normals, unsigned maxTrianglesPerBox,
+        unsigned triangleCount) {
         BoundingBox innerBoundingBox = calculateBoundingBoxForIndices(indices);
         if (indices.size() / 3 <= maxTrianglesPerBox) {
             return new NestedBoundingBox{
-                innerBoundingBox, indices, nullptr, nullptr, 0, Vec3::X_AXIS
+                innerBoundingBox, indices, normals, nullptr, nullptr, 0, Vec3::X_AXIS
             };
         }
         // get longest axis to split along
@@ -89,7 +92,9 @@ namespace RayTracing {
 
         // split triangles along axis center
         std::vector<int> indicesLeft = {};
+        std::vector<Vec3> normalsLeft = {};
         std::vector<int> indicesRight = {};
+        std::vector<Vec3> normalsRight = {};
         float splitValue = innerBoundingBox.minPos.getValue(splitAxis) + (length / 2.0f);
         for (unsigned triangle = 0; triangle < triangleCount; triangle++) {
             bool left = false;
@@ -107,11 +112,13 @@ namespace RayTracing {
                 indicesLeft.push_back(indices[triangleStartIndex + 0]);
                 indicesLeft.push_back(indices[triangleStartIndex + 1]);
                 indicesLeft.push_back(indices[triangleStartIndex + 2]);
+                normalsLeft.push_back(normals[triangle]);
             }
             if (right) {
                 indicesRight.push_back(indices[triangleStartIndex + 0]);
                 indicesRight.push_back(indices[triangleStartIndex + 1]);
                 indicesRight.push_back(indices[triangleStartIndex + 2]);
+                normalsRight.push_back(normals[triangle]);
             }
         }
 
@@ -119,14 +126,14 @@ namespace RayTracing {
         if (indicesLeft.size() == indices.size() || indicesRight.size() == indices.size()) {
             // unable to split further
             return new NestedBoundingBox{
-                innerBoundingBox, indices, nullptr, nullptr, 0, Vec3::X_AXIS
+                innerBoundingBox, indices, normals, nullptr, nullptr, 0, Vec3::X_AXIS
             };
         }
 
         return new NestedBoundingBox{
-            innerBoundingBox, {},
-            updateNestedBoundingBoxRecursive(indicesLeft, maxTrianglesPerBox, indicesLeft.size() / 3),
-            updateNestedBoundingBoxRecursive(indicesRight, maxTrianglesPerBox, indicesRight.size() / 3),
+            innerBoundingBox, {}, {},
+            updateNestedBoundingBoxRecursive(indicesLeft, normalsLeft, maxTrianglesPerBox, indicesLeft.size() / 3),
+            updateNestedBoundingBoxRecursive(indicesRight, normalsRight, maxTrianglesPerBox, indicesRight.size() / 3),
             splitValue, splitAxis
         };
     }

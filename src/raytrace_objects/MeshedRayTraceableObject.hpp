@@ -67,6 +67,7 @@ namespace RayTracing {
     private:
         /// Recursively update the nested bounding box
         NestedBoundingBox *updateNestedBoundingBoxRecursive(const std::vector<int> &indices,
+                                                            const std::vector<Vec3> &normals,
                                                             unsigned maxTrianglesPerBox,
                                                             unsigned triangleCount);
 

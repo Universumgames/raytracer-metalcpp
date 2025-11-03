@@ -324,13 +324,18 @@ namespace RayTracing {
         }
 
 #ifdef USE_SHADER_METAL
+        /// Convert to Metal simd type uint2
+        simd::uint2 toMetal() const requires (X == 2 && std::is_same<T, unsigned>::value) {
+            return simd::uint2{values[0], values[1]};
+        }
+
         /// Convert to Metal simd type float3
-        simd::float3 toMetal() requires (X == 3 && std::is_same<T, float>::value) {
+        simd::float3 toMetal() const requires (X == 3 && std::is_same<T, float>::value) {
             return simd::float3{values[0], values[1], values[2]};
         }
 
         /// Convert to Metal simd type float4
-        simd::float4 toMetal() requires (X == 4 && std::is_same<T, float>::value) {
+        simd::float4 toMetal() const requires (X == 4 && std::is_same<T, float>::value) {
             return simd::float4{values[0], values[1], values[2], values[3]};
         }
 #endif
