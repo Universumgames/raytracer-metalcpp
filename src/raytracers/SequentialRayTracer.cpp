@@ -31,11 +31,13 @@ namespace RayTracing {
     Image *SequentialRayTracer::raytrace(Scene scene) {
         TIMING_START(prepping)
         auto *image = new Image(getWindowSize());
-        auto rays = calculateStartingRays(scene.camera);
-
         scene.prepareRender();
         TIMING_END(prepping)
-        TIMING_LOG(prepping, identifier(), "prepping scene for raytracing")
+        TIMING_LOG(prepping, RaytracingTimer::Component::SCENE_LOADING, "prepping scene for raytracing")
+        TIMING_START(rays)
+        auto rays = calculateStartingRays(scene.camera);
+        TIMING_END(rays)
+        TIMING_LOG(rays, RaytracingTimer::Component::ENCODING, "calculating starting rays")
         std::cout << "[" << identifier() << "] Starting raytrace with "
                 << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
                 << scene.objects.size() << " mesh objects (" << scene.getTriangleCount() << " triangles), "
@@ -138,8 +140,8 @@ namespace RayTracing {
         resolveRays(image, rays);
         TIMING_END(resolve)
 
-        TIMING_LOG(tracing, identifier(), "tracing rays")
-        TIMING_LOG(resolve, identifier(), "resolving rays into image")
+        TIMING_LOG(tracing, RaytracingTimer::Component::RAYTRACING, "tracing rays")
+        TIMING_LOG(resolve, RaytracingTimer::Component::RAYTRACING, "resolving rays into image")
 
         return image;
     }

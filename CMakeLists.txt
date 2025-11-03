@@ -37,7 +37,14 @@ add_subdirectory(lib)
 ## adding respective shaders for compilation
 add_subdirectory(shader)
 
-add_definitions(-DPLATFORM_NAME="${CMAKE_SYSTEM_NAME}" -DARCHITECTURE="${CMAKE_HOST_SYSTEM_PROCESSOR}")
+# Get the latest commit hash
+execute_process(
+        COMMAND git rev-parse HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+add_definitions(-DPLATFORM_NAME="${CMAKE_SYSTEM_NAME}" -DARCHITECTURE="${CMAKE_HOST_SYSTEM_PROCESSOR}" -DGIT_COMMIT_HASH="${GIT_COMMIT_HASH}")
 
 add_custom_target(CopyResources
         COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_SOURCE_DIR}/cnr.otf ${CMAKE_BINARY_DIR}

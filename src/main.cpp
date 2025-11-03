@@ -20,18 +20,25 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     TIMING_START(raytrace)
     Image *raytraced = raytracer->raytrace(scene);
     TIMING_END(raytrace)
-    TIMING_LOG(raytrace, "Benchmarking", raytracer->identifier() + " raytracing")
+    TIMING_LOG_RAYTRACER(raytracer, raytrace, RaytracingTimer::Component::RAYTRACING, "Total raytracing time");
 
     bool exists = std::ifstream(benchmarkFile).good();
     std::ofstream timeLog;
     timeLog.open(benchmarkFile, std::ios::app);
     if (!exists) {
-        timeLog << "Implementation,Platform,Architecture,Filename,Samples,Bounces,Triangles,Spheres,Duration(ms)" <<
+        timeLog <<
+                "Implementation,Platform,Architecture,Filename,Samples,Bounces,Triangles,Spheres,Duration(ms),Scene Loading(ms),Encoding(ms),Raytracing(ms),Git Hash"
+                <<
                 std::endl;
     }
     timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
             raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << scene.totalTriangleCount() <<
-            "," << scene.totalSphericalCount() << "," << TIMING_MILLIS(raytrace)
+            "," << scene.totalSphericalCount() << "," <<
+            TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::SCENE_LOADING) << "," <<
+            TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::ENCODING) << "," <<
+            TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::RAYTRACING) << "," <<
+            TIMING_MILLIS(raytrace) << "," <<
+            GIT_COMMIT_HASH
             << std::endl;
     timeLog.close();
 

@@ -1,4 +1,4 @@
-Implementation,Platform,Architecture,Filename,Samples,Bounces,Triangles,Spheres,Duration(ms)
+Implementation,Platform,Architecture,Filename,Samples,Bounces,Triangles,Spheres,Duration(ms),Scene Loading(ms),Encoding(ms),Raytracing(ms),Git Hash
 SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,380500,2,6710
 SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,380500,2,3249
 SequentialRayTracer,Darwin,arm64,scene/scene.json,1,3,380500,2,3255
@@ -293,3 +293,4 @@ MetalRayTracer,Darwin,arm64,scene/scene_simple.json,4,3,24,2,954
 MetalRayTracer,Darwin,arm64,scene/scene_simple.json,4,3,24,2,958
 MetalRayTracer,Darwin,arm64,scene/scene_simple.json,4,3,24,2,1018
 MetalRayTracer,Darwin,arm64,scene/scene_simple.json,4,3,24,2,1015
+MetalRayTracer,Darwin,arm64,scene/scene_simple.json,4,3,24,2,0,671,962,952,8e4a06dad0e7ae7590121acd178f59ea752c64ed

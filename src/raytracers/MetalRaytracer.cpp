@@ -105,7 +105,7 @@ namespace RayTracing {
         commandBuffer->commit();
         commandBuffer->waitUntilCompleted();
         TIMING_END(executeCompute)
-        TIMING_LOG(executeCompute, identifier(), "Compute command execution")
+        TIMING_LOG(executeCompute, RaytracingTimer::Component::RAYTRACING, "Compute command execution")
     }
 
     void MetalRaytracer::encodeUVTestData(MetalEncodingData data,
@@ -382,7 +382,8 @@ namespace RayTracing {
         computeEncoder->setBuffer(bufferResult, 0, 9);
 
         TIMING_END(prepBuffers)
-        TIMING_LOG(prepBuffers, identifier(), "Preparing and encoding data into buffers for raytracing")
+        TIMING_LOG(prepBuffers, RaytracingTimer::Component::ENCODING,
+                   "Preparing and encoding data into buffers for raytracing")
 
         MTL::Size gridSize = MTL::Size::Make(getWindowSize().getX(), getWindowSize().getY(), getSamplesPerPixel());
 
@@ -396,7 +397,7 @@ namespace RayTracing {
         TIMING_START(prepping)
         scene.prepareRender();
         TIMING_END(prepping)
-        TIMING_LOG(prepping, identifier(), "prepping scene for raytracing")
+        TIMING_LOG(prepping, RaytracingTimer::Component::SCENE_LOADING, "prepping scene for raytracing")
         std::cout << "[" << identifier() << "] Starting raytrace with "
                 << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
                 << scene.objects.size() << " mesh objects (" << scene.getTriangleCount() << " triangles), "
