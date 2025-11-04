@@ -38,10 +38,10 @@ namespace RayTracing {
             object->updateBoundingBox();
             object->transform.update();
             unsigned maxTriangleCount = object->mesh->numTriangles;
-            if (object->mesh->numTriangles > 200) {
+            if (maxTriangleCount > 500) {
                 maxTriangleCount /= 2;
             }
-            if (object->mesh->numTriangles > 2000) {
+            if (maxTriangleCount > 4000) {
                 maxTriangleCount /= 2;
             }
             object->updateNestedBoundingBox(maxTriangleCount + 1);

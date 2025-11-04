@@ -39,7 +39,8 @@ kernel void raytrace(
             Metal_LocalRay localRay = toLocalRay(currentRay, meshObject.inverseTransform, meshObject.inverseRotate, meshObject.inverseScale);
             
             /// this calculation is also done in intersectTrianglesInBox
-            /*if(!intersectsBoundingBox(localRay, meshObject.boundingBox)){
+#ifdef NAIVE_BOUNDING_BOX
+            if(!intersectsBoundingBox(localRay, boundingBoxes[meshObject.boundingBoxIndex])){
                 continue;
             }
             
@@ -58,15 +59,16 @@ kernel void raytrace(
                     currentRotatedNormal = rotateNormal(meshObject.rotation, intersection.normal);
                     currentColor = meshObject.color;
                 }
-             }*/
-            
-            Metal_Intersection intersection = intersectTrianglesInBox(localRay, meshObject, meshObject.boundingBox, meshIndices, meshVertices, meshNormals, boundingBoxes);
+             }
+#else
+            Metal_Intersection intersection = intersectTrianglesInBox(localRay, meshObjIndex, meshObject.boundingBoxIndex, meshObjects, meshIndices, meshVertices, meshNormals, boundingBoxes);
             
             if(intersection.hit && intersection.distance < currentHit.distance){
                 currentHit = intersection;
                 currentRotatedNormal = rotateNormal(meshObject.rotation, intersection.normal);
                 currentColor = meshObject.color;
             }
+#endif
         }
 
         /// check intersections with spheres

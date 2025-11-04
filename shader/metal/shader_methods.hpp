@@ -43,10 +43,11 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, simd::float3 triangle[3
 /**
  TODO
  */
-Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, Metal_MeshRayTraceableObject meshObject,
-                                           Metal_NestedBoundingBox boundingBox, deviceint *meshIndices,
-                                           device float3*meshVertices, device float3*meshNormals,
-                                           device Metal_NestedBoundingBox*boundingBoxes);
+Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, int meshObjectIndex,
+                                           int boundingBoxIndex, device Metal_MeshRayTraceableObject*meshObjects,
+                                           deviceint *meshIndices,
+                                           device float3 *meshVertices, device float3 *meshNormals,
+                                           device Metal_NestedBoundingBox *boundingBoxes);
 
 /**
  * Check if the ray intersects the bounding box

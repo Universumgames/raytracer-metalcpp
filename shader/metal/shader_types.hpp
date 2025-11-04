@@ -49,7 +49,7 @@ struct Metal_RayTraceSettings {
 };
 
 struct Metal_MeshRayTraceableObject {
-    Metal_NestedBoundingBox boundingBox;
+    unsigned boundingBoxIndex;
     simd::float4x4 transform;
     simd::float4x4 inverseTransform;
     simd::float4x4 rotation;
@@ -78,3 +78,8 @@ struct Metal_Light {
 };
 
 #define METAL_COLOR_COUNT_MAX ((unsigned)6)
+/// max stack size for nested bounding box traversing
+#define METAL_NESTING_BB_STACK ((unsigned) 30)
+
+/// naive bounding box checking, not using nested structure
+//#define NAIVE_BOUNDING_BOX

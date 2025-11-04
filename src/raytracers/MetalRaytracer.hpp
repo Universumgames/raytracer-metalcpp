@@ -6,6 +6,8 @@
 #include <Metal/MTLComputeCommandEncoder.hpp>
 
 #include "../../shader/metal/shader_types.hpp"
+#include "Metal/MTLCaptureManager.hpp"
+#include "Metal/MTLCaptureScope.hpp"
 
 namespace RayTracing {
     /// Ray tracer implementation using Apple's Metal API
@@ -13,6 +15,11 @@ namespace RayTracing {
     private:
         NS::AutoreleasePool *pAutoreleasePool = nullptr;
         MTL::Device *device = nullptr;
+#ifdef METAL_DEBUGGING
+        MTL::CaptureScope *captureScope = nullptr;
+        MTL::CaptureManager *captureManager = nullptr;
+        MTL::CaptureDescriptor *captureDescriptor = nullptr;
+#endif
         MTL::CommandQueue *commandQueue = nullptr;
         MTL::Library *defaultLibrary = nullptr;
 

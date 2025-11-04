@@ -2,11 +2,12 @@ file(GLOB SHADER_SRC *.metal)
 file(GLOB SHADER_HEADERS *.h*)
 
 set(METALLIB ${CMAKE_CURRENT_BINARY_DIR}/default.metallib)
+set(METALSYMBOLS ${CMAKE_CURRENT_BINARY_DIR}/default.metallibsym)
 
 add_custom_command(
         OUTPUT ${METALLIB}
-        COMMAND xcrun -sdk macosx metal -frecord-sources=flat ${SHADER_SRC}
-        DEPENDS ${SHADER_SRC}
+        COMMAND xcrun -sdk macosx metal -frecord-sources=flat -gline-tables-only ${SHADER_SRC}
+        DEPENDS ${SHADER_SRC} ${SHADER_HEADERS}
         VERBATIM
 )
 
@@ -14,7 +15,7 @@ add_custom_command(
 set_source_files_properties(${METALLIB} PROPERTIES GENERATED TRUE)
 
 # Create an object library that contains the shader sources and the generated metallib
-add_library(METAL_SHADERS OBJECT ${SHADER_SRC} ${SHADER_HEADERS} ${METALLIB})
+add_custom_target(METAL_SHADERS DEPENDS ${METALLIB})
 
 set_target_properties(METAL_SHADERS PROPERTIES
         DEBUG_POSTFIX ""
@@ -27,11 +28,12 @@ set_target_properties(METAL_SHADERS PROPERTIES
         LINKER_LANGUAGE Metal
 )
 
-target_sources(${PROJECT_NAME} PRIVATE ${SHADER_SRC} ${SHADER_HEADERS} ${METALLIB})
+target_sources(${PROJECT_NAME} PRIVATE ${SHADER_SRC} ${SHADER_HEADERS})
 
 add_custom_target(
         COPIED_METAL_SHADERS
         COMMAND ${CMAKE_COMMAND} -E copy ${METALLIB} ${CMAKE_CURRENT_BINARY_DIR}/../../
+        COMMAND ${CMAKE_COMMAND} -E copy ${METALSYMBOLS} ${CMAKE_CURRENT_BINARY_DIR}/../../
         DEPENDS METAL_SHADERS
 )
 

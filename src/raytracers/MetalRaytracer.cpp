@@ -13,6 +13,8 @@
 #include "../Renderer.h"
 #include "../timing.hpp"
 #include "../../shader/metal/shader_types.hpp"
+#include "Metal/MTLCaptureManager.hpp"
+#include "Metal/MTLCaptureScope.hpp"
 
 
 namespace RayTracing {
@@ -20,15 +22,33 @@ namespace RayTracing {
         : RayTracer(windowSize, bounces, samplesPerPixel) {
         pAutoreleasePool = NS::AutoreleasePool::alloc()->init();
         initialize();
+#ifdef METAL_DEBUGGING
+        captureScope->beginScope();
+#endif
     }
 
     MetalRaytracer::~MetalRaytracer() {
+#ifdef METAL_DEBUGGING
+        captureScope->endScope();
+        captureManager->stopCapture();
+#endif
         pAutoreleasePool->release();
     }
 
     void MetalRaytracer::initialize() {
         auto windowSize = getWindowSize();
         device = MTL::CreateSystemDefaultDevice();
+#ifdef METAL_DEBUGGING
+        captureManager = MTL::CaptureManager::sharedCaptureManager();
+        captureScope = captureManager->newCaptureScope(device);
+        captureDescriptor = MTL::CaptureDescriptor::alloc()->init();
+        captureDescriptor->setCaptureObject(captureScope);
+        captureDescriptor->setCaptureObject(device);
+        captureDescriptor->setDestination(MTL::CaptureDestination::CaptureDestinationGPUTraceDocument);
+        captureDescriptor->setOutputURL(NS::URL::fileURLWithPath(
+            NS::String::string("./metal_capture.gputrace", NS::UTF8StringEncoding)));
+        captureManager->startCapture(device);
+#endif
 
         defaultLibrary = device->newDefaultLibrary();
         if (!defaultLibrary) {
@@ -207,7 +227,7 @@ namespace RayTracing {
         for (auto &object: objects) {
             auto metalObject =
                     Metal_MeshRayTraceableObject{
-                        .boundingBox = object->boundingBox.toMetalBasic(),
+                        .boundingBoxIndex = (unsigned) nestedBoundingBoxes.size(),
                         .transform = object->transform.getTransformMatrix().toMetal(),
                         .inverseTransform = object->transform.getInverseTransformMatrix().toMetal(),
                         .rotation = object->transform.getRotationMatrix().toMetal(),
@@ -223,54 +243,57 @@ namespace RayTracing {
                 vertices.push_back(vertex.toMetal());
             }
 
-            // copy bounding box indices
+            // transform nested bounding boxes into metal format (flattened)
             NestedBoundingBox rootBoundingBox = *(object->nestedBoundingBox);
             std::vector toTraverse = {object->nestedBoundingBox};
-            unsigned long newTriangleCount = 0;
+            unsigned long newTotalTriangleCount = 0;
             while (!toTraverse.empty()) {
-                auto current = toTraverse.back();
-                toTraverse.pop_back();
+                // pop front
+                auto current = toTraverse.front();
+                toTraverse.erase(toTraverse.begin());
 
                 auto currentMetal = current->toMetalBasic();
-                newTriangleCount += current->indices.size() / 3;
 
-                unsigned childCount = 0;
-
+                // get child bounding boxes, add them to the traversal and set the indices in the parent
+                unsigned leftTreeDepth = 0;
                 if (current->left != nullptr) {
                     toTraverse.push_back(current->left);
-                    currentMetal.childLeftIndex = (unsigned) nestedBoundingBoxes.size() + 1;
-                    childCount = current->left->totalNodeCount();
+                    currentMetal.childLeftIndex = (int) nestedBoundingBoxes.size() + 1;
+                    leftTreeDepth = current->left->totalNodeCount();
                 } else {
                     currentMetal.childLeftIndex = -1;
                 }
                 if (current->right != nullptr) {
                     toTraverse.push_back(current->right);
-                    currentMetal.childRightIndex = (unsigned) nestedBoundingBoxes.size() + childCount + 1;
+                    currentMetal.childRightIndex = (int) nestedBoundingBoxes.size() + leftTreeDepth + 1;
                 } else {
                     currentMetal.childRightIndex = -1;
                 }
 
+                // set offsets for indices and normals, and copy them
                 if (!current->indices.empty()) {
-                    currentMetal.indicesOffset = (unsigned) indices.size();
-                    currentMetal.normalsOffset = (unsigned) normals.size();
-                    currentMetal.triangleCount = object->mesh->numTriangles;
+                    currentMetal.indicesOffset = (int) indices.size();
+                    currentMetal.normalsOffset = (int) normals.size();
+                    currentMetal.triangleCount = current->indices.size() / 3;
+                    newTotalTriangleCount += currentMetal.triangleCount;
                     indices.insert(indices.end(), current->indices.begin(), current->indices.end());
-                    for (auto &normal: current->normals) {
-                        normals.push_back(normal.toMetal());
-                    }
+                    std::ranges::transform(current->normals, std::back_inserter(normals),
+                                           [](const Vec3 &n) {
+                                               return n.toMetal();
+                                           });
                 } else {
                     currentMetal.indicesOffset = -1;
                     currentMetal.normalsOffset = -1;
                     currentMetal.triangleCount = 0;
-                }
-                if (*current == rootBoundingBox) {
-                    metalObject.boundingBox = currentMetal;
+                    // currentMetal.indicesOffset = (int) indices.size();
+                    // currentMetal.normalsOffset = (int) normals.size();
+                    // currentMetal.triangleCount = object->mesh->numTriangles;
                 }
                 nestedBoundingBoxes.push_back(currentMetal);
             }
 
             // for legacy single hitbox rendering
-            metalObject.triangleCount = newTriangleCount;
+            metalObject.triangleCount = newTotalTriangleCount;
             meshObjects.push_back(metalObject);
         }
         return {

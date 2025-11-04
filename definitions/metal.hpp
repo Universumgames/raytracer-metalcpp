@@ -2,3 +2,5 @@
 #include "definitions.hpp"
 
 #define USE_SHADER_METAL
+
+//#define METAL_DEBUGGING

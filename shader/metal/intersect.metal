@@ -55,31 +55,86 @@ Metal_Intersection intersectTriangle(Metal_LocalRay ray, float3 triangle[3], flo
     };
 }
 
-Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, Metal_MeshRayTraceableObject meshObject, Metal_NestedBoundingBox boundingBox, device int* meshIndices, device float3* meshVertices, device float3* meshNormals, device Metal_NestedBoundingBox* boundingBoxes){
-    if(!intersectsBoundingBox(ray, boundingBox))
+Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, int meshObjectIndex,
+                                           int boundingBoxIndex, device Metal_MeshRayTraceableObject* meshObjects, device int *meshIndices,
+                                           device float3 *meshVertices, device float3 *meshNormals,
+                                           device Metal_NestedBoundingBox *boundingBoxes){
+    
+    if(!intersectsBoundingBox(ray, boundingBoxes[boundingBoxIndex]))
         return {
             .hit = false,
             .distance = INFINITY
         };
     
+    /// using heap stack because recursion can cause stack overflows quickly and dynamically allocating memory is not possible
+    int boundingBoxIndexStack[METAL_NESTING_BB_STACK];
+    unsigned stackSize = 0;
+    boundingBoxIndexStack[stackSize++] = boundingBoxIndex;
+    
+    Metal_Intersection nearestIntersection = { .hit = false, .distance = INFINITY };
+    
+    while(stackSize > 0){
+        int currentBoundingBoxIndex = boundingBoxIndexStack[--stackSize];
+        Metal_NestedBoundingBox box = boundingBoxes[currentBoundingBoxIndex];
+        
+        if(!intersectsBoundingBox(ray, box))
+            continue;
+        
+        if(box.indicesOffset == -1){
+            if(box.childLeftIndex != -1 )
+                boundingBoxIndexStack[stackSize++] = box.childLeftIndex;
+            if(box.childRightIndex != -1)
+                boundingBoxIndexStack[stackSize++] = box.childRightIndex;
+        }else{
+            /// bounding box is leaf node, check all triangles
+            int vertexOffset = meshObjects[meshObjectIndex].vertexOffset;
+            for(unsigned i = 0; i < box.triangleCount; i++){
+                int startIndicesIndex = box.indicesOffset + (i * 3);
+                float3 triangle[3] = {
+                    meshVertices[vertexOffset + meshIndices[startIndicesIndex + 0]],
+                    meshVertices[vertexOffset + meshIndices[startIndicesIndex + 1]],
+                    meshVertices[vertexOffset + meshIndices[startIndicesIndex + 2]],
+                };
+                Metal_Intersection intersection = intersectTriangle(ray, triangle, meshNormals[box.normalsOffset + i]);
+                if(intersection.hit && intersection.distance < nearestIntersection.distance){
+                    nearestIntersection = intersection;
+                }
+            }
+        }
+    }
+    
+    return nearestIntersection;
+    
+    /// recursion implementation
+    /// causes stack overflow quickly
+    /*Metal_NestedBoundingBox boundingBox = boundingBoxes[boundingBoxIndex];
+    
     /// if bounding box is not a leaf node, check children
     if(boundingBox.indicesOffset == -1){
-        Metal_Intersection left = {.hit = false, .distance = INFINITY};
-        Metal_Intersection right = {.hit = false, .distance = INFINITY};
+        Metal_Intersection left = { .hit = false, .distance = INFINITY };
+        Metal_Intersection right = { .hit = false, .distance = INFINITY };
         if(boundingBox.childLeftIndex != -1 )
             /// recursive call required because no dynamic memory for a variable array can be allocated
-            left = intersectTrianglesInBox(ray, meshObject, boundingBoxes[boundingBox.childLeftIndex], meshIndices, meshNormals, meshVertices, boundingBoxes);
+            left = intersectTrianglesInBox(ray, meshObjectIndex, boundingBox.childLeftIndex, meshObjects, meshIndices, meshVertices, meshNormals, boundingBoxes);
         if(boundingBox.childRightIndex != -1)
-            right = intersectTrianglesInBox(ray, meshObject, boundingBoxes[boundingBox.childRightIndex], meshIndices, meshNormals, meshVertices, boundingBoxes);
-        if(left.distance < right.distance)
-            return left;
-        else
-            return right;
+            right = intersectTrianglesInBox(ray, meshObjectIndex, boundingBox.childRightIndex, meshObjects, meshIndices, meshVertices, meshNormals, boundingBoxes);
+        
+        Metal_Intersection ret = {
+                .hit = false,
+                .distance = INFINITY
+            };
+        
+        if(left.hit && left.distance < ret.distance)
+            ret = left;
+        if(right.hit && right.distance < ret.distance)
+            ret = right;
+        
+        return ret;
     }
     
     /// bounding box is leaf node, check all triangles
     Metal_Intersection nearestIntersection = { .hit = false, .distance = INFINITY };
-    int vertexOffset = meshObject.vertexOffset;
+    int vertexOffset = meshObjects[meshObjectIndex].vertexOffset;
     for(unsigned i = 0; i < boundingBox.triangleCount; i++){
         int startIndicesIndex = boundingBox.indicesOffset + (i * 3);
         float3 triangle[3] = {
@@ -87,13 +142,13 @@ Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, Metal_MeshRayTrac
             meshVertices[vertexOffset + meshIndices[startIndicesIndex + 1]],
             meshVertices[vertexOffset + meshIndices[startIndicesIndex + 2]],
         };
-        Metal_Intersection cur = intersectTriangle(ray, triangle, meshNormals[boundingBox.normalsOffset + i]);
-        if(cur.hit && cur.distance < nearestIntersection.distance){
-            nearestIntersection = cur;
+        Metal_Intersection intersection = intersectTriangle(ray, triangle, meshNormals[boundingBox.normalsOffset + i]);
+        if(intersection.hit && intersection.distance < nearestIntersection.distance){
+            nearestIntersection = intersection;
         }
     }
     
-    return nearestIntersection;
+    return nearestIntersection;*/
 }
 
 bool intersectsBoundingBox(Metal_LocalRay ray, Metal_NestedBoundingBox box) {
