@@ -63,12 +63,16 @@ namespace RayTracing {
         virtual Image *rayTest(Camera *camera) = 0;
 
         /// Get the window size
-        Vec2u getWindowSize() const { return windowSize; }
+        [[nodiscard]] Vec2u getWindowSize() const { return windowSize; }
 
         /// Get the number of samples per pixel
-        unsigned getSamplesPerPixel() const;
+        [[nodiscard]] unsigned getSamplesPerPixel() const;
 
         /// Get the number of bounces
-        unsigned getBounces() const;
+        [[nodiscard]] unsigned getBounces() const;
+
+        [[nodiscard]] unsigned getRayCount() const {
+            return windowSize.getX() * windowSize.getY() * samplesPerPixel;
+        }
     };
 }

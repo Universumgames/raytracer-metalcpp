@@ -27,13 +27,18 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     timeLog.open(benchmarkFile, std::ios::app);
     if (!exists) {
         timeLog <<
-                "Implementation,Platform,Architecture,Filename,Samples,Bounces,Triangles,Spheres,Duration(ms),Scene Loading(ms),Encoding(ms),Raytracing(ms),Git Hash"
+                "Implementation,Platform,Architecture,Filename," <<
+                "Samples,Bounces,Rays," <<
+                "Triangles,Spheres," <<
+                "Scene Loading(ms),Encoding(ms),Raytracing(ms),Total Duration (ms)" <<
+                "Git Hash"
                 <<
                 std::endl;
     }
     timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
-            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << scene.totalTriangleCount() <<
-            "," << scene.totalSphericalCount() << "," <<
+            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," <<
+            raytracer->getRayCount() << "," <<
+            scene.totalTriangleCount() << "," << scene.totalSphericalCount() << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::SCENE_LOADING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::ENCODING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::RAYTRACING) << "," <<

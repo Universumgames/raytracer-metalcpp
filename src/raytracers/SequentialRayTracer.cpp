@@ -39,7 +39,7 @@ namespace RayTracing {
         TIMING_END(rays)
         TIMING_LOG(rays, RaytracingTimer::Component::ENCODING, "calculating starting rays")
         std::cout << "[" << identifier() << "] Starting raytrace with "
-                << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
+                << getRayCount() << " rays, "
                 << scene.objects.size() << " mesh objects (" << scene.getTriangleCount() << " triangles), "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"

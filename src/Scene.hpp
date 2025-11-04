@@ -55,11 +55,7 @@ namespace RayTracing {
          * @return Total triangle count
          */
         [[nodiscard]] unsigned totalTriangleCount() const {
-            unsigned count = 0;
-            for (const auto &obj: objects) {
-                count += obj->mesh->numTriangles;
-            }
-            return count;
+            return triangleCount;
         }
 
         /**

@@ -14,7 +14,7 @@ inline std::string sceneFile = "scene/scene_simple.json";
 inline std::string benchmarkFile = "../timeLog.csv";
 inline unsigned bounces = 3;
 inline unsigned samples = 4;
-inline auto windowSize = RayTracing::Vec2u(800, 600);
+inline auto windowSize = RayTracing::Vec2u(1920, 1440);
 
 /**
  * Resolve command line arguments and set global variables accordingly

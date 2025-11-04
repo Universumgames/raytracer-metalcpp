@@ -62,10 +62,10 @@ namespace RayTracing {
         memcpy(bufferForward->contents(), forward, sizeof(simd::float3));
 
         bufferResult = device->newBuffer(
-            sizeof(simd::float4) * windowSize.getX() * windowSize.getY() * getSamplesPerPixel(),
+            sizeof(simd::float4) * getRayCount(),
             MTL::ResourceStorageModeShared);
 
-        bufferRays = device->newBuffer(sizeof(Metal_Ray) * windowSize.getX() * windowSize.getY() * getSamplesPerPixel(),
+        bufferRays = device->newBuffer(sizeof(Metal_Ray) * getRayCount(),
                                        MTL::ResourceStorageModeShared);
 
         // data to be filled on encode
@@ -399,7 +399,7 @@ namespace RayTracing {
         TIMING_END(prepping)
         TIMING_LOG(prepping, RaytracingTimer::Component::SCENE_LOADING, "prepping scene for raytracing")
         std::cout << "[" << identifier() << "] Starting raytrace with "
-                << getWindowSize().getX() * getWindowSize().getY() * getSamplesPerPixel() << " rays, "
+                << getRayCount() << " rays, "
                 << scene.objects.size() << " mesh objects (" << scene.getTriangleCount() << " triangles), "
                 << scene.spheres.size() << " spheres and "
                 << scene.lights.size() << " light sources"
