@@ -48,6 +48,7 @@ namespace RayTracing {
                 std::endl;
 
         TIMING_START(tracing)
+#pragma omp parallel for schedule(dynamic)
         for (auto &ray: rays) {
             for (unsigned b = 0; b < getBounces(); b++) {
                 HitInfo currentHit{.hit = false, .distance = INFINITY};
@@ -62,8 +63,8 @@ namespace RayTracing {
                         continue;
                     }
 
-                    std::vector<int> indices;
-                    std::vector<NestedBoundingBox *> boxesToCheck;
+                    std::vector<int> indices = object->mesh->indices;
+                    /*std::vector<NestedBoundingBox *> boxesToCheck;
                     boxesToCheck.push_back(object->nestedBoundingBox);
                     while (!boxesToCheck.empty()) {
                         auto nestedBox = boxesToCheck.back();
@@ -78,7 +79,7 @@ namespace RayTracing {
                         if (nestedBox->right != nullptr && localRay.intersectsBoundingBox(*nestedBox->right)) {
                             boxesToCheck.push_back(nestedBox->right);
                         }
-                    }
+                    }*/
 
                     if (indices.empty()) continue;
 
