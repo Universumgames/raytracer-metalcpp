@@ -1,6 +1,8 @@
 #pragma once
 #include "shader_types.hpp"
 
+//@formatter:off
+
 /**
  * Reflect ray at origin with surface normal
  * @param ray the ray to reflect
@@ -41,11 +43,20 @@ Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, flo
 Metal_Intersection intersectTriangle(Metal_LocalRay ray, simd::float3 triangle[3], simd::float3 customNormal);
 
 /**
- TODO
+ * Check intersection with all triangles in the bounding box
+ * @param ray the ray in object space
+ * @param meshObjectIndex the index of the mesh object where the intersections are checked
+ * @param boundingBoxIndex the index of the bounding box to check
+ * @param meshObjects the mesh objects in the scene
+ * @param meshIndices the mesh indices buffer
+ * @param meshVertices the mesh vertices buffer
+ * @param meshNormals the mesh normals buffer
+ * @param boundingBoxes the bounding boxes buffer
+ * @return the closest intersection of the ray with the triangles in the bounding box
  */
 Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, int meshObjectIndex,
-                                           int boundingBoxIndex, device Metal_MeshRayTraceableObject*meshObjects,
-                                           deviceint *meshIndices,
+                                           int boundingBoxIndex, device Metal_MeshRayTraceableObject *meshObjects,
+                                           device int *meshIndices,
                                            device float3 *meshVertices, device float3 *meshNormals,
                                            device Metal_NestedBoundingBox *boundingBoxes);
 
@@ -86,3 +97,5 @@ simd::float3 rotateNormal(simd::float4x4 rotation, simd::float3 normal);
  * @return percentage the brightness has decreased after the "distance"
  */
 float lightDissipationCoefficient(float distance);
+
+//@formatter:on

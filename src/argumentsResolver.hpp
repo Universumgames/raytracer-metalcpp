@@ -3,19 +3,18 @@
 #include <string>
 
 #include "math/vectors.hpp"
+#include "raytracers/RayTracerFactory.hpp"
 
-
-inline bool openWindow = true;
-inline bool renderTests = true;
-inline bool helped = false;
-inline bool sequential = false;
-inline std::string outputFile = "./raytraced.jpg";
-inline std::string sceneFile = "scene/scene_simple_atmosphere.json";
-inline std::string benchmarkFile = "../timeLog.csv";
-inline unsigned bounces = 4;
-inline unsigned samples = 4;
-//inline auto windowSize = RayTracing::Vec2u(1920, 1440);
-inline auto windowSize = RayTracing::Vec2u(800, 600);
+extern bool openWindow;
+extern bool renderTests;
+extern bool helped;
+extern RayTracing::RayTracerType implementation;
+extern std::string outputFile;
+extern std::string sceneFile;
+extern std::string benchmarkFile;
+extern unsigned bounces;
+extern unsigned samples;
+extern RayTracing::Vec2u windowSize;
 
 /**
  * Resolve command line arguments and set global variables accordingly
@@ -37,6 +36,8 @@ inline void decodeArguments(int argc, char *argv[]) {
             std::cout << "\t-b <file>\t\t\t specify benchmark csv file (default: " << benchmarkFile << ")" << std::endl;
             std::cout << "\t--sequential\t\t\t use the sequential raytracer implementation instead of the gpu" <<
                     std::endl;
+            std::cout << "\t--multi-threaded\t\t use the multi-threaded cpu raytracer implementation" << std::endl;
+            std::cout << "\t--shader\t\t\t use the gpu raytracer implementation (default)" << std::endl;
             std::cout << "\t--bounces <num>\t\t\t specify number of bounces (default: " << bounces << ")" << std::endl;
             std::cout << "\t--samples <num>\t\t\t specify number of samples per pixel (default: " << samples << ")" <<
                     std::endl;
@@ -65,7 +66,11 @@ inline void decodeArguments(int argc, char *argv[]) {
             benchmarkFile = argv[i + 1];
             i++;
         } else if (arg == "--sequential") {
-            sequential = true;
+            implementation = RayTracing::SEQUENTIAL;
+        } else if (arg == "--multi-threaded") {
+            implementation = RayTracing::MULTI_THREADED;
+        } else if (arg == "--shader") {
+            implementation = RayTracing::SHADER_BASED;
         } else if (arg == "--bounces") {
             if (argc < i + 1) {
                 std::cerr << "Missing argument for --bounces" << std::endl;

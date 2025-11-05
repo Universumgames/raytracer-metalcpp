@@ -8,6 +8,18 @@
 
 using namespace RayTracing;
 
+bool openWindow = true;
+bool renderTests = true;
+bool helped = false;
+RayTracerType implementation = SHADER_BASED;
+std::string outputFile = "./raytraced.jpg";
+std::string sceneFile = "scene/scene_atmosphere.json";
+std::string benchmarkFile = "../timeLog.csv";
+unsigned bounces = 4;
+unsigned samples = 4;
+//auto windowSize = RayTracing::Vec2u(1920, 1440);
+auto windowSize = Vec2u(800, 600);
+
 /**
  * Benchmark the given raytracer with the given scene and log the time taken to a CSV file
  * @param raytracer the raytracer implemenation to benchmark
@@ -65,9 +77,7 @@ int main(int argc, char *argv[]) {
 
     auto imageHandler = new ImageHandler(windowSize);
     auto raytracerFactory = RayTracerFactory::init(windowSize, bounces, samples);
-    auto *raytracer = sequential
-                          ? raytracerFactory->getSequentialImplementation()
-                          : raytracerFactory->getShaderImplementation();
+    auto *raytracer = raytracerFactory->getRayTracerByType(implementation);
     if (raytracer == nullptr) {
         std::cerr << "No implementation found for desired raytracer, using sequential implementation" << std::endl;
         raytracer = raytracerFactory->getSequentialImplementation();

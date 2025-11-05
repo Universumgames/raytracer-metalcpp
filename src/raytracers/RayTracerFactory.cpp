@@ -2,6 +2,7 @@
 
 #include "CudaRayTracer.hpp"
 #include "MetalRaytracer.hpp"
+#include "OpenMPRaytracer.hpp"
 #include "SequentialRayTracer.hpp"
 
 namespace RayTracing {
@@ -25,6 +26,9 @@ namespace RayTracing {
     RayTracerFactory::RayTracerFactory(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel) {
         this->sequentialRayTracer = new SequentialRayTracer(windowSize, bounces,
                                                             samplesPerPixel);
+
+        this->multiThreadedRayTracer = new OpenMPRaytracer(windowSize, bounces, samplesPerPixel);
+
 #ifdef USE_SHADER_METAL
         this->shaderRayTracer = new MetalRaytracer(windowSize, bounces, samplesPerPixel);
 #endif

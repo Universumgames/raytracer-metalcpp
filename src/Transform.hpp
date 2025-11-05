@@ -76,7 +76,6 @@ namespace RayTracing {
         Mat4x4 calcInverseRotationMatrix();
 
     protected:
-        friend class SequentialRayTracer;
         friend struct Ray;
     };
 }

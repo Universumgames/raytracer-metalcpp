@@ -3,7 +3,7 @@
 
 namespace RayTracing {
     class SequentialRayTracer : public RayTracer {
-    private:
+    protected:
         void resolveRays(Image *image, std::vector<Ray> &rays, ColorBlendMode mode = AVERAGE) const;
 
     public:
