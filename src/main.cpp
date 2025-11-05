@@ -32,7 +32,7 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     TIMING_START(raytrace)
     Image *raytraced = raytracer->raytrace(scene);
     TIMING_END(raytrace)
-    TIMING_LOG_RAYTRACER(raytracer, raytrace, RaytracingTimer::Component::RAYTRACING, "Total raytracing time");
+    TIMING_LOG_RAYTRACER(raytracer, raytrace, RaytracingTimer::Component::TOTAL_RAYTRACING, "Total raytracing time");
 
     bool exists = std::ifstream(benchmarkFile).good();
     std::ofstream timeLog;
@@ -42,7 +42,7 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
                 "Implementation,Platform,Architecture,Filename," <<
                 "Samples,Bounces,Rays," <<
                 "Triangles,Spheres," <<
-                "Scene Loading(ms),Encoding(ms),Raytracing(ms),Total Duration (ms)" <<
+                "Scene Loading(ms),Encoding(ms),Raytracing(ms),Total Duration (ms)," <<
                 "Git Hash"
                 <<
                 std::endl;
@@ -54,7 +54,7 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::SCENE_LOADING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::ENCODING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::RAYTRACING) << "," <<
-            TIMING_MILLIS(raytrace) << "," <<
+            TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::TOTAL_RAYTRACING) << "," <<
             GIT_COMMIT_HASH
             << std::endl;
     timeLog.close();

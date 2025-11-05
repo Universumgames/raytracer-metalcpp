@@ -12,6 +12,10 @@ auto duration_##name##_millis = duration_##name.count();
 
 #define TIMING_MILLIS(name) (duration_##name##_millis)
 
+#define TIMING_LOG_SIMPLE(name, componentName, humanText)\
+    std::cout << "[" << componentName << "] " << (humanText) << " took "\
+            << TIMING_MILLIS(name) << " ms\n";
+
 
 #define TIMING_LOG(name, component, operation)\
     RaytracingTimer::getInstance()->logDuration(this, component, TIMING_MILLIS(name), operation);
@@ -29,6 +33,8 @@ public:
         SCENE_LOADING,
         ENCODING,
         RAYTRACING,
+        DECODING,
+        TOTAL_RAYTRACING,
     };
 
 private:

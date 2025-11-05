@@ -38,6 +38,8 @@ namespace RayTracing {
 
         MTL::Buffer *bufferResult = nullptr;
 
+        bool completed = false;
+
     private:
         void initialize();
 

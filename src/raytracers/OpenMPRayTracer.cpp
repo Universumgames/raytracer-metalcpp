@@ -1,10 +1,14 @@
-#include "OpenMPRaytracer.hpp"
+#include "OpenMPRayTracer.hpp"
 #include "../timing.hpp"
 
 #include <iostream>
 
 namespace RayTracing {
-    Image *OpenMPRaytracer::raytrace(Scene scene) {
+    OpenMPRayTracer::OpenMPRayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel)
+        : SequentialRayTracer(windowSize, bounces, samplesPerPixel) {
+    }
+
+    Image *OpenMPRayTracer::raytrace(Scene scene) {
         TIMING_START(prepping)
         auto *image = new Image(getWindowSize());
         scene.prepareRender();
@@ -24,6 +28,8 @@ namespace RayTracing {
                 std::endl;
 
         TIMING_START(tracing)
+        long iteration = 0;
+        double progress = 0.0;
 #pragma omp parallel for schedule(dynamic)
         for (auto &ray: rays) {
             for (unsigned b = 0; b < getBounces(); b++) {
@@ -110,15 +116,21 @@ namespace RayTracing {
                     b = getBounces(); // no hit, stop bouncing
                 }
             }
+            iteration++;
+            progress = iteration / (static_cast<double>(rays.size()));
+            if (iteration % 10000 == 0) {
+                std::cout << "\r" << iteration << "/" << rays.size() << " rays traced (" << (progress * 100.0) << "%)"
+                        << std::flush;
+            }
         }
+        std::cout << '\r';
         TIMING_END(tracing)
+        TIMING_LOG(tracing, RaytracingTimer::Component::RAYTRACING, "tracing rays")
 
         TIMING_START(resolve)
         resolveRays(image, rays);
         TIMING_END(resolve)
-
-        TIMING_LOG(tracing, RaytracingTimer::Component::RAYTRACING, "tracing rays")
-        TIMING_LOG(resolve, RaytracingTimer::Component::RAYTRACING, "resolving rays into image")
+        TIMING_LOG(resolve, RaytracingTimer::Component::DECODING, "resolving rays into image")
 
         return image;
     }

@@ -3,11 +3,9 @@
 
 namespace RayTracing {
     /// Raytracer implementation using OpenMP for parallelization on CPU
-    class OpenMPRaytracer : public SequentialRayTracer {
+    class OpenMPRayTracer : public SequentialRayTracer {
     public:
-        OpenMPRaytracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel)
-            : SequentialRayTracer(windowSize, bounces, samplesPerPixel) {
-        }
+        OpenMPRayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
         /**
          * Raytrace a scene and generate image

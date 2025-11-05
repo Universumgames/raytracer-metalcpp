@@ -2,6 +2,7 @@
 #include "MetalRaytracer.hpp"
 
 #include <iostream>
+#include <thread>
 
 #include <Metal/MTLLibrary.hpp>
 #include <Metal/MTLCommandBuffer.hpp>
@@ -122,8 +123,21 @@ namespace RayTracing {
 
         TIMING_START(executeCompute)
         computeEncoder->endEncoding();
+        completed = false;
+        commandBuffer->addCompletedHandler(MTL::HandlerFunction([this](MTL::CommandBuffer *commandBuffer) {
+            this->completed = true;
+        }));
         commandBuffer->commit();
-        commandBuffer->waitUntilCompleted();
+        //commandBuffer->waitUntilCompleted();
+        TIMING_START(waiting)
+        while (!this->completed) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+            TIMING_END(waiting)
+            std::cout << "\r[" << identifier() << "] Waiting for compute command to complete... " <<
+                    TIMING_MILLIS(waiting) << " ms elapsed"
+                    << std::flush;
+        }
+        std::cout << '\r' << std::flush;
         TIMING_END(executeCompute)
         TIMING_LOG(executeCompute, RaytracingTimer::Component::RAYTRACING, "Compute command execution")
     }
