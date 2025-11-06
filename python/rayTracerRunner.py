@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from enum import Enum
 
 raytracer_work_dir = "../cmake-build-debug"
@@ -44,7 +45,7 @@ def get_samples_per_pixel_options():
 
 
 def get_bounces_options():
-    return [1, 2, 3, 4, 6]
+    return [1, 2, 4, 6]
 
 
 ### get the cross product of every combination of window size, samples per pixel, and bounces
@@ -62,6 +63,24 @@ def get_cross_product():
                     "bounces": bounce
                 })
     return cross_product
+
+
+def read_timelog(file_path) -> pd.DataFrame:
+    df = pd.read_csv(file_path)
+    return df
+
+
+def has_config_been_run(df: pd.DataFrame, scene_file: str, width: int, height: int, samples_per_pixel: int,
+                        bounces: int, implementation: RayTracerImplementation) -> bool:
+    filtered_df = df[
+        (df['Filename'] == scene_file) &
+        (df['Width'] == width) &
+        (df['Height'] == height) &
+        (df['Samples'] == samples_per_pixel) &
+        (df['Bounces'] == bounces) &
+        (df['Implementation'].isin(implementation.to_c_class_name()))
+        ]
+    return not filtered_df.empty
 
 
 def run_ray_tracer(scene_file: str, width: int, height: int, samples_per_pixel: int, bounces: int,
@@ -96,9 +115,16 @@ def run_ray_tracer(scene_file: str, width: int, height: int, samples_per_pixel: 
 
 if __name__ == "__main__":
     scenes = get_scene_files()
-    for scene in scenes:
-        print(f"Rendering scene: {scene}")
-        for combination in get_cross_product():
-            for implementation in RayTracerImplementation:
-                run_ray_tracer(scene, combination["size"][0], combination["size"][1], combination["samples_per_pixel"],
-                               combination["bounces"], implementation)
+
+    sizes = get_window_sizes()
+    samples = get_samples_per_pixel_options()
+    bounces = get_bounces_options()
+    alreadyRun = read_timelog(timelog_file)
+
+    for size in sizes:
+        for scene in scenes:
+            for sample in samples:
+                for bounce in bounces:
+                    for implementation in RayTracerImplementation:
+                        if not has_config_been_run(alreadyRun, scene, size[0], size[1], sample, bounce, implementation):
+                            run_ray_tracer(scene, size[0], size[1], sample, bounce, implementation)

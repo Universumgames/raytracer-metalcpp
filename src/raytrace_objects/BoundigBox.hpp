@@ -119,19 +119,6 @@ namespace RayTracing {
             return 1 + std::max(leftDepth, rightDepth);
         }
 
-        std::vector<int> getAllIndices() const {
-            std::vector<int> allIndices = indices;
-            if (left != nullptr) {
-                auto leftIndices = left->getAllIndices();
-                allIndices.insert(allIndices.end(), leftIndices.begin(), leftIndices.end());
-            }
-            if (right != nullptr) {
-                auto rightIndices = right->getAllIndices();
-                allIndices.insert(allIndices.end(), rightIndices.begin(), rightIndices.end());
-            }
-            return allIndices;
-        }
-
         [[nodiscard]] unsigned totalNodeCount() const {
             unsigned count = 1; // counting this box
             if (left != nullptr) {

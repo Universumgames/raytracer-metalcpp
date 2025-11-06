@@ -137,7 +137,7 @@ namespace RayTracing {
             }
             iteration++;
             progress = iteration / (static_cast<double>(rays.size()));
-            if (iteration % 10000 == 0) {
+            if (iteration % 1000 == 0) {
                 std::cout << "\r" << iteration << "/" << rays.size() << " rays traced (" << (progress * 100.0) << "%)"
                         << std::flush;
             }
@@ -149,7 +149,7 @@ namespace RayTracing {
         TIMING_START(resolve)
         resolveRays(image, rays);
         TIMING_END(resolve)
-        TIMING_LOG_SIMPLE(resolve, identifier(), "resolving rays into image")
+        TIMING_LOG(resolve, RaytracingTimer::Component::DECODING, "resolving rays into image")
 
         return image;
     }

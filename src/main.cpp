@@ -41,8 +41,9 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
         timeLog <<
                 "Implementation,Platform,Architecture,Filename," <<
                 "Samples,Bounces,Rays," <<
+                "Width,Height," <<
                 "Triangles,Spheres," <<
-                "Scene Loading(ms),Encoding(ms),Raytracing(ms),Total Duration (ms)," <<
+                "Scene Loading(ms),Encoding(ms),Raytracing(ms),Decoding(ms),Total Duration (ms)," <<
                 "Git Hash"
                 <<
                 std::endl;
@@ -50,10 +51,12 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
             raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," <<
             raytracer->getRayCount() << "," <<
+            raytracer->getWindowSize().getX() << "," << raytracer->getWindowSize().getY() << "," <<
             scene.totalTriangleCount() << "," << scene.totalSphericalCount() << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::SCENE_LOADING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::ENCODING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::RAYTRACING) << "," <<
+            TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::DECODING) << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::TOTAL_RAYTRACING) << "," <<
             GIT_COMMIT_HASH
             << std::endl;
