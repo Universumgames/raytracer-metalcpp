@@ -49,8 +49,8 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
                 std::endl;
     }
     timeLog << raytracer->identifier() << "," << PLATFORM_NAME << "," << ARCHITECTURE << "," << scene.fileName << "," <<
-            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," <<
-            raytracer->getRayCount() << "," <<
+            raytracer->getSamplesPerPixel() << "," << raytracer->getBounces() << "," << raytracer->getRayCount() << ","
+            <<
             raytracer->getWindowSize().getX() << "," << raytracer->getWindowSize().getY() << "," <<
             scene.totalTriangleCount() << "," << scene.totalSphericalCount() << "," <<
             TIMING_GET_DURATION(raytracer, RaytracingTimer::Component::SCENE_LOADING) << "," <<
