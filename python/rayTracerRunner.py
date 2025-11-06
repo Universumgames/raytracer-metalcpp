@@ -90,7 +90,7 @@ def run_ray_tracer(scene_file: str, width: int, height: int, samples_per_pixel: 
     scene_file_name = os.path.basename(scene_file)
     raytraced_output = os.path.join(absolute_output_dir, implementation.name + "_" + scene_file_name.replace('.json',
                                                                                                              f'_{width}x{height}_s{samples_per_pixel}_b{bounces}.png'))
-    runCommand = "cd {} && ./Raytracer -s {} --window-size {} {} --samples {} --bounces {} -b {} --no-window -of {} {}".format(
+    runCommand = "cd {} && ./Raytracer -s {} --window-size {} {} --samples {} --bounces {} -b {} --no-window --no-tests -of {} {}".format(
         raytracer_work_dir,
         scene_file,
         width,
@@ -128,3 +128,13 @@ if __name__ == "__main__":
                     for implementation in RayTracerImplementation:
                         if not has_config_been_run(alreadyRun, scene, size[0], size[1], sample, bounce, implementation):
                             run_ray_tracer(scene, size[0], size[1], sample, bounce, implementation)
+                        else:
+                            print(
+                                "Skipping already run configuration: Scene: {}, Size: {}x{}, Samples: {}, Bounces: {}, Implementation: {}".format(
+                                    scene,
+                                    size[0],
+                                    size[1],
+                                    sample,
+                                    bounce,
+                                    implementation.name
+                                ))

@@ -16,7 +16,7 @@ namespace RayTracing {
 
         /// Get the identifier of the raytracer
         std::string identifier() override {
-            return "OpenMPRaytracer";
+            return "OpenMPRayTracer";
         }
     };
 }

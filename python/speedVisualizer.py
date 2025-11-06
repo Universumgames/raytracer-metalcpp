@@ -10,7 +10,7 @@ graph_path = "../timelog_plot.html"
 
 def read_timelog(file_path) -> pd.DataFrame:
     df = pd.read_csv(file_path)
-    df["Workload"] = df["Rays"] * df["Bounces"] * df["Samples"] * df["Triangles"]
+    df["Workload"] = df["Rays"] * df["Bounces"] * df["Triangles"]
     return df
 
 
@@ -83,11 +83,11 @@ if __name__ == "__main__":
         },
         title="Total Duration vs Workload by Implementation and Git Hash",
         log_x=True,
-        # log_y=True,
+        log_y=True,
     )
 
     fig.update_layout(
-        xaxis_title="Workload (Rays × Bounces × Samples × Triangles)",
+        xaxis_title="Workload (Rays × Bounces × Triangles)",
         yaxis_title="Total Duration (ms)",
         hovermode="closest",
     )
