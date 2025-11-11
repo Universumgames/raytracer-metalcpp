@@ -3,7 +3,6 @@
 #include <random>
 #include <nlohmann/json.hpp>
 
-#include "../random.hpp"
 #ifdef USE_SHADER_METAL
 #include <simd/simd.h>
 #endif
@@ -180,7 +179,7 @@ namespace RayTracing {
          * @return cross product
          */
         template<unsigned int M = X>
-        typename std::enable_if<M == 3, Vector<3, T> >::type
+        std::enable_if_t<M == 3, Vector<3, T> >
         cross(const Vector<3, T> &rhs) const {
             Vector<3, T> result;
             result.values[0] = values[1] * rhs.values[2] - values[2] * rhs.values[1];
@@ -368,7 +367,7 @@ namespace RayTracing {
         }
 
         /// Convert radians to degrees (only for 3D vectors)
-        Vector<X, T> asDegreeToRadian() const requires (X == 3) {
+        [[nodiscard]] Vector<X, T> asDegreeToRadian() const requires (X == 3) {
             return {
                 deg2rad(values[0]),
                 deg2rad(values[1]),
@@ -390,17 +389,17 @@ namespace RayTracing {
 
 #ifdef USE_SHADER_METAL
         /// Convert to Metal simd type uint2
-        simd::uint2 toMetal() const requires (X == 2 && std::is_same<T, unsigned>::value) {
+        [[nodiscard]] simd::uint2 toMetal() const requires (X == 2 && std::is_same<T, unsigned>::value) {
             return simd::uint2{values[0], values[1]};
         }
 
         /// Convert to Metal simd type float3
-        simd::float3 toMetal() const requires (X == 3 && std::is_same<T, float>::value) {
+        [[nodiscard]] simd::float3 toMetal() const requires (X == 3 && std::is_same<T, float>::value) {
             return simd::float3{values[0], values[1], values[2]};
         }
 
         /// Convert to Metal simd type float4
-        simd::float4 toMetal() const requires (X == 4 && std::is_same<T, float>::value) {
+        [[nodiscard]] simd::float4 toMetal() const requires (X == 4 && std::is_same<T, float>::value) {
             return simd::float4{values[0], values[1], values[2], values[3]};
         }
 #endif

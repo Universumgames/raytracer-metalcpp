@@ -25,10 +25,10 @@ namespace RayTracing {
 
         RayTraceableObject() = default;
 
-        RayTraceableObject(const RGBf &color = {}, float specularIntensity = 1, const Vec3 &position = {},
-                           const Vec3 &scale = Vec3(1),
-                           const Vec3 rad = {}) : color(color), specularIntensity(specularIntensity),
-                                                  transform({position, rad, scale}) {
+        explicit RayTraceableObject(const RGBf &color = {}, float specularIntensity = 1, const Vec3 &position = Vec3{},
+                                    const Vec3 &scale = Vec3(1),
+                                    const Vec3 &rad = Vec3{}) : color(color), specularIntensity(specularIntensity),
+                                                                transform({position, rad, scale}) {
         }
 
         virtual ~RayTraceableObject() = default;

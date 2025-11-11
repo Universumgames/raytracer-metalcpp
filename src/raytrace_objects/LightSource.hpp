@@ -23,8 +23,9 @@ namespace RayTracing {
               emittingColor(emitting_color) {
         }
 
-        LightSource(const SerializableLightSource &obj) : SphereRayTraceableObject({}, 1, obj.position, obj.radius),
-                                                          emittingColor(obj.emittingColor) {
+        explicit LightSource(const SerializableLightSource &obj) : SphereRayTraceableObject(
+                                                                       {}, 1, obj.position, obj.radius),
+                                                                   emittingColor(obj.emittingColor) {
         }
     };
 }

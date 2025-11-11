@@ -24,7 +24,7 @@ namespace RayTracing {
 
     public:
         /// Default constructor initializing all values to initial
-        Matrix(T initial = 0) {
+        explicit Matrix(T initial = 0) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
                     values[i][j] = initial;
@@ -36,7 +36,7 @@ namespace RayTracing {
          * Initialize matrix with 2D array
          * @param v matrix values column-major
          */
-        Matrix(T v[X][Y]) {
+        explicit Matrix(T v[X][Y]) {
             setValues(v);
         }
 
@@ -44,7 +44,7 @@ namespace RayTracing {
          * Initialize matrix with 2D vector
          * @param v matrix values column-major
          */
-        Matrix(std::vector<std::vector<T> > v) {
+        explicit Matrix(std::vector<std::vector<T> > v) {
             setValues(v);
         }
 

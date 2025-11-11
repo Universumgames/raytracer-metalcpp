@@ -272,11 +272,11 @@ namespace RayTracing {
                 auto currentMetal = current->toMetalBasic();
 
                 // get child bounding boxes, add them to the traversal and set the indices in the parent
-                unsigned leftTreeDepth = 0;
+                int leftTreeDepth = 0;
                 if (current->left != nullptr) {
                     toTraverse.push_back(current->left);
                     currentMetal.childLeftIndex = (int) nestedBoundingBoxes.size() + 1;
-                    leftTreeDepth = current->left->totalNodeCount();
+                    leftTreeDepth = (int) current->left->totalNodeCount();
                 } else {
                     currentMetal.childLeftIndex = -1;
                 }

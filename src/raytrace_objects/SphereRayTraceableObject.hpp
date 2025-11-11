@@ -14,19 +14,20 @@ namespace RayTracing {
     public:
         float radius{};
 
-        SphereRayTraceableObject() : RayTraceableObject(RGBf{}, 1, Vec3{}, {1, 1, 1}, {}) {
+        SphereRayTraceableObject() : RayTraceableObject(RGBf{}, 1, Vec3{}, {1, 1, 1}, Vec3{}) {
         }
 
         SphereRayTraceableObject(const RGBf &color, float specularIntensity, const Vec3 &position,
                                  float radius)
-            : RayTraceableObject(color, specularIntensity, position, {1, 1, 1}, {}),
+            : RayTraceableObject(color, specularIntensity, position, {1, 1, 1}, Vec3{}),
               radius(radius) {
         }
 
-        SphereRayTraceableObject(const SerializableSphere &obj) : RayTraceableObject(obj.color, obj.specularIntensity,
-                                                                      obj.position, {1, 1, 1},
-                                                                      {}),
-                                                                  radius(obj.radius) {
+        explicit SphereRayTraceableObject(const SerializableSphere &obj) : RayTraceableObject(
+                                                                               obj.color, obj.specularIntensity,
+                                                                               obj.position, {1, 1, 1},
+                                                                               Vec3{}),
+                                                                           radius(obj.radius) {
         }
 
         void updateBoundingBox() override {
