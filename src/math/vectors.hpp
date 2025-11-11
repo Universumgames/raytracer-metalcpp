@@ -126,11 +126,11 @@ namespace RayTracing {
          */
         [[nodiscard]] Vector normalized() const {
             float length = this->length();
-            T v[X];
+            Vector v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] / length;
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -204,11 +204,11 @@ namespace RayTracing {
          * @return element wise divided vector
          */
         Vector operator/(T t) const {
-            T v[X];
+            Vector<X, T> v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] / t;
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -217,11 +217,11 @@ namespace RayTracing {
          * @return element wise multiplied vector
          */
         Vector operator*(T t) const {
-            T v[X];
+            Vector<X, T> v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] * t;
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -229,12 +229,12 @@ namespace RayTracing {
          * @param other other vector
          * @return element wise divided vector
          */
-        Vector operator/(Vector<X, T> &other) const {
-            T v[X];
+        Vector operator/(Vector &other) const {
+            Vector v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] / other.values[i];
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -242,12 +242,12 @@ namespace RayTracing {
          * @param other other vector
          * @return element wise multiplied vector
          */
-        Vector operator*(const Vector<X, T> &other) const {
-            T v[X];
+        Vector operator*(const Vector &other) const {
+            Vector v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] * other.values[i];
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -255,12 +255,12 @@ namespace RayTracing {
          * @param other other vector
          * @return added vector
          */
-        Vector operator+(const Vector<X, T> &other) const {
-            T v[X];
+        Vector operator+(const Vector &other) const {
+            Vector v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] + other.values[i];
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -268,12 +268,12 @@ namespace RayTracing {
          * @param other other vector
          * @return subtracted vector
          */
-        Vector operator-(const Vector<X, T> &other) const {
-            T v[X];
+        Vector operator-(const Vector &other) const {
+            Vector v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = values[i] - other.values[i];
             }
-            return Vector(v);
+            return v;
         }
 
         /**
@@ -281,7 +281,7 @@ namespace RayTracing {
          * @param other other vector
          * @return true if each dimension is equal
          */
-        bool operator==(const Vector<X, T> &other) const {
+        bool operator==(const Vector &other) const {
             for (unsigned int i = 0; i < X; i++) {
                 if (values[i] != other.values[i]) {
                     return false;
@@ -313,6 +313,16 @@ namespace RayTracing {
 
         /// Get value at direction
         T operator[](Direction d) const {
+            return values[d];
+        }
+
+        /// Get value at dimension
+        T &operator[](unsigned i) {
+            return values[i];
+        }
+
+        /// Get value at direction
+        T &operator[](Direction d) {
             return values[d];
         }
 
@@ -367,7 +377,7 @@ namespace RayTracing {
         }
 
         /// Convert radians to degrees (only for 3D vectors)
-        [[nodiscard]] Vector<X, T> asDegreeToRadian() const requires (X == 3) {
+        [[nodiscard]] Vector asDegreeToRadian() const requires (X == 3) {
             return {
                 deg2rad(values[0]),
                 deg2rad(values[1]),
@@ -376,15 +386,15 @@ namespace RayTracing {
         }
 
         /// Generate a random vector with normally distributed components
-        static Vector<X, T> random() {
-            T v[X];
+        static Vector random() {
             static float sigma = 0.8f;
             static thread_local std::mt19937 gen(std::random_device{}());
             static std::normal_distribution<T> dist(0.0f, sigma);
+            Vector v;
             for (unsigned int i = 0; i < X; i++) {
                 v[i] = dist(gen);
             }
-            return Vector<X, T>(v);
+            return v;
         }
 
 #ifdef USE_SHADER_METAL

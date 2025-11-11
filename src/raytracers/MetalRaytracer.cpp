@@ -214,20 +214,21 @@ namespace RayTracing {
                     simd::float4 color = bufferContent[rayIndex];
                     colors[s] = RGBf::fromFloat4(color);
                 }
-                image->setPixel(x, y, RGBf::blend(colors, samples));
+                (*image)[x, y] = RGBf::blend(colors, samples).toRGBA8();
             }
         }
         return image;
     }
 
     std::vector<Metal_Ray> MetalRaytracer::raysToMetal(const std::vector<Ray> &rays) {
-        std::vector<Metal_Ray> result;
-        for (auto &ray: rays) {
-            result.push_back(Metal_Ray{
+        std::vector<Metal_Ray> result(rays.size());
+        for (int i = 0; i < rays.size(); i++) {
+            const auto &ray = rays[i];
+            result[i] = Metal_Ray{
                 .origin = ray.origin.toMetal(),
                 .direction = ray.direction.toMetal(),
                 .rngSeed = ray.rngSeed.toMetal(),
-            });
+            };
         }
         return result;
     }

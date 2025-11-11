@@ -34,6 +34,14 @@ namespace RayTracing {
         void setPixel(unsigned int x, unsigned int y, RGBf color);
 
         /**
+         * Get a reference to the color of a pixel at (x, y)
+         * @param x x coordinate
+         * @param y y coordinate
+         * @return Reference to the 8Bit RGBA Color at the specified pixel
+         */
+        RGBA8 &operator[](unsigned int x, unsigned int y);
+
+        /**
          * Get the color of a pixel at (x, y)
          * @param x x coordinate
          * @param y y coordinate

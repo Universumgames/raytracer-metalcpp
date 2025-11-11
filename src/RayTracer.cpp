@@ -50,6 +50,7 @@ namespace RayTracing {
 
         std::vector<Vec2> offsets = getSamplingOffsets();
 
+//#pragma omp parallel for schedule(static)
         for (auto y = 0; y < windowSize.getY(); y++) {
             for (auto x = 0; x < windowSize.getX(); x++) {
                 for (auto s = 0; s < samplesPerPixel; s++) {

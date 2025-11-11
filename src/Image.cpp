@@ -28,4 +28,8 @@ namespace RayTracing {
     RGBA8 *Image::valueAt(unsigned int x, unsigned int y) {
         return &image[height - y - 1][x];
     }
+
+    RGBA8 &Image::operator[](unsigned int x, unsigned int y) {
+        return image[height - y - 1][x];
+    }
 }
