@@ -4,23 +4,28 @@
 
 namespace RayTracing {
     RGBf RGBf::blend(const std::vector<RGBf> &colors, ColorBlendMode mode) {
-        if (colors.empty()) {
+        return blend(colors.data(), colors.size(), mode);
+    }
+
+    RGBf RGBf::blend(const RGBf *colors, size_t count, ColorBlendMode mode) {
+        if (count == 0) {
             return RGBf::BLACK();
         }
         switch (mode) {
             case AVERAGE: {
                 RGBf sum{0, 0, 0, 0};
-                for (auto &color: colors) {
-                    sum += color;
+                for (int i = 0; i < count; i++) {
+                    sum += colors[i];
                 }
-                return sum / (float) colors.size();
+                return sum / (float) count;
             }
             case COUNT: {
-                return {1.f / (float) colors.size(), 1.f / (float) colors.size(), 1.f / (float) colors.size(), 1.f};
+                return {1.f / (float) count, 1.f / (float) count, 1.f / (float) count, 1.f};
             }
             default: return RGBf::BLACK();
         }
     }
+
 
     RGBf RGBf::operator*=(const RGBf &other) {
         this->a() *= other.getA();

@@ -1,6 +1,9 @@
 #pragma once
 #include <cstdarg>
+#include <random>
 #include <nlohmann/json.hpp>
+
+#include "../random.hpp"
 #ifdef USE_SHADER_METAL
 #include <simd/simd.h>
 #endif
@@ -9,7 +12,11 @@
 #define rad2deg(rad) (rad * 180.0f / (float)M_PI)
 
 namespace RayTracing {
-    /// Vector class
+    /**
+     * Generic vector class
+     * @tparam X number of dimensions
+     * @tparam T type of the vector values
+     */
     template<unsigned int X,
         typename T,
         typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
@@ -25,32 +32,27 @@ namespace RayTracing {
 
         T values[X] = {};
 
+        /// Default constructor initializing all values to initial
         Vector(T initial = 0) {
             for (unsigned int i = 0; i < X; i++) {
                 values[i] = initial;
             }
         }
 
-        // Vector(T value1, T values, ...) requires (X >= 1) {
-        //     this->values[0] = value1;
-        //     std::va_list args;
-        //     va_start(args, values);
-        //     for (unsigned int i = 1; i < X; i++) {
-        //         this->values[i] = va_arg(args, T);;
-        //     }
-        // }
-
+        /// Constructor for 2D vector
         Vector(T x, T y) requires (X == 2) {
             values[X_AXIS] = x;
             values[Y_AXIS] = y;
         }
 
+        /// Constructor for 3D vector
         Vector(T x, T y, T z) requires (X == 3) {
             values[X_AXIS] = x;
             values[Y_AXIS] = y;
             values[Z_AXIS] = z;
         }
 
+        /// Constructor for 4D vector
         Vector(T x, T y, T z, T w) requires (X == 4) {
             values[X_AXIS] = x;
             values[Y_AXIS] = y;
@@ -58,18 +60,21 @@ namespace RayTracing {
             values[W_AXIS] = w;
         }
 
+        /// Constructor from array
         Vector(T values[X]) {
             for (unsigned int i = 0; i < X; i++) {
                 this->values[i] = values[i];
             }
         }
 
+        /// Constructor from vector
         Vector(const std::vector<T> &values) {
             for (unsigned int i = 0; i < X; i++) {
                 this->values[i] = values[i];
             }
         }
 
+        /// Copy constructor
         Vector(const Vector &other) {
             for (unsigned int i = 0; i < X; i++) {
                 values[i] = other.values[i];
@@ -184,12 +189,21 @@ namespace RayTracing {
             return result;
         }
 
-        template<unsigned int M = X>
-        typename std::enable_if<M == 3, Vector<3, T> >::type
-        static cross(const Vector<3, T> &a, const Vector<3, T> &b) {
+        /**
+         * Cross product between two vectors (only for 3D vectors)
+         * @param a vector a
+         * @param b vector b
+         * @return cross product
+         */
+        static Vector<3, T> cross(const Vector<3, T> &a, const Vector<3, T> &b) {
             return a.cross(b);
         }
 
+        /**
+         * Scalar division
+         * @param t scalar value
+         * @return element wise divided vector
+         */
         Vector operator/(T t) const {
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -198,6 +212,11 @@ namespace RayTracing {
             return Vector(v);
         }
 
+        /**
+         * Scalar multiplication
+         * @param t scalar value
+         * @return element wise multiplied vector
+         */
         Vector operator*(T t) const {
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -206,6 +225,11 @@ namespace RayTracing {
             return Vector(v);
         }
 
+        /**
+         * Element wise division with another vector
+         * @param other other vector
+         * @return element wise divided vector
+         */
         Vector operator/(Vector<X, T> &other) const {
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -214,6 +238,11 @@ namespace RayTracing {
             return Vector(v);
         }
 
+        /**
+         * Element wise multiplication with another vector
+         * @param other other vector
+         * @return element wise multiplied vector
+         */
         Vector operator*(const Vector<X, T> &other) const {
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -222,6 +251,11 @@ namespace RayTracing {
             return Vector(v);
         }
 
+        /**
+         * Vector addition
+         * @param other other vector
+         * @return added vector
+         */
         Vector operator+(const Vector<X, T> &other) const {
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -230,6 +264,11 @@ namespace RayTracing {
             return Vector(v);
         }
 
+        /**
+         * Vector subtraction
+         * @param other other vector
+         * @return subtracted vector
+         */
         Vector operator-(const Vector<X, T> &other) const {
             T v[X];
             for (unsigned int i = 0; i < X; i++) {
@@ -238,6 +277,11 @@ namespace RayTracing {
             return Vector(v);
         }
 
+        /**
+         * Equality check
+         * @param other other vector
+         * @return true if each dimension is equal
+         */
         bool operator==(const Vector<X, T> &other) const {
             for (unsigned int i = 0; i < X; i++) {
                 if (values[i] != other.values[i]) {
@@ -247,6 +291,7 @@ namespace RayTracing {
             return true;
         }
 
+        /// In-place addition
         Vector &operator+=(const Vector &other) {
             for (unsigned int i = 0; i < X; i++) {
                 values[i] += other.values[i];
@@ -254,6 +299,7 @@ namespace RayTracing {
             return *this;
         }
 
+        /// In-place subtraction
         Vector &operator/=(T t) {
             for (unsigned int i = 0; i < X; i++) {
                 values[i] /= t;
@@ -261,8 +307,14 @@ namespace RayTracing {
             return *this;
         }
 
+        /// Get value at dimension
         T operator[](unsigned i) const {
             return values[i];
+        }
+
+        /// Get value at direction
+        T operator[](Direction d) const {
+            return values[d];
         }
 
         NLOHMANN_DEFINE_TYPE_INTRUSIVE(Vector, values)
@@ -315,12 +367,25 @@ namespace RayTracing {
             return result;
         }
 
+        /// Convert radians to degrees (only for 3D vectors)
         Vector<X, T> asDegreeToRadian() const requires (X == 3) {
             return {
                 deg2rad(values[0]),
                 deg2rad(values[1]),
                 deg2rad(values[2])
             };
+        }
+
+        /// Generate a random vector with normally distributed components
+        static Vector<X, T> random() {
+            T v[X];
+            static float sigma = 0.8f;
+            static thread_local std::mt19937 gen(std::random_device{}());
+            static std::normal_distribution<T> dist(0.0f, sigma);
+            for (unsigned int i = 0; i < X; i++) {
+                v[i] = dist(gen);
+            }
+            return Vector<X, T>(v);
         }
 
 #ifdef USE_SHADER_METAL
@@ -341,11 +406,16 @@ namespace RayTracing {
 #endif
     };
 
+    /// 2D float vector
     typedef Vector<2, float> Vec2;
+    /// 3D float vector
     typedef Vector<3, float> Vec3;
+    /// 4D float vector
     typedef Vector<4, float> Vec4;
+    /// 2D unsigned vector
     typedef Vector<2, unsigned> Vec2u;
 
+    /// Quaternion represented as a 4D float vector
     struct Quaternion : public Vector<4, float> {
         /**
          * Get quaternion from euler angles in radians
@@ -353,29 +423,24 @@ namespace RayTracing {
          * @return quaternion
          */
         static Quaternion fromEuler(const Vec3 &rad) {
-            auto xQ = Quaternion({
-                cos(rad.getX() * 0.5f),
-                sin(rad.getX() * 0.5f),
-                0,
-                0
-            });
+            auto yaw = rad.getY();
+            auto pitch = rad.getX();
+            auto roll = rad.getZ();
+            // Assuming the angles are in radians.
+            float cy = std::cos(yaw * 0.5f);
+            float sy = std::sin(yaw * 0.5f);
+            float cp = std::cos(pitch * 0.5f);
+            float sp = std::sin(pitch * 0.5f);
+            float cr = std::cos(roll * 0.5f);
+            float sr = std::sin(roll * 0.5f);
 
-            auto yQ = Quaternion({
-                cos(rad.getY() * 0.5f),
-                0,
-                sin(rad.getY() * 0.5f),
-                0
-            });
+            Quaternion q;
+            q.w() = cr * cp * cy + sr * sp * sy;
+            q.x() = sr * cp * cy - cr * sp * sy;
+            q.y() = cr * sp * cy + sr * cp * sy;
+            q.z() = cr * cp * sy - sr * sp * cy;
 
-            auto zQ = Quaternion({
-                cos(rad.getZ() * 0.5f),
-                0,
-                0,
-                sin(rad.getZ() * 0.5f)
-            });
-
-            auto q = zQ * yQ * xQ;
-            return Quaternion(q);
+            return q;
         }
 
         /**

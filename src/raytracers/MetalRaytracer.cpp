@@ -204,16 +204,17 @@ namespace RayTracing {
     Image *MetalRaytracer::outputBufferToImage(unsigned samples) {
         auto windowSize = getWindowSize();
         auto *image = new Image(windowSize.getX(), windowSize.getY());
+        auto *bufferContent = (simd::float4 *) bufferResult->contents();
         for (unsigned y = 0; y < windowSize.getY(); y++) {
             for (unsigned x = 0; x < windowSize.getX(); x++) {
-                std::vector<RGBf> colors;
-                unsigned startIndex = (y * getWindowSize().getX() + x) * samples;
+                RGBf colors[samples];
+                unsigned startIndex = (y * windowSize.getX() + x) * samples;
                 for (unsigned s = 0; s < samples; s++) {
                     unsigned rayIndex = startIndex + s;
-                    simd::float4 color = ((simd::float4 *) bufferResult->contents())[rayIndex];
-                    colors.push_back(RGBf::fromFloat4(color));
+                    simd::float4 color = bufferContent[rayIndex];
+                    colors[s] = RGBf::fromFloat4(color);
                 }
-                image->setPixel(x, y, RGBf::blend(colors));
+                image->setPixel(x, y, RGBf::blend(colors, samples));
             }
         }
         return image;
@@ -224,7 +225,8 @@ namespace RayTracing {
         for (auto &ray: rays) {
             result.push_back(Metal_Ray{
                 .origin = ray.origin.toMetal(),
-                .direction = ray.direction.toMetal()
+                .direction = ray.direction.toMetal(),
+                .rngSeed = ray.rngSeed.toMetal(),
             });
         }
         return result;
@@ -248,6 +250,7 @@ namespace RayTracing {
                         .inverseRotate = object->transform.getInverseRotationMatrix().toMetal(),
                         .inverseScale = object->transform.getInverseScaleMatrix().toMetal(),
                         .color = object->color.toMetal(),
+                        .specularIntensity = object->specularIntensity,
                         .indicesOffset = (unsigned) indices.size(),
                         .triangleCount = object->mesh->numTriangles,
                         .vertexOffset = (unsigned) vertices.size(),
@@ -328,6 +331,7 @@ namespace RayTracing {
                 .center = object->transform.getTranslation().toMetal(),
                 .radius = object->radius,
                 .color = object->color.toMetal(),
+                .specularIntensity = object->specularIntensity
             });
         }
         return result;
@@ -382,8 +386,9 @@ namespace RayTracing {
         prepBuffer(&bufferMeshVertices, device, sizeof(simd::float3) * meshObjects.vertices.size());
         prepBuffer(&bufferMeshIndices, device, sizeof(int) * meshObjects.indices.size());
         prepBuffer(&bufferNormals, device, sizeof(simd::float3) * meshObjects.normals.size());
-        prepBuffer(&bufferBoundingBoxes, device, sizeof(Metal_NestedBoundingBox) * meshObjects.boundingBoxes.size());
-        prepBuffer(&bufferSphereObjects, device, sizeof(Metal_SphereRayTraceableObject) * sphereObjects.size());
+        prepBuffer(&bufferBoundingBoxes, device,
+                   sizeof(Metal_NestedBoundingBox) * (meshObjects.boundingBoxes.size() + 1));
+        prepBuffer(&bufferSphereObjects, device, sizeof(Metal_SphereRayTraceableObject) * (sphereObjects.size() + 1));
         prepBuffer(&bufferLights, device, sizeof(Metal_Light) * lights.size());
 
 

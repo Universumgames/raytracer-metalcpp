@@ -12,9 +12,6 @@ namespace RayTracing {
         assert(windowSize.getY() > 0);
     }
 
-    RayTracer::~RayTracer() {
-    }
-
     unsigned RayTracer::getSamplesPerPixel() const {
         return samplesPerPixel;
     }
@@ -30,8 +27,8 @@ namespace RayTracing {
     }
 
     std::vector<Ray> RayTracer::calculateStartingRays(Camera *camera) {
-        const double aspect_ratio = (double) windowSize.getX() / (double) windowSize.getY();
-        const double fov_adjustment = tan((camera->fov * M_PI / 180.0) / 2.0);
+        const float aspect_ratio = (float) windowSize.getX() / (float) windowSize.getY();
+        const float fov_adjustment = tan((camera->fov * M_PI / 180.0f) / 2.0f);
 
         Vec3 screenOrigin = Vec3::zero();
         Vec3 screen00 = screenOrigin + Vec3(-(float) windowSize.getX() / 2.0f, 0, -(float) windowSize.getY() / 2.0f);
@@ -40,7 +37,10 @@ namespace RayTracing {
         Vec3 camRight = Vec3::right();
         Vec3 camUp = Vec3::up();
 
-        std::vector<Ray> rays;
+        Vec2 viewBoxScaling = getViewBoxScaling();
+        Vec3 viewBoxScaling3D = {viewBoxScaling.getX(), 1, viewBoxScaling.getY()};
+
+        std::vector<Ray> rays; //(getRayCount());
 #ifdef DEBUG_INITIAL_RAY_GENERATION
         std::ofstream raysFile("../python/rays.py");
         std::ofstream pixelFile("../python/pixels.py");
@@ -50,16 +50,29 @@ namespace RayTracing {
 
         std::vector<Vec2> offsets = getSamplingOffsets();
 
-        for (int y = 0; y < windowSize.getY(); y++) {
-            for (int x = 0; x < windowSize.getX(); x++) {
-                for (const auto &offset: offsets) {
+        for (auto y = 0; y < windowSize.getY(); y++) {
+            for (auto x = 0; x < windowSize.getX(); x++) {
+                for (auto s = 0; s < samplesPerPixel; s++) {
+                    const Vec2 &offset = offsets[s];
                     Vec3 samplingPixelLocation = {x + offset.getX(), 0, y + offset.getY()};
-                    Vec3 pixel = (screen00 + samplingPixelLocation) * Vec3(
-                                     getViewBoxScaling().getX(), 1, getViewBoxScaling().getY());
+                    Vec3 pixel = (screen00 + samplingPixelLocation) * viewBoxScaling3D;
                     Vec3 rayDir = (camForward + (camRight * pixel.getX() * aspect_ratio * fov_adjustment) + (
                                        camUp * pixel.getZ() * fov_adjustment)).normalized();
-                    Ray ray = Ray(pixel, rayDir, {}, x, y);
+                    // auto pixelX = x + offset.getX() + screen00.getX() * viewBoxScaling3D.getX();
+                    // auto pixelY = y + offset.getY() + screen00.getZ() * viewBoxScaling3D.getZ();
+                    // Vec3 rayDir = (camForward + (camRight * (pixelX * aspect_ratio * fov_adjustment)) + (
+                    //                    camUp * (pixelY * fov_adjustment))).normalized();
+
+                    unsigned index = (y * windowSize.getX() + x) * samplesPerPixel + s;
+                    /// original assignment
+                    Ray ray = Ray(pixel, rayDir, Vec3::random(), {}, x, y);
                     rays.push_back(ray);
+                    /// optimized, faster
+                    // rays[index].origin = {pixelX, screen00.getY(), pixelY};
+                    // rays[index].direction = rayDir;
+                    // rays[index].rngSeed = Vec3::random();
+                    // rays[index].idX = x;
+                    // rays[index].idY = y;
 #ifdef DEBUG_INITIAL_RAY_GENERATION
                     if (y % 32 == 0 && x % 32 == 0 && offset == offsets[0]) {
                         pixelFile << "[" << pixel.getX() << ", " << pixel.getY() << ", " << pixel.z() << "]," <<

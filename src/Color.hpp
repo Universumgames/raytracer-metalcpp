@@ -52,6 +52,7 @@ namespace RayTracing {
         [[nodiscard]] Vec4 forceVec4
 
         (
+        
         )
         const
  {
@@ -72,7 +73,7 @@ namespace RayTracing {
 
 #ifdef USE_SHADER_CUDA
         static RGBA8 fromFloat4(float4 f) {
-            auto* fP = (float*) &f;
+            auto *fP = (float *) &f;
             return {fP[0] * 255, fP[1] * 255, fP[2] * 255, fP[3] * 255};
         }
 #endif
@@ -125,6 +126,9 @@ namespace RayTracing {
         /// Blends a list of colors using the specified blend mode
         static RGBf blend(const std::vector<RGBf> &colors, ColorBlendMode mode = ColorBlendMode::AVERAGE);
 
+        /// Blends an array of colors using the specified blend mode
+        static RGBf blend(const RGBf *colors, size_t count, ColorBlendMode mode = ColorBlendMode::AVERAGE);
+
         RGBf operator*=(const RGBf &other);
 
         /// Converts to an 8-bit per channel RGBA color
@@ -142,7 +146,7 @@ namespace RayTracing {
 
 #ifdef USE_SHADER_CUDA
         static RGBf fromFloat4(float4 f) {
-            auto* fP = (float*) &f;
+            auto *fP = (float *) &f;
             return {fP[0], fP[1], fP[2], fP[3]};
         }
 #endif

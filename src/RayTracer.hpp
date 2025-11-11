@@ -8,15 +8,16 @@ namespace RayTracing {
     class RayTracer {
     protected:
         /**
-         * get the view box scaling to convert from screen space to world space
+         * calulate the view box scaling to convert from screen space to world space
          * ratio of the view boc to the screen space
          * (1/windowSize)
+         * @return view box scaling
          */
         Vec2 getViewBoxScaling();
 
         /**
          * Calculate the starting rays for the raytrace
-         * @return
+         * @return vector of rays starting from the camera through each pixel
          */
         std::vector<Ray> calculateStartingRays(Camera *camera);
 
@@ -35,9 +36,15 @@ namespace RayTracing {
     public:
         RayTracer() = delete;
 
+        /**
+         * Base raytracer constructor
+         * @param windowSize window size to raytrace
+         * @param bounces bounce count per ray
+         * @param samplesPerPixel rays per pixel
+         */
         RayTracer(const Vec2u &windowSize, unsigned bounces, unsigned samplesPerPixel);
 
-        virtual ~RayTracer();
+        virtual ~RayTracer() = default;
 
         /// Get the identifier of the raytracer
         virtual std::string identifier() = 0;
@@ -71,6 +78,7 @@ namespace RayTracing {
         /// Get the number of bounces
         [[nodiscard]] unsigned getBounces() const;
 
+        /// Get the total number of rays to be traced
         [[nodiscard]] unsigned getRayCount() const {
             return windowSize.getX() * windowSize.getY() * samplesPerPixel;
         }

@@ -44,7 +44,7 @@ Renderer::Renderer(const RayTracing::Vec2u &windowSize, ImageHandler *imageHandl
 }
 
 void Renderer::init() {
-    window = new sf::RenderWindow(sf::VideoMode({windowSize.getX(), windowSize.getX()}), std::string("Raytracer"));
+    window = new sf::RenderWindow(sf::VideoMode({windowSize.getX(), windowSize.getY()}), std::string("Raytracer"));
     window->setFramerateLimit(50);
 
     // Font

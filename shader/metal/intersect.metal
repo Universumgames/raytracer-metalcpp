@@ -3,7 +3,7 @@
 
 using namespace metal;
 
-#define epsilon 1.192093E-07
+#define epsilon 1.0E-10
 
 Metal_Intersection intersectSphere(Metal_Ray ray, simd::float3 sphereCenter, float sphereRadius){
     float3 offsetRayOrigin = ray.origin - sphereCenter;
@@ -68,7 +68,7 @@ Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, int meshObjectInd
     
     /// using heap stack because recursion can cause stack overflows quickly and dynamically allocating memory is not possible
     int boundingBoxIndexStack[METAL_NESTING_BB_STACK];
-    unsigned stackSize = 0;
+    int stackSize = 0;
     boundingBoxIndexStack[stackSize++] = boundingBoxIndex;
     
     Metal_Intersection nearestIntersection = { .hit = false, .distance = INFINITY };
@@ -77,8 +77,8 @@ Metal_Intersection intersectTrianglesInBox(Metal_LocalRay ray, int meshObjectInd
         int currentBoundingBoxIndex = boundingBoxIndexStack[--stackSize];
         Metal_NestedBoundingBox box = boundingBoxes[currentBoundingBoxIndex];
         
-        if(!intersectsBoundingBox(ray, box))
-            continue;
+        //if(!intersectsBoundingBox(ray, box))
+        //    continue;
         
         if(box.indicesOffset == -1){
             if(box.childLeftIndex != -1 )
@@ -161,25 +161,22 @@ bool intersectsBoundingBox(Metal_LocalRay ray, Metal_NestedBoundingBox box) {
         return true;
     }
 
-    for (int i = 0; i < 3; i++) {
-        if (abs(ray.direction[i]) < epsilon) {
-            if (ray.origin[i] < box.min[i] || ray.origin[i] > box.max[i]) {
+    for (int axis = 0; axis < 3; axis++) {
+        if (abs(ray.direction[axis]) < epsilon) {
+            if (ray.origin[axis] < box.min[axis] || ray.origin[axis] > box.max[axis]) {
                 return false;
             }
         } else {
-            float invD = 1.0f / ray.direction[i];
-            float t0 = (box.min[i] - ray.origin[i]) * invD;
-            float t1 = (box.max[i] - ray.origin[i]) * invD;
-            if (invD < 0.0f) {
-                float temp = t0;
-                t0 = t1;
-                t1 = temp;
+            float invD = 1.0f / ray.direction[axis]; /// more performant to calculate just one division than two
+            float t1 = (box.min[axis] - ray.origin[axis]) * invD;
+            float t2 = (box.max[axis] - ray.origin[axis]) * invD;
+            if(t1 > t2){
+                auto tTemp = t1;
+                t1 = t2;
+                t2 = tTemp;
             }
-            tmin = max(tmin, t0);
-            tmax = min(tmax, t1);
-            if (tmax <= tmin) {
-                return false;
-            }
+            tmin = max(tmin, t1);
+            tmax = min(tmax, t2);
         }
     }
     return tmax >= tmin && tmin >= 0;

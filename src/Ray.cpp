@@ -95,19 +95,29 @@ namespace RayTracing {
     }*/
 
     /// get fractional part of number
-    float frac(float f) {
-        return f - (long) f;
+    float fract(float f) {
+        return fmod(f, 1.0);
     }
 
     /// pseudo random number generation
     float pseudoRandom(float seed) {
-        return frac(sin(seed * 4123.2345) * 43758.5453123) * 345.75467 * 9435.834123546;
+        return fract(sin(seed * 4123.207643345f) * 4358.545334675123f) * 365.754674686f * 5.8341456723546f;
     }
 
-    Vec3 randomHemisphereReflection(Vec3 normal) {
-        Vec3 randVec = Vec3(pseudoRandom(normal.x() * 598.1256 + normal.y() * 414.5788),
-                            pseudoRandom(normal.y() * 358.3404 + normal.z() * 692.6398),
-                            pseudoRandom(normal.z() * 928.3458 + normal.x() * 348.34575)).normalized();
+    float pseudoRandom(float seed1, float seed2) {
+        float pr1 = pseudoRandom(seed1);
+        float pr2 = pseudoRandom(seed2);
+        float lSeed1 = fract(seed1) * 100.0345950234578f;
+        float lSeed2 = fract(seed2) * 100.0324579203456f;
+        return fract(sin(pr1 * 4653.12456934f + pr2 * 2344.3424945953f) * 5468.54804553123f) * 3445.7549678367f +
+               fract(9435.83412354f + lSeed1 * 8623.4813246734f + lSeed2 * 3437.3245812357f) * 4346.324684542f;
+    }
+
+    Vec3 randomHemisphereReflection(const Vec3 &normal, const Vec3 &seedVec) {
+        Vec3 seed = seedVec + normal;
+        Vec3 randVec = Vec3(pseudoRandom(seed.getX() * 8349.856707256f, seed.getY() * 4314.578234568238f),
+                            pseudoRandom(seed.getY() * 3958.321343564f, seed.getZ() * 2372.639348236458f),
+                            pseudoRandom(seed.getZ() * 2258.323545674f, seed.getX() * 3578.345763467015f)).normalized();
         if (Vec3::dot(randVec, normal) < 0) {
             randVec = randVec * -1;
         }
@@ -118,7 +128,7 @@ namespace RayTracing {
         this->origin = location;
         float dot = Vec3::dot(direction, normal);
         Vec3 totalReflectionVec = direction - (normal * dot) * 2;
-        Vec3 rhf = randomHemisphereReflection(normal);
+        Vec3 rhf = randomHemisphereReflection(normal, rngSeed);
         this->direction = (totalReflectionVec * totalReflection + rhf * (1 - totalReflection)).normalized();
         //this->direction = totalReflectionVec;
         return direction;

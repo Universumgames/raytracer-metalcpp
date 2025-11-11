@@ -6,7 +6,7 @@ namespace RayTracing {
     struct SerializableSphere : public SerializableRayTraceableObject {
         float radius{};
 
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableSphere, position, color, radius)
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableSphere, position, color, specularIntensity, radius)
     };
 
     /// Ray traceable object represented by a sphere
@@ -14,16 +14,17 @@ namespace RayTracing {
     public:
         float radius{};
 
-        SphereRayTraceableObject() : RayTraceableObject(RGBf{}, Vec3{}, {1, 1, 1}, {}) {
+        SphereRayTraceableObject() : RayTraceableObject(RGBf{}, 1, Vec3{}, {1, 1, 1}, {}) {
         }
 
-        SphereRayTraceableObject(const RGBf &color, const Vec3 &position,
+        SphereRayTraceableObject(const RGBf &color, float specularIntensity, const Vec3 &position,
                                  float radius)
-            : RayTraceableObject(color, position, {1, 1, 1}, {}),
+            : RayTraceableObject(color, specularIntensity, position, {1, 1, 1}, {}),
               radius(radius) {
         }
 
-        SphereRayTraceableObject(const SerializableSphere &obj) : RayTraceableObject(obj.color, obj.position, {1, 1, 1},
+        SphereRayTraceableObject(const SerializableSphere &obj) : RayTraceableObject(obj.color, obj.specularIntensity,
+                                                                      obj.position, {1, 1, 1},
                                                                       {}),
                                                                   radius(obj.radius) {
         }

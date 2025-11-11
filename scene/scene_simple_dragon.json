@@ -34,6 +34,7 @@
         "b": 128,
         "a": 128
       },
+      "specularIntensity": 0.8,
       "scale": {
         "values": [
           1,
@@ -64,6 +65,7 @@
         "b": 128,
         "a": 128
       },
+      "specularIntensity": 0.8,
       "scale": {
         "values": [
           1,
@@ -94,6 +96,7 @@
         "b": 128,
         "a": 255
       },
+      "specularIntensity": 0.8,
       "scale": {
         "values": [
           0.0625,
@@ -124,6 +127,7 @@
         "b": 128,
         "a": 255
       },
+      "specularIntensity": 0.8,
       "scale": {
         "values": [
           1,

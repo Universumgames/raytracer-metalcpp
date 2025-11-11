@@ -22,7 +22,7 @@ kernel void raytrace(
     uint idx = (gid.y * gridSize.x + gid.x) * gridSize.z + gid.z;
     Metal_Ray currentRay = rays[idx];
     simd::float4 colors[METAL_COLOR_COUNT_MAX];
-    simd::float4 lightColor;
+    simd::float4 lightColor = float4(0.0);
     unsigned colorCount = 0;
     /// bounce ray around and check for nearest intersection on each bounce
     for(unsigned b = 0; b < min(settings.bounces, METAL_COLOR_COUNT_MAX); b++){
@@ -32,6 +32,7 @@ kernel void raytrace(
         };
         float3 currentRotatedNormal = float3(0.0);
         float4 currentColor = float4(0.0);
+        float currentSpecularIntensity = 0.0f;
 
         /// check intersections with meshes
         for(unsigned meshObjIndex = 0; meshObjIndex < settings.meshObjectCount; meshObjIndex++){
@@ -58,6 +59,7 @@ kernel void raytrace(
                     currentHit = intersection;
                     currentRotatedNormal = rotateNormal(meshObject.rotation, intersection.normal);
                     currentColor = meshObject.color;
+
                 }
              }
 #else
@@ -67,6 +69,7 @@ kernel void raytrace(
                 currentHit = intersection;
                 currentRotatedNormal = rotateNormal(meshObject.rotation, intersection.normal);
                 currentColor = meshObject.color;
+                currentSpecularIntensity = meshObject.specularIntensity;
             }
 #endif
         }
@@ -79,6 +82,7 @@ kernel void raytrace(
                 currentHit = intersection;
                 currentRotatedNormal = intersection.normal;
                 currentColor = sphereObject.color;
+                currentSpecularIntensity = sphereObject.specularIntensity;
             }
         }
 
@@ -102,7 +106,7 @@ kernel void raytrace(
             }else{
                 colors[colorCount] = currentColor * lightDissipationCoefficient(currentHit.distance);
                 colorCount++;
-                Metal_Ray newRay = reflectAt(currentRay, currentHit.hitPoint, currentRotatedNormal, 0.5f);
+                Metal_Ray newRay = reflectAt(currentRay, currentHit.hitPoint, currentRotatedNormal, currentSpecularIntensity);
                 currentRay.origin = newRay.origin;
                 currentRay.direction = newRay.direction;
                 //currentRay.totalDistance += currentHit.distance;
@@ -112,17 +116,18 @@ kernel void raytrace(
             b = settings.bounces; // no hit, stop bouncing
         }
     }
-    float4 finalColor = float4(0.0);
+    float4 finalColor = float4(1.0);
     if(colorCount > 0){
         for(unsigned c = 0; c < colorCount; c++){
-            finalColor += colors[c];
+            finalColor *= colors[c];
         }
-        finalColor = finalColor / float(colorCount);
-        finalColor += lightColor;
-        finalColor /= 2.0f;
+        //finalColor = finalColor / (float) colorCount;
+        finalColor *= lightColor;
+        //finalColor /= 2.0f;
+        //finalColor *= lightColor;
         finalColor.w = 1.0f;
     }else{
-        finalColor = float4(0.0, 0.0, 0.0, 1.0);
+        finalColor = lightColor;
     }
     result[idx] = finalColor;
 }

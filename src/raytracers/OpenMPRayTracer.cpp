@@ -36,6 +36,7 @@ namespace RayTracing {
                 HitInfo currentHit{.hit = false, .distance = INFINITY};
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
+                float currentSpecularIntensity = 0.0f;
 
                 // check collision with complex objects
                 for (const auto object: scene.objects) {
@@ -45,8 +46,8 @@ namespace RayTracing {
                         continue;
                     }
 
-                    std::vector<int> indices = object->mesh->indices;
-                    /*std::vector<NestedBoundingBox *> boxesToCheck;
+                    std::vector<int> indices; //= object->mesh->indices;
+                    std::vector<NestedBoundingBox *> boxesToCheck;
                     boxesToCheck.push_back(object->nestedBoundingBox);
                     while (!boxesToCheck.empty()) {
                         auto nestedBox = boxesToCheck.back();
@@ -61,7 +62,7 @@ namespace RayTracing {
                         if (nestedBox->right != nullptr && localRay.intersectsBoundingBox(*nestedBox->right)) {
                             boxesToCheck.push_back(nestedBox->right);
                         }
-                    }*/
+                    }
 
                     if (indices.empty()) continue;
 
@@ -77,6 +78,7 @@ namespace RayTracing {
                             currentHit = intersection;
                             currentRotatedNormal = object->transform.getTransformedNormal(intersection.normal);
                             currentColor = object->color;
+                            currentSpecularIntensity = object->specularIntensity;
                         }
                     }
                 }
@@ -88,6 +90,7 @@ namespace RayTracing {
                         currentHit = intersection;
                         currentRotatedNormal = intersection.normal;
                         currentColor = sphere->color;
+                        currentSpecularIntensity = sphere->specularIntensity;
                     }
                 }
 
@@ -110,7 +113,8 @@ namespace RayTracing {
                     } else {
                         ray.colors.emplace_back(currentColor);
                     }
-                    ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal);
+                    ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal,
+                                  currentSpecularIntensity);
                     ray.totalDistance += currentHit.distance;
                 } else {
                     b = getBounces(); // no hit, stop bouncing

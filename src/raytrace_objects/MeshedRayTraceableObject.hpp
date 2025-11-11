@@ -23,7 +23,8 @@ namespace RayTracing {
         std::string fileName;
         Vec3 scale;
 
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableMeshedRayTraceableObject, color, position, rotation, fileName, scale)
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableMeshedRayTraceableObject, color, specularIntensity, position,
+                                       rotation, fileName, scale)
     };
 
     /// Ray traceable object represented by a triangle mesh
@@ -37,14 +38,15 @@ namespace RayTracing {
         MeshedRayTraceableObject() : RayTraceableObject({}, {}, Vec3(1), {}) {
         };
 
-        MeshedRayTraceableObject(const RGBf &color, const Vec3 &position, const Vec3 &rotation,
+        MeshedRayTraceableObject(const RGBf &color, float specularIntensity, const Vec3 &position, const Vec3 &rotation,
                                  std::string fileName)
-            : RayTraceableObject(color, position, {1, 1, 1}, rotation),
+            : RayTraceableObject(color, specularIntensity, position, {1, 1, 1}, rotation),
               fileName(std::move(fileName)) {
         }
 
         explicit MeshedRayTraceableObject(const SerializableMeshedRayTraceableObject &obj) : RayTraceableObject(
-                obj.color, obj.position, obj.scale, obj.rotation.asDegreeToRadian()), fileName(obj.fileName) {
+                obj.color, obj.specularIntensity, obj.position, obj.scale, obj.rotation.asDegreeToRadian()),
+            fileName(obj.fileName) {
         }
 
         /**

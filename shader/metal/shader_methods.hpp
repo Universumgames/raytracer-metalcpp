@@ -72,9 +72,10 @@ bool intersectsBoundingBox(Metal_LocalRay ray, Metal_NestedBoundingBox box);
  * Generate a pseudo-random direction vector that deviates at most 90 degrees from the provided normal
  * (the values of the normal act as a seed for the pseudorandom number generator)
  * @param normal the normal the reflection should roughly be directed to
+ * @param seedVec the seed vector for better randomness
  * @return random normalized vector that roughly points in the direction of "normal"
  */
-simd::float3 randomHemisphereReflection(simd::float3 normal);
+simd::float3 randomHemisphereReflection(simd::float3 normal, simd::float3 seedVec);
 
 /**
  * Generate a pseudo random number

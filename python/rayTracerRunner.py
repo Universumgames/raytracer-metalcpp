@@ -31,8 +31,14 @@ class RayTracerImplementation(Enum):
 
 
 def get_scene_files():
-    files = os.listdir(raytracer_work_dir + "/scene")
-    scene_files = [os.path.join("scene", f) for f in files if f.endswith('.json')]
+    # files = os.listdir(raytracer_work_dir + "/scene")
+    # scene_files = [os.path.join("scene", f) for f in files if f.endswith('.json')]
+    # return scene_files
+    scene_files = [
+        "scene/scene_simple.json",
+        "scene/scene_atmosphere.json",
+        "scene/scene_simple_atmosphere.json"
+    ]
     return scene_files
 
 

@@ -8,15 +8,22 @@
 #include "vectors.hpp"
 
 namespace RayTracing {
-    /// Matrix class
+    /**
+     * Matrix class
+     * @tparam X width of the matrix
+     * @tparam Y height of the matrix
+     * @tparam T type of the matrix values
+     */
     template<unsigned int X,
         unsigned int Y,
         typename T,
         typename = typename std::enable_if<std::is_arithmetic<T>::value, T>::type>
     class Matrix {
-    public:
+        /// Matrix values column-major
         T values[X][Y] = {};
 
+    public:
+        /// Default constructor initializing all values to initial
         Matrix(T initial = 0) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
@@ -25,15 +32,26 @@ namespace RayTracing {
             }
         }
 
+        /**
+         * Initialize matrix with 2D array
+         * @param v matrix values column-major
+         */
         Matrix(T v[X][Y]) {
             setValues(v);
         }
 
-        /// [X][Y]
+        /**
+         * Initialize matrix with 2D vector
+         * @param v matrix values column-major
+         */
         Matrix(std::vector<std::vector<T> > v) {
             setValues(v);
         }
 
+        /**
+         * Set matrix values from 2D vector
+         * @param v matrix values column-major
+         */
         void setValues(std::vector<std::vector<T> > v) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
@@ -42,6 +60,10 @@ namespace RayTracing {
             }
         }
 
+        /**
+         * Set matrix values from 2D array
+         * @param v matrix values column-major
+         */
         void setValues(T v[X][Y]) {
             for (int i = 0; i < X; i++) {
                 for (int j = 0; j < Y; j++) {
@@ -50,18 +72,38 @@ namespace RayTracing {
             }
         }
 
+        /**
+         * Set value at row and column
+         * @param row row
+         * @param col column
+         * @param value value to set
+         */
         void setValue(unsigned int row, unsigned int col, T value) {
             values[row][col] = value;
         }
 
+        /**
+         * Get value at row and column
+         * @param row row
+         * @param col column
+         * @return value at row and column
+         */
         T getValue(unsigned int row, unsigned int col) {
             return values[row][col];
         }
 
+        /// Row access
         T *operator[](size_t i) { return values[i]; }
+        /// Row access (const)
         const T *operator[](size_t i) const { return values[i]; }
 
         // Multiplication: (X×Y) * (Y×Z) = (X×Z)
+        /**
+         * Multiply matrix with another matrix
+         * @tparam Z number of columns in rhs matrix
+         * @param rhs right-hand side matrix
+         * @return result matrix
+         */
         template<unsigned int Z>
         Matrix<X, Z, T> operator*(const Matrix<Y, Z, T> &rhs) const {
             Matrix<X, Z, T> result;

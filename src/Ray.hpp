@@ -19,6 +19,7 @@ namespace RayTracing {
     struct Ray {
         Vec3 origin;
         Vec3 direction;
+        Vec3 rngSeed; /// Seed for random number generation, since shaders don't have good random functions
         std::vector<RGBf> colors;
 
         unsigned idX, idY;

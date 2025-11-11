@@ -55,6 +55,7 @@ namespace RayTracing {
                 HitInfo currentHit{.hit = false, .distance = INFINITY};
                 Vec3 currentRotatedNormal;
                 RGBf currentColor;
+                float currentSpecularIntensity = 0.0f;
 
                 // check collision with complex objects
                 for (const auto object: scene.objects) {
@@ -96,6 +97,7 @@ namespace RayTracing {
                             currentHit = intersection;
                             currentRotatedNormal = object->transform.getTransformedNormal(intersection.normal);
                             currentColor = object->color;
+                            currentSpecularIntensity = object->specularIntensity;
                         }
                     }
                 }
@@ -107,6 +109,7 @@ namespace RayTracing {
                         currentHit = intersection;
                         currentRotatedNormal = intersection.normal;
                         currentColor = sphere->color;
+                        currentSpecularIntensity = sphere->specularIntensity;
                     }
                 }
 
@@ -129,7 +132,8 @@ namespace RayTracing {
                     } else {
                         ray.colors.emplace_back(currentColor);
                     }
-                    ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal);
+                    ray.reflectAt(currentHit.hitPoint - ray.direction * 0.1f, currentRotatedNormal,
+                                  currentSpecularIntensity);
                     ray.totalDistance += currentHit.distance;
                 } else {
                     b = getBounces(); // no hit, stop bouncing
@@ -179,17 +183,17 @@ namespace RayTracing {
                 for (int i = 0; i < getSamplesPerPixel(); i++) {
                     const auto &currentRay = rays[startIndex + i];
 
-                    RGBf finalColor = RGBf(0.0);
+                    RGBf finalColor = RGBf(1.0);
                     if (!currentRay.colors.empty()) {
                         for (const auto &color: currentRay.colors) {
-                            finalColor += color;
+                            finalColor *= color;
                         }
-                        finalColor = finalColor / static_cast<float>(currentRay.colors.size());
-                        finalColor += currentRay.lightColor;
-                        finalColor /= 2.0f;
+                        //finalColor = finalColor / static_cast<float>(currentRay.colors.size());
+                        finalColor *= currentRay.lightColor;
+                        //finalColor /= 2.0f;
                         finalColor.w() = 1.0f;
                     } else {
-                        finalColor = RGBf(0.0, 0.0, 0.0, 1.0);
+                        finalColor = currentRay.lightColor;
                     }
 
                     sampleColors.push_back(finalColor);

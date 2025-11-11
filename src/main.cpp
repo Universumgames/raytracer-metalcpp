@@ -9,16 +9,16 @@
 using namespace RayTracing;
 
 bool openWindow = true;
-bool renderTests = true;
+bool renderTests = false;
 bool helped = false;
 RayTracerType implementation = SHADER_BASED;
 std::string outputFile = "./raytraced.jpg";
-std::string sceneFile = "scene/scene_atmosphere.json";
+std::string sceneFile = "scene/scene_monkey.json";
 std::string benchmarkFile = "../timeLog.csv";
-unsigned bounces = 4;
-unsigned samples = 4;
-//auto windowSize = RayTracing::Vec2u(1920, 1440);
-auto windowSize = Vec2u(800, 600);
+unsigned bounces = 10;
+unsigned samples = 20;
+auto windowSize = RayTracing::Vec2u(1920, 1440);
+// auto windowSize = Vec2u(400, 300);
 
 /**
  * Benchmark the given raytracer with the given scene and log the time taken to a CSV file

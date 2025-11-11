@@ -46,8 +46,8 @@ if __name__ == "__main__":
     # Compute speedup: reference time / current time
     df[speedup_col] = df["Reference Time"] / df[time_col]
 
-    # Optionally, sort or filter out rows without reference
-    # df = df.dropna(subset=["Speedup vs " + reference_impl])
+    # filter out rows without reference
+    df = df.dropna(subset=["Speedup vs " + reference_impl])
 
     # Create the scatter plot
     fig = px.line(
@@ -74,7 +74,7 @@ if __name__ == "__main__":
             "Height": True,
         },
         title=f"Speedup vs {reference_impl} by Workload",
-        log_x=True,  # optional: log scale for workload if it spans many magnitudes
+        log_x=True,
         log_y=True,
     )
 

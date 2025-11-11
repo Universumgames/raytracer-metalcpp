@@ -1,6 +1,12 @@
 #pragma once
+//////////////////////////////////////////////////////////////////
+/// Metal specific definitions
+//////////////////////////////////////////////////////////////////
+
 #include "definitions.hpp"
 
+/// Enable Metal shader usage
 #define USE_SHADER_METAL
 
+/// Enable Metal debugging and GPU capture
 //#define METAL_DEBUGGING
