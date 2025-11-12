@@ -60,7 +60,7 @@ namespace RayTracing {
         }
 
         /// Constructor from array
-        Vector(T values[X]) {
+        Vector(const T values[X]) {
             for (unsigned int i = 0; i < X; i++) {
                 this->values[i] = values[i];
             }

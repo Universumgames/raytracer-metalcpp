@@ -1,33 +1,20 @@
 {
-  "camera":{
-    "position": {
-      "values": [0,0,0]
-    },
-    "direction": {
-      "values": [0,0,0]
-    },
-    "fov": 90,
-    "size": {
-      "values": [0,0]
-    }
+  "camera": {
+    "fov": 90
   },
   "objects": [
     {
       "fileName": "cube.stl",
-      "position": {
-        "values": [
-          -2,
-          7,
-          -2
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
+      "position": [
+        -2,
+        7,
+        -2
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
       "color": {
         "r": 255,
         "g": 255,
@@ -35,30 +22,24 @@
         "a": 128
       },
       "specularIntensity": 0.8,
-      "scale": {
-        "values": [
-          1,
-          1,
-          1
-        ]
-      }
+      "scale": [
+        1,
+        1,
+        1
+      ]
     },
     {
       "fileName": "cube.stl",
-      "position": {
-        "values": [
-          -2.5,
-          8,
-          -1
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
+      "position": [
+        -2.5,
+        8,
+        -1
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
       "color": {
         "r": 255,
         "g": 0,
@@ -66,30 +47,24 @@
         "a": 128
       },
       "specularIntensity": 0.8,
-      "scale": {
-        "values": [
-          1,
-          1,
-          1
-        ]
-      }
+      "scale": [
+        1,
+        1,
+        1
+      ]
     },
     {
       "fileName": "low_poly_dragon_origin_fixed.stl",
-      "position": {
-        "values": [
-          2,
-          7,
-          -2
-        ]
-      },
-      "rotation": {
-        "values": [
-          180,
-          90,
-          0
-        ]
-      },
+      "position": [
+        2,
+        7,
+        -2
+      ],
+      "rotation": [
+        180,
+        90,
+        0
+      ],
       "color": {
         "r": 128,
         "g": 255,
@@ -97,30 +72,24 @@
         "a": 255
       },
       "specularIntensity": 0.8,
-      "scale": {
-        "values": [
-          0.0625,
-          0.0625,
-          0.0625
-        ]
-      }
+      "scale": [
+        0.0625,
+        0.0625,
+        0.0625
+      ]
     },
     {
       "fileName": "uv_sphere_atmosphere.stl",
-      "position": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
       "color": {
         "r": 128,
         "g": 128,
@@ -128,42 +97,37 @@
         "a": 255
       },
       "specularIntensity": 0.8,
-      "scale": {
-        "values": [
-          1,
-          1,
-          1
-        ]
-      }
+      "scale": [
+        1,
+        1,
+        1
+      ]
     }
   ],
   "spheres": [
     {
-      "position": {
-        "values": [
-          1,
-          7,
-          1
-        ]
-      },
+      "position": [
+        1,
+        7,
+        1
+      ],
       "radius": 1,
       "color": {
         "r": 128,
         "g": 128,
         "b": 255,
         "a": 255
-      }
+      },
+      "specularIntensity": 0.8
     }
   ],
   "lights": [
     {
-      "position": {
-        "values": [
-          0,
-          -55,
-          0
-        ]
-      },
+      "position": [
+        0,
+        -55,
+        0
+      ],
       "radius": 50,
       "emittingColor": {
         "r": 255,

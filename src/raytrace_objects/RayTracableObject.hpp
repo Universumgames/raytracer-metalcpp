@@ -10,8 +10,8 @@ namespace RayTracing {
     struct SerializableRayTraceableObject {
         RGBA8 color;
         float specularIntensity;
-        Vec3 position;
-        Vec3 rotation;
+        float position[3];
+        float rotation[3];
     };
 
     /// Base class for all ray traceable objects

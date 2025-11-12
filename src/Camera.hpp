@@ -4,12 +4,12 @@
 namespace RayTracing {
     /// Serializable representation of a camera
     struct SerializableCamera {
-        Vec3 position;
-        Vec3 direction;
+        float position[3];
+        float direction[3];
         float fov;
-        Vec2 size;
+        float size[2];
 
-        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableCamera, position, direction, fov, size)
+        NLOHMANN_DEFINE_TYPE_INTRUSIVE(SerializableCamera, fov)
     };
 
     /// Camera class representing a viewpoint in 3D space

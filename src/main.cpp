@@ -17,7 +17,7 @@ std::string sceneFile = "scene/scene_monkey.json";
 std::string benchmarkFile = "../timeLog.csv";
 unsigned bounces = 10;
 unsigned samples = 20;
-auto windowSize = RayTracing::Vec2u(1920, 1440);
+Vec2u windowSize = RayTracing::Vec2u(1920, 1440);
 // auto windowSize = Vec2u(400, 300);
 
 /**
@@ -71,12 +71,29 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     }
     return raytraced;
 }
+/// get all scene files in the scene directory and validate the json structure
+void sceneValidator() {
+    auto files = std::filesystem::directory_iterator("scene/");
+    for (const auto &file: files) {
+        if (file.path().extension() == ".json") {
+            try {
+                auto scene = Scene::loadFromFile(file.path().string());
+            }catch (std::exception &e) {
+                std::cerr << "Error loading scene " << file.path().string() << std::endl;
+                std::cerr << e.what() << std::endl;
+            }
+            std::cout << "Validated scene file: " << file.path().string() << std::endl;
+        }
+    }
+}
 
 int main(int argc, char *argv[]) {
     decodeArguments(argc, argv);
     if (helped) {
         return 0;
     }
+
+    sceneValidator();
 
     auto imageHandler = new ImageHandler(windowSize);
     auto raytracerFactory = RayTracerFactory::init(windowSize, bounces, samples);

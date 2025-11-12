@@ -1,44 +1,20 @@
 {
   "camera": {
-    "position": {
-      "values": [
-        0,
-        0,
-        0
-      ]
-    },
-    "direction": {
-      "values": [
-        0,
-        0,
-        0
-      ]
-    },
-    "fov": 90,
-    "size": {
-      "values": [
-        0,
-        0
-      ]
-    }
+    "fov": 90
   },
   "objects": [
     {
       "fileName": "monkey.stl",
-      "position": {
-        "values": [
-          0,
-          7,
-          0
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
+      "position": [
+        0,
+        7,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
       "color": {
         "r": 255,
         "g": 255,
@@ -46,30 +22,24 @@
         "a": 255
       },
       "specularIntensity": 0.1,
-      "scale": {
-        "values": [
-          1,
-          1,
-          1
-        ]
-      }
+      "scale": [
+        1,
+        1,
+        1
+      ]
     },
     {
       "fileName": "cube_invert.stl",
-      "position": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
-      "rotation": {
-        "values": [
-          0,
-          0,
-          0
-        ]
-      },
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "rotation": [
+        0,
+        0,
+        0
+      ],
       "color": {
         "r": 100,
         "g": 100,
@@ -77,26 +47,22 @@
         "a": 255
       },
       "specularIntensity": 0.1,
-      "scale": {
-        "values": [
-          40,
-          40,
-          40
-        ]
-      }
+      "scale": [
+        40,
+        40,
+        40
+      ]
     }
   ],
   "spheres": [
   ],
   "lights": [
     {
-      "position": {
-        "values": [
-          -20,
-          4,
-          0
-        ]
-      },
+      "position": [
+        -20,
+        4,
+        0
+      ],
       "radius": 15,
       "emittingColor": {
         "r": 255,
@@ -106,13 +72,11 @@
       }
     },
     {
-      "position": {
-        "values": [
-          20,
-          4,
-          0
-        ]
-      },
+      "position": [
+        20,
+        4,
+        0
+      ],
       "radius": 15,
       "emittingColor": {
         "r": 255,
