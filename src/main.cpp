@@ -78,7 +78,7 @@ void sceneValidator() {
         if (file.path().extension() == ".json") {
             try {
                 auto scene = Scene::loadFromFile(file.path().string());
-            }catch (std::exception &e) {
+            } catch (std::exception &e) {
                 std::cerr << "Error loading scene " << file.path().string() << std::endl;
                 std::cerr << e.what() << std::endl;
             }
