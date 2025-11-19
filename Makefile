@@ -13,7 +13,7 @@ run: build
 	cd cmake-build-debug && ./RayTracer
 
 run_cicd: build
-	cd cmake-build-debug && ./RayTracer --no-window --sequential -s scene_simple.json -o raytraced.jpg
+	cd cmake-build-debug && ./RayTracer --no-window --sequential -s scene/scene_simple.json -o raytraced.jpg
 	cp cmake-build-debug/raytraced.jpg .
 
 xcode_create:
