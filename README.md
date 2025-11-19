@@ -1,4 +1,4 @@
-# Multi Shader Language Raytracer
+# Multi Parallel Raytracer
 
 ## Summary
 Our goal was to create a relatively simple raytracer in C++.

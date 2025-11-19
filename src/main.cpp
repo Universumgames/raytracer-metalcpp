@@ -71,6 +71,7 @@ Image *benchmarkRaytracer(RayTracer *raytracer, const Scene &scene, bool deleteI
     }
     return raytraced;
 }
+
 /// get all scene files in the scene directory and validate the json structure
 void sceneValidator() {
     auto files = std::filesystem::directory_iterator("scene/");
@@ -78,7 +79,7 @@ void sceneValidator() {
         if (file.path().extension() == ".json") {
             try {
                 auto scene = Scene::loadFromFile(file.path().string());
-            } catch (std::exception &e) {
+            } catch (std::runtime_error &e) {
                 std::cerr << "Error loading scene " << file.path().string() << std::endl;
                 std::cerr << e.what() << std::endl;
             }

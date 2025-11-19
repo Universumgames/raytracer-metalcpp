@@ -2,6 +2,8 @@ import os
 import pandas as pd
 from enum import Enum
 
+from pandas import DataFrame
+
 raytracer_work_dir = "../cmake-build-debug"
 timelog_file = "../timelog.csv"
 raytraced_output_dir = "./output"
@@ -37,7 +39,8 @@ def get_scene_files():
     scene_files = [
         "scene/scene_simple.json",
         "scene/scene_atmosphere.json",
-        "scene/scene_simple_atmosphere.json"
+        "scene/scene_simple_atmosphere.json",
+        "scene/scene_monkey.json"
     ]
     return scene_files
 
@@ -71,7 +74,9 @@ def get_cross_product():
     return cross_product
 
 
-def read_timelog(file_path) -> pd.DataFrame:
+def read_timelog(file_path) -> DataFrame | None:
+    if not os.path.exists(file_path):
+        return None
     df = pd.read_csv(file_path)
     return df
 
@@ -132,7 +137,8 @@ if __name__ == "__main__":
             for sample in samples:
                 for bounce in bounces:
                     for implementation in RayTracerImplementation:
-                        if not has_config_been_run(alreadyRun, scene, size[0], size[1], sample, bounce, implementation):
+                        if (alreadyRun is None) or not has_config_been_run(alreadyRun, scene, size[0], size[1], sample,
+                                                                           bounce, implementation):
                             run_ray_tracer(scene, size[0], size[1], sample, bounce, implementation)
                         else:
                             print(
