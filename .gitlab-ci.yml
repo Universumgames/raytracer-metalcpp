@@ -4,11 +4,15 @@ image: ubuntu:25.10
 build:
   before_script:
     - apt update
-    - apt install -y cmake build-essential make gcc git libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libx11-dev xserver-xorg-dev xorg-dev
+    - apt install -y cmake build-essential make gcc git libsfml-dev libudev-dev libopenal-dev libvorbis-dev libflac-dev libx11-dev xserver-xorg-dev xorg-dev python3
   script:
     - make build
     - make run_cicd
+    - make python_prep
+    - make report
   artifacts:
     paths:
       - timeLog.csv
       - raytraced.jpg
+      - speedup.html
+      - timelog_plot.html

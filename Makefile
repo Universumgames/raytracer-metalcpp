@@ -20,3 +20,10 @@ xcode_create:
 	mkdir -p cmake-xcode
 	cd cmake-xcode && cmake .. -G Xcode
 	cd cmake-xcode && open RayTracer.xcodeproj
+
+python_prep:
+	cd python && pip install -r requirements.txt
+
+report:
+	cd python && python speedVisualiser.py
+	cd python && python speedupCalculator.py

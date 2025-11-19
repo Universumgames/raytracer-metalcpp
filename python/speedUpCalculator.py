@@ -79,5 +79,4 @@ if __name__ == "__main__":
     )
 
     fig.write_html(graph_path)
-    fig.show()
-    pass
+    # fig.show()
