@@ -14,7 +14,9 @@ build:
     - make build
   artifacts:
     paths:
-      - cmake-build-debug/
+      - cmake-build-debug/RayTracer
+      - cmake-build-debug/scene
+      - cmake-build-debug/default.metallib
 
 test:
   stage: test
