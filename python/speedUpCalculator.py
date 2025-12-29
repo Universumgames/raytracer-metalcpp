@@ -55,6 +55,9 @@ if __name__ == "__main__":
         x="Workload",
         y=speedup_col,
         color="Implementation",  # color by implementation
+        line_group="Bounces",
+        line_dash="Samples",
+        symbol="Triangles",
         markers=True,
         hover_data={
             "Implementation": True,
@@ -79,4 +82,4 @@ if __name__ == "__main__":
     )
 
     fig.write_html(graph_path)
-    # fig.show()
+    fig.show()

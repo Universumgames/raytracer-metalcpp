@@ -92,4 +92,4 @@ if __name__ == "__main__":
         hovermode="closest",
     )
     fig.write_html(graph_path)
-    # fig.show()
+    fig.show()

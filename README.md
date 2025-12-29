@@ -1,15 +1,20 @@
 # Multi Parallel Raytracer
 
 ## Summary
+
 Our goal was to create a relatively simple raytracer in C++.
 Out of curiosity we wanted to create not only one simple Raytracer but extend this idea for this project to raytrace in
 C++ using a sequential implementation as comparison to a Metal Shader Implementation.
-Depending on which operating system you are on, cmake automatically fetches most dependencies and compiles with the available shader (CUDA on Windows and Metal on MacOS, since no other option is either possible or probable).
-If you want to run this project without any shader and just try to CPU-raytrace you can even compile this project on linux.
-The only dependencies required for this project to compile is SFML (libsfml-dev) and their dependencies. 
-There is a simple make target provided to install the required dependencies with the linux apt package manager (`make install_deps_apt`).
+Depending on which operating system you are on, cmake automatically fetches most dependencies and compiles with the
+available shader (CUDA on Windows and Metal on MacOS, since no other option is either possible or probable).
+If you want to run this project without any shader and just try to CPU-raytrace you can even compile this project on
+linux.
+The only dependencies required for this project to compile is SFML (libsfml-dev) and their dependencies.
+There is a simple make target provided to install the required dependencies with the linux apt package manager (
+`make install_deps_apt`).
 
-We did not come up with all the formulas and ideas on our own and used some libraries as well as learning resources to get this project so far.
+We did not come up with all the formulas and ideas on our own and used some libraries as well as learning resources to
+get this project so far.
 For a detailed list of all resources and libraries we used along the journey we compiled an overview in [
 `Resources.md`](./Resources.md).
 
@@ -59,3 +64,34 @@ After all the bounces are finished for a ray, the colors from each hit are multi
 determine the ray color.
 Finally after all the rays are traced, the average color of all rays (the samples) per pixel is calculated and written
 to the output image.
+
+## Output
+
+The output of the program will the rendered image saved as a PNG file. The default destination is `raytraced.jpg`, but
+can be changed using the command line arguments.
+In addition the programm will time the execution and store the timing results in the `timelog.csv` file for later
+analysis.
+
+## Analysis and Comparison of the Implementations
+
+To view and compare the performance of the sequential and parallel implementations, you can use the provided
+`python/speedVisualizer.py` and `python/speedUpCalculator.py` scripts.
+These scripts will read the `timelog.csv` file and generate visualizations of the execution times and speedup achieved
+by the parallel implementation.
+
+Comparing the different implementations and scenes that were rendered for the benchmark, we can see that the triangle
+count, the number of bounces as well as the screen resolution (combined with the number of samples per pixel, which
+basically increases the virtual screen size) have a significant impact on the performance.
+While at the beginning, with low settings the sequential implementation is close to the parallel implementations in
+terms of duration needed for the rendering, the difference increases significantly with higher settings.
+Where as the sequential implementation takes almost one and a half hours to render the most complex scene in the
+benchmarks, the metal shader implementation is able to render the same scene in a matter of half a dozen seconds.
+
+Those two numbers alone already show that the power of parallelization and using the GPU for such tasks.
+Looking at the speedup graphs generated with the provided python scripts, we can see that the speedup achieved by the
+parallelisations varies drastically depending on the scene and settings.
+While some scenes achieve a speedup of over 1000x compared to the sequential implementation, other scenes only achieve a
+speedup of around 4x.
+This variation can be attributed to losses due to overhead of copying data buffers to and from the GPU.
+However, overall the parallel implementations show a significant improvement in performance compared to the sequential
+implementation, especially for complex scenes with high triangle counts and multiple bounces.
