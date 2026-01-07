@@ -3,3 +3,4 @@
 cmake-xcode
 .gitlab-ci-local
 XCode
+analysis
